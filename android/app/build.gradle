@@ -122,6 +122,9 @@ def enableHermes = project.ext.react.get("enableHermes", false);
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    lintOptions { 
+        checkReleaseBuilds false
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -129,11 +132,14 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.secondlife"
+        applicationId "io.thunderstone.secondlife"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        ndk {
+            debugSymbolLevel = 'FULL'
+        }
     }
     splits {
         abi {
@@ -168,6 +174,7 @@ android {
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources true
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
@@ -191,9 +198,9 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
-    implementation "com.facebook.react:react-native:+"  // From node_modules
+    implementation 'com.facebook.react:react-native:0.20.1'  // From node_modules
 
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

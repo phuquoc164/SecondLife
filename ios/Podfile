@@ -7,6 +7,11 @@ target 'SecondLife' do
   config = use_native_modules!
 
   use_react_native!(:path => config["reactNativePath"])
+  pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
+
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary.podspec"
+  pod 'Permission-Camera', :path => "#{permissions_path}/Camera.podspec"
 
   target 'SecondLifeTests' do
     inherit! :complete
