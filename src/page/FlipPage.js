@@ -1,0 +1,208 @@
+/** React */
+import React, {useEffect, useState} from 'react';
+import {Animated, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+/** App */
+import Form from './Form';
+import ListProducts from './ListProducts';
+import FetchService from '../lib/FetchService';
+import {initialListData, STORAGE_KEY, STORAGE_USER} from '../lib/constants';
+import {formatListProducts, toUppercaseKeys} from '../lib/Helpers';
+
+let value = 0;
+
+const animatedValue = new Animated.Value(0);
+
+const frontInterpolate = animatedValue.interpolate({
+  inputRange: [0, 180],
+  outputRange: ['0deg', '180deg'],
+});
+const backInterpolate = animatedValue.interpolate({
+  inputRange: [0, 180],
+  outputRange: ['180deg', '360deg'],
+});
+
+const FlipPage = (props) => {
+  console.log(props.token);
+  animatedValue.addListener((valueListener) => {
+    value = valueListener.value;
+  });
+  const [showForm, setShowForm] = useState(true);
+  const [listData, setListData] = useState({
+    categories: initialListData,
+    brands: initialListData,
+    listProducts: {
+      sold: [],
+      haventsold: [],
+    },
+  });
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const getData = async () => {
+    try {
+      const categories = await FetchService.get('categories', props.token);
+      const brands = await FetchService.get('brands', props.token);
+      const listProducts = await FetchService.get('products', props.token);
+
+      // token va expiré, envoyer une requete pour renouveler le token
+      if (categories.refreshToken) {
+        try {
+          const user = AsyncStorage.getItem(STORAGE_USER);
+          const userData = JSON.parse(user);
+          const {username, password} = userData;
+          const response = await FetchService.login(username, password);
+          if (response && response.token) {
+            await AsyncStorage.setItem(STORAGE_KEY, response.token);
+            setToken(token);
+          }
+        } catch (error) {
+          console.debug(error);
+        }
+      }
+
+      const {listProductsSold, listProductsHaventSold} = formatListProducts(listProducts.data);
+      if (categories.data.length > 0 && brands.data.length > 0) {
+        const listCategories = [];
+        categories.data.forEach((category) => {
+          const newCategory = toUppercaseKeys(category);
+          newCategory['HasImage'] = true;
+          listCategories.push(newCategory);
+        });
+        const listBrands = [];
+        brands.data.forEach((brand) => {
+          const newBrand = toUppercaseKeys(brand);
+          listBrands.push(newBrand);
+        });
+
+        setListData({
+          categories: listCategories,
+          brands: listBrands,
+          listProducts: {
+            sold: listProductsSold,
+            haventsold: listProductsHaventSold,
+          },
+        });
+      } else {
+        setListData({
+          ...listData,
+          listProducts: {
+            sold: listProductsSold,
+            haventsold: listProductsHaventSold,
+          },
+        });
+      }
+    } catch (error) {
+      console.debug(error);
+      if (error === 'Not allowed to use this Resource') {
+        Alert.alert(
+          'Problème de connexion',
+          'Votre compte est connecté par autre appareil. Veuillez réconnecter!',
+          [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
+        );
+      }
+    }
+  };
+
+  const flipCard = () => {
+    if (value >= 90) {
+      Animated.spring(animatedValue, {
+        toValue: 0,
+        friction: 8,
+        tension: 10,
+        useNativeDriver: true,
+      }).start();
+      setShowForm(true);
+    } else {
+      Animated.spring(animatedValue, {
+        toValue: 180,
+        friction: 8,
+        tension: 10,
+        useNativeDriver: true,
+      }).start();
+      setShowForm(false);
+    }
+  };
+
+  const updateListProducts = (uri) => {
+    const newProductsSold = [...listData.listProducts.sold];
+    const newProductsHaventSold = [];
+    listData.listProducts.haventsold.forEach((product) => {
+      if (product.uri === uri) {
+        newProductsSold.push({
+          ...product,
+          sold: true
+        });
+      } else {
+        newProductsHaventSold.push(product);
+      }
+    });
+    setListData({
+      ...listData,
+      listProducts: {
+        sold: newProductsSold,
+        haventsold: newProductsHaventSold,
+      },
+    });
+  };
+
+  const frontAnimatedStyle = {
+    transform: [{rotateY: frontInterpolate}],
+  };
+  const backAnimatedStyle = {
+    transform: [{rotateY: backInterpolate}],
+  };
+  let displayFrontStyle = {display: 'flex'};
+  let displayBackStyle = {display: 'none'};
+  if (!showForm) {
+    displayFrontStyle = {display: 'none'};
+    displayBackStyle = {display: 'flex'};
+  }
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[styles.flipCard, frontAnimatedStyle, displayFrontStyle]}>
+        <Form
+          categories={listData.categories}
+          brands={listData.brands}
+          handleLogout={props.handleLogout}
+          flipCard={flipCard}
+        />
+      </Animated.View>
+      <Animated.View
+        style={[backAnimatedStyle, styles.flipCard, displayBackStyle]}>
+        <ListProducts
+          listProductsSold={listData.listProducts.sold}
+          listProductsHaventSold={listData.listProducts.haventsold}
+          updateListProducts={updateListProducts}
+          flipCard={flipCard}
+          token={props.token}
+        />
+      </Animated.View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  flipCard: {
+    height: '100%',
+    width: '100%',
+    backfaceVisibility: 'hidden',
+  },
+  flipText: {
+    width: 90,
+    fontSize: 20,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+});
+
+export default FlipPage;

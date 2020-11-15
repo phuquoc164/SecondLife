@@ -2,13 +2,13 @@
 import React, {useEffect, useState} from 'react';
 import {View, ImageBackground, Alert, Platform} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /** App */
 import LoginPage from './src/page/LoginPage';
-import Form from './src/page/Form';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {STORAGE_KEY, STORAGE_USER} from './src/lib/constants';
 import LaunchScreen from './src/page/LaunchScreen';
+import FlipPage from "./src/page/FlipPage";
 
 const App = () => {
   const [data, setData] = useState({
@@ -35,7 +35,7 @@ const App = () => {
         console.debug('reading token error');
         Alert.alert(
           'Problème de connexion',
-          'On a rencontré un problème de lire votre token dans le storage. Veuillez vous connecter à nouveau!',
+          'On a rencontré un problème de lire votre token depuis le storage. Veuillez vous connecter à nouveau!',
           [{text: 'Se connecter', onPress: () => handleLogout()}],
         );
       }
@@ -52,8 +52,8 @@ const App = () => {
       await AsyncStorage.setItem(STORAGE_USER, JSON.stringify(data));
       setData({isLogin: true, token, showLaunchScreen: false});
     } catch (error) {
-      console.debug('save token error');
-      alert('Une erreur est survenue. Veuillez reconnecter!');
+      console.debug('save token error', "error");
+      Alert.alert("Problème de storage", "Une problème est survenue. Veuillez réessayer!");
     }
   };
 
@@ -79,7 +79,7 @@ const App = () => {
         {data.showLaunchScreen ? (
           <LaunchScreen />
         ) : data.isLogin ? (
-          <Form handleLogout={handleLogout} token={data.token} />
+          <FlipPage handleLogout={handleLogout} token={data.token} />
         ) : (
           <LoginPage handleLogin={handleLogin} />
         )}

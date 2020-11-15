@@ -15,34 +15,20 @@ import {
   View,
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 /** App */
 import ResultPage from './ResultPage';
 import CustomDateTimePicker from '../components/CustomDateTimePicker';
 import {colors} from '../assets/colors';
-import {
-  initialArticle,
-  initialInformation,
-  initialListData,
-  listStates,
-  STORAGE_KEY,
-  STORAGE_USER,
-} from '../lib/constants';
-import {
-  createSku,
-  toUppercaseKeys,
-  validateEmail,
-  verifyData,
-} from '../lib/Helpers';
+import {initialArticle, initialInformation, listStates} from '../lib/constants';
+import {createSku, validateEmail, verifyData} from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
 import Picker from '../components/Picker';
 import ModalPhoto from '../components/ModalPhoto';
 
 const Form = (props) => {
   const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState(props.token);
   const [information, setInformation] = useState(initialInformation);
   const [article, setArticle] = useState(initialArticle);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -52,66 +38,6 @@ const Form = (props) => {
     isSuccess: false,
   });
   const [showError, setShowError] = useState(false);
-  const [listData, setListData] = useState({
-    categories: initialListData,
-    brands: initialListData,
-  });
-
-  useEffect(() => {
-    getData();
-  }, []);
-
-  const getData = async () => {
-    try {
-      const categories = await FetchService.get('categories', token);
-      const brands = await FetchService.get('brands', token);
-
-      // token va expiré, envoyer une requete pour renouveler le token
-      if (categories.refreshToken || brands.refreshToken) {
-        try {
-          const user = AsyncStorage.getItem(STORAGE_USER);
-          const userData = JSON.parse(user);
-          const {username, password} = userData;
-          const response = await FetchService.login(username, password);
-          if (response && response.token) {
-            await AsyncStorage.setItem(STORAGE_KEY, response.token);
-            setToken(token);
-          }
-        } catch (error) {
-          console.debug(error);
-        }
-      }
-
-      /** Initialiser le list categories et list des marques */
-      if (categories.data.length > 0 && brands.data.length > 0) {
-        const listCategories = [];
-        categories.data.forEach((category) => {
-          const newCategory = toUppercaseKeys(category);
-          newCategory['HasImage'] = true;
-          listCategories.push(newCategory);
-        });
-        const listBrands = [];
-        brands.data.forEach((brand) => {
-          const newBrand = toUppercaseKeys(brand);
-          listBrands.push(newBrand);
-        });
-
-        setListData({
-          categories: listCategories,
-          brands: listBrands,
-        });
-      }
-    } catch (error) {
-      console.debug("Error", error);
-      if (error === 'Not allowed to use this Resource') {
-        Alert.alert(
-          'Problème de connexion',
-          'Votre compte est connecté par autre appareil. Veuillez réconnecter!',
-          [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
-        );
-      }
-    }
-  };
 
   const handleTakePhoto = async () => {
     setShowModalPhoto(false);
@@ -120,7 +46,7 @@ const Form = (props) => {
       maxWidth: 1000,
       maxHeight: 1000,
       includeBase64: true,
-      quality: 0.9
+      quality: 0.9,
     };
     const permissionCamera =
       Platform.OS === 'ios'
@@ -160,7 +86,6 @@ const Form = (props) => {
     } catch (err) {
       console.warn(err);
     }
-    
   };
 
   const handleSelectPhoto = async () => {
@@ -206,13 +131,8 @@ const Form = (props) => {
         );
       }
     } catch (error) {
-
+      console.warn(err);
     }
-    if (Platform.OS === "ios") {
-      const granted = await request(PERMISSIONS.IOS.PHOTO_LIBRARY);
-      console.log(granted);
-    }
-    
   };
 
   const handleAddArticle = () => {
@@ -290,8 +210,8 @@ const Form = (props) => {
   };
 
   const renderFormArticle = () => (
-    <SafeAreaView style={{flexDirection: 'column'}}>
-      <ScrollView>
+    <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
+      <ScrollView style={{marginBottom: 50}}>
         <View style={{paddingHorizontal: 20}}>
           <Image
             source={require('../assets/images/logo.png')}
@@ -304,6 +224,7 @@ const Form = (props) => {
             }}
           />
           <Text style={styles.title}>Informations Client</Text>
+
           <View style={styles.group}>
             {/* Nom */}
             <View style={styles.inputGroup}>
@@ -589,7 +510,7 @@ const Form = (props) => {
               <Text style={styles.label}>Catégorie</Text>
               <Picker
                 dataSelected={article.category}
-                items={listData.categories}
+                items={props.categories}
                 placeholder="Sélectionnez une catégorie"
                 showError={showError}
                 onSelected={(selected) =>
@@ -607,7 +528,7 @@ const Form = (props) => {
               <Text style={styles.label}>Marque</Text>
               <Picker
                 dataSelected={article.brand}
-                items={listData.brands}
+                items={props.brands}
                 placeholder="Sélectionnez une marque"
                 showError={showError}
                 onSelected={(selected) =>
@@ -735,6 +656,26 @@ const Form = (props) => {
         handleTakePhoto={handleTakePhoto}
         handleSelectPhoto={handleSelectPhoto}
       />
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          width: '100%',
+          zIndex: 999,
+          backgroundColor: colors.black,
+          paddingVertical: 15
+        }}
+        onPress={props.flipCard}>
+        <Text
+          style={{
+            textAlign: 'center',
+            fontWeight: 'bold',
+            color: colors.white,
+            textTransform: 'uppercase',
+          }}>
+          List Produits
+        </Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 
