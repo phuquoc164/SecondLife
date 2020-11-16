@@ -1,6 +1,6 @@
 /** React */
 import React, {useEffect, useState} from 'react';
-import {Animated, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, Animated, StyleSheet, View} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /** App */
@@ -24,10 +24,10 @@ const backInterpolate = animatedValue.interpolate({
 });
 
 const FlipPage = (props) => {
-  console.log(props.token);
   animatedValue.addListener((valueListener) => {
     value = valueListener.value;
   });
+  const [isErrorApi, setIsErrorApi] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [productAdded, setProductAdded] = useState(null);
   const [listData, setListData] = useState({
@@ -40,40 +40,42 @@ const FlipPage = (props) => {
   });
 
   useEffect(() => {
-    getData();
+    const initData = async () => {
+      await getListCategoriesBrands();
+      await getListProducts();
+    }
+
+    initData();
   }, []);
 
   useEffect(() => {
-    const updateListProducts = async () => {
-      try {
-        const listProducts = await FetchService.get('products', props.token);
-        const {listProductsSold, listProductsHaventSold} = formatListProducts(listProducts.data);
-        setListData({
-          ...listData,
-          listProducts: {
-            sold: listProductsSold,
-            haventsold: listProductsHaventSold
-          }
-        })
-      } catch (error) {
-        console.debug(error);
-        if (error === 'Not allowed to use this Resource') {
-          Alert.alert(
-            'Erreur système',
-            'Votre session à expirée, veuillez-vous re-connecter.',
-            [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
-          );
-        }
-      }
-    };
-    updateListProducts();
+    if (productAdded !== null) {
+      getListProducts();
+    }
   }, [productAdded]);
 
-  const getData = async () => {
+  const getListProducts = async () => {
+    try {
+      const listProducts = await FetchService.get('products', props.token);
+      const {listProductsSold, listProductsHaventSold} = formatListProducts(listProducts.data);
+      isErrorApi && setIsErrorApi(false);
+      setListData({
+        ...listData,
+        listProducts: {
+          sold: listProductsSold,
+          haventsold: listProductsHaventSold,
+        },
+      });
+    } catch (error) {
+      console.debug(error);
+      setIsErrorApi(true);
+    }
+  };
+
+  const getListCategoriesBrands = async () => {
     try {
       const categories = await FetchService.get('categories', props.token);
       const brands = await FetchService.get('brands', props.token);
-      const listProducts = await FetchService.get('products', props.token);
 
       // token va expiré, envoyer une requete pour renouveler le token
       if (categories.refreshToken) {
@@ -91,7 +93,6 @@ const FlipPage = (props) => {
         }
       }
 
-      const {listProductsSold, listProductsHaventSold} = formatListProducts(listProducts.data);
       if (categories.data.length > 0 && brands.data.length > 0) {
         const listCategories = [];
         categories.data.forEach((category) => {
@@ -106,20 +107,9 @@ const FlipPage = (props) => {
         });
 
         setListData({
+          ...listData,
           categories: listCategories,
           brands: listBrands,
-          listProducts: {
-            sold: listProductsSold,
-            haventsold: listProductsHaventSold,
-          },
-        });
-      } else {
-        setListData({
-          ...listData,
-          listProducts: {
-            sold: listProductsSold,
-            haventsold: listProductsHaventSold,
-          },
         });
       }
     } catch (error) {
@@ -129,6 +119,11 @@ const FlipPage = (props) => {
           'Erreur système',
           'Votre session à expirée, veuillez-vous re-connecter.',
           [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
+        );
+      } else {
+        Alert.alert(
+          'Erreur système',
+          'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
         );
       }
     }
@@ -208,6 +203,7 @@ const FlipPage = (props) => {
           listProductsSold={listData.listProducts.sold}
           listProductsHaventSold={listData.listProducts.haventsold}
           updateListProducts={updateListProducts}
+          isErrorApi={isErrorApi}
           flipCard={flipCard}
           token={props.token}
         />

@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 import {
   Alert,
   Image,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -110,25 +111,40 @@ const ListProducts = (props) => {
     );
   };
 
-  const renderProductsSold = () => (
-    <View style={styles.styleListItem}>
-      {props.listProductsSold.map((product) => renderItem(product))}
-    </View>
+  const renderNoItem = () => (
+    <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24}}>
+      {props.isErrorApi
+        ? 'Une erreur API est survenue'
+        : "Il n'y a aucun produits"}
+    </Text>
   );
 
-  const renderProductsHaventSold = () => (
-    <View style={styles.styleListItem}>
-      {props.listProductsHaventSold.map((product) => renderItem(product))}
-    </View>
-  );
+  const renderProductsSold = () =>
+    props.listProductsSold.length > 0 ? (
+      <View style={styles.styleListItem}>
+        {props.listProductsSold.map((product) => renderItem(product))}
+      </View>
+    ) : (
+      renderNoItem()
+    );
+
+  const renderProductsHaventSold = () =>
+    props.listProductsHaventSold.length > 0 ? (
+      <View style={styles.styleListItem}>
+        {props.listProductsHaventSold.map((product) => renderItem(product))}
+      </View>
+    ) : (
+      renderNoItem()
+    );
 
   const title = showList === 'haventSold'
       ? 'List produits à vendre'
       : 'List produits vendus';
 
+  const styleScrollView = Platform.OS === 'android' ? {marginBottom: 50} : {paddingBottom: 10};
   return (
     <SafeAreaView style={{width: '100%', height: '100%', position: 'relative'}}>
-      <ScrollView style={{marginBottom: 50}}>
+      <ScrollView style={styleScrollView}>
         <View
           style={{
             justifyContent: 'center',

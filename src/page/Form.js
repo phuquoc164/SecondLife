@@ -105,7 +105,6 @@ const Form = (props) => {
       const granted = await request(permissionPhoto);
       if (granted === RESULTS.GRANTED) {
         launchImageLibrary(options, (response) => {
-          console.log(response);
           if (response.didCancel) {
             console.debug('User cancelled image picker');
           } else if (response.error) {
@@ -212,9 +211,10 @@ const Form = (props) => {
     }
   };
 
+  const styleScrollView = Platform.OS === 'android' ? {marginBottom: 50} : {paddingBottom: 10};
   const renderFormArticle = () => (
     <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
-      <ScrollView style={{marginBottom: 50}}>
+      <ScrollView style={styleScrollView}>
         <View style={{paddingHorizontal: 20}}>
           <Image
             source={require('../assets/images/logo.png')}
@@ -666,7 +666,7 @@ const Form = (props) => {
           width: '100%',
           zIndex: 999,
           backgroundColor: colors.black,
-          paddingVertical: 15
+          paddingVertical: 15,
         }}
         onPress={props.flipCard}>
         <Text
