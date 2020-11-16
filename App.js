@@ -34,8 +34,8 @@ const App = () => {
       } catch (error) {
         console.debug('reading token error');
         Alert.alert(
-          'Problème de connexion',
-          'On a rencontré un problème de lire votre token depuis le storage. Veuillez vous connecter à nouveau!',
+          'Erreur système',
+          'Votre session à expirée, veuillez-vous re-connecter!',
           [{text: 'Se connecter', onPress: () => handleLogout()}],
         );
       }
@@ -53,7 +53,7 @@ const App = () => {
       setData({isLogin: true, token, showLaunchScreen: false});
     } catch (error) {
       console.debug('save token error', "error");
-      Alert.alert("Problème de storage", "Une problème est survenue. Veuillez réessayer!");
+      Alert.alert('Erreur système', 'Veuillez-vous réessayer!');
     }
   };
 

@@ -59,8 +59,8 @@ const FlipPage = (props) => {
         console.debug(error);
         if (error === 'Not allowed to use this Resource') {
           Alert.alert(
-            'Problème de connexion',
-            'Votre compte est connecté par autre appareil. Veuillez réconnecter!',
+            'Erreur système',
+            'Votre session à expirée, veuillez-vous re-connecter.',
             [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
           );
         }
@@ -126,8 +126,8 @@ const FlipPage = (props) => {
       console.debug(error);
       if (error === 'Not allowed to use this Resource') {
         Alert.alert(
-          'Problème de connexion',
-          'Votre compte est connecté par autre appareil. Veuillez réconnecter!',
+          'Erreur système',
+          'Votre session à expirée, veuillez-vous re-connecter.',
           [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
         );
       }

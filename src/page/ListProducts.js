@@ -1,6 +1,7 @@
+/** React */
 import React, {useState} from 'react';
 import {
-    Alert,
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -9,8 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+/** App */
 import {colors} from '../assets/colors';
-import FetchService from "../lib/FetchService";
+import FetchService from '../lib/FetchService';
 
 const ListProducts = (props) => {
   const [showList, setShowList] = useState('haventSold');
@@ -25,19 +28,24 @@ const ListProducts = (props) => {
   };
 
   const handleSellProduct = (uri) => {
-    FetchService.delete(uri, props.token).then(response => {
+    FetchService.delete(uri, props.token)
+      .then((response) => {
         if (response.success) {
-            props.updateListProducts(uri);
+          props.updateListProducts(uri);
         } else {
-            Alert.alert("Problème de API", "Une problème est survenue. Veuillez reéssayer!");
+          Alert.alert(
+            'Erreur système',
+            'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
+          );
         }
-    }).catch(error => {
+      })
+      .catch((error) => {
         console.debug(error);
         Alert.alert(
-          'Problème de API',
-          'Une problème est survenue. Veuillez reéssayer!',
+          'Erreur système',
+          'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
         );
-    })
+      });
   };
 
   const renderItem = (item) => {
@@ -114,7 +122,9 @@ const ListProducts = (props) => {
     </View>
   );
 
-  const title = showList === 'haventSold' ? "List produits à vendre" : "List produits vendus";
+  const title = showList === 'haventSold'
+      ? 'List produits à vendre'
+      : 'List produits vendus';
 
   return (
     <SafeAreaView style={{width: '100%', height: '100%', position: 'relative'}}>
@@ -123,7 +133,7 @@ const ListProducts = (props) => {
           style={{
             justifyContent: 'center',
             paddingVertical: 20,
-            position: "relative"
+            position: 'relative',
           }}>
           <Text style={styles.label}>{title}</Text>
           <TouchableOpacity
@@ -159,8 +169,7 @@ const ListProducts = (props) => {
         <TouchableOpacity
           style={{
             ...styles.btnMenuBottom,
-            backgroundColor:
-              showList === 'sold' ? colors.white : colors.black,
+            backgroundColor: showList === 'sold' ? colors.white : colors.black,
           }}
           onPress={() => setShowList('sold')}
           disabled={showList === 'sold'}>

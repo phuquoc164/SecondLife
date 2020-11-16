@@ -1,5 +1,5 @@
 /** React */
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -75,8 +75,8 @@ const Form = (props) => {
       } else {
         console.debug('Camera permission denied');
         Alert.alert(
-          'Problème de permission',
-          'SecondLife a besoin de la permission de caméra',
+          'Demande de permission',
+          'Nous avons besoin de la permission d\'accéder à votre caméra.',
           [
             {text: 'Annuler', style: 'cancel'},
             {text: 'Paramètres', onPress: () => Linking.openSettings()},
@@ -122,8 +122,8 @@ const Form = (props) => {
       } else {
         console.debug('Photo permission denied');
         Alert.alert(
-          'Problème de permission',
-          'SecondLife a besoin de la permission pour accéder la bibliothèque de photo',
+          'Demande de permission',
+          'Nous avons besoin de la permission d\'accéder à votre bibliothèque média.',
           [
             {text: 'Annuler', style: 'cancel'},
             {text: 'Paramètres', onPress: () => Linking.openSettings()},
@@ -143,7 +143,7 @@ const Form = (props) => {
     if (isErrorInformation || isErrorArticle) {
       Alert.alert(
         'Formulaire invalide',
-        'Veuillez vérifier tous les champs rouges',
+        'Veuillez corriger les champs encadrés en rouge.',
       );
       setShowError(true);
       setLoading(false);
