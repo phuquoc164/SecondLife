@@ -178,9 +178,12 @@ const Form = (props) => {
           },
         ],
       };
-      FetchService.post('products', data, token)
+      FetchService.post('products', data, props.token)
         .then((response) => {
           setResultPage({show: true, isSuccess: response.success});
+          if (response.success) {
+            props.handleAddProduct(data);
+          }
         })
         .catch((error) => {
           console.debug(error);

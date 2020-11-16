@@ -29,6 +29,7 @@ const FlipPage = (props) => {
     value = valueListener.value;
   });
   const [showForm, setShowForm] = useState(true);
+  const [productAdded, setProductAdded] = useState(null);
   const [listData, setListData] = useState({
     categories: initialListData,
     brands: initialListData,
@@ -41,6 +42,32 @@ const FlipPage = (props) => {
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    const updateListProducts = async () => {
+      try {
+        const listProducts = await FetchService.get('products', props.token);
+        const {listProductsSold, listProductsHaventSold} = formatListProducts(listProducts.data);
+        setListData({
+          ...listData,
+          listProducts: {
+            sold: listProductsSold,
+            haventsold: listProductsHaventSold
+          }
+        })
+      } catch (error) {
+        console.debug(error);
+        if (error === 'Not allowed to use this Resource') {
+          Alert.alert(
+            'Problème de connexion',
+            'Votre compte est connecté par autre appareil. Veuillez réconnecter!',
+            [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
+          );
+        }
+      }
+    };
+    updateListProducts();
+  }, [productAdded]);
 
   const getData = async () => {
     try {
@@ -134,7 +161,7 @@ const FlipPage = (props) => {
       if (product.uri === uri) {
         newProductsSold.push({
           ...product,
-          sold: true
+          sold: true,
         });
       } else {
         newProductsHaventSold.push(product);
@@ -171,6 +198,8 @@ const FlipPage = (props) => {
           brands={listData.brands}
           handleLogout={props.handleLogout}
           flipCard={flipCard}
+          handleAddProduct={(product) => setProductAdded(product)}
+          token={props.token}
         />
       </Animated.View>
       <Animated.View
