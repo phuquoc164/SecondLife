@@ -30,20 +30,20 @@ const FlipPage = (props) => {
   const [isErrorApi, setIsErrorApi] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [productAdded, setProductAdded] = useState(null);
+  const [listProducts, setListProducts] = useState({
+    sold: [],
+    haventsold: [],
+  });
   const [listData, setListData] = useState({
     categories: initialListData,
     brands: initialListData,
-    listProducts: {
-      sold: [],
-      haventsold: [],
-    },
   });
 
   useEffect(() => {
     const initData = async () => {
       await getListCategoriesBrands();
       await getListProducts();
-    }
+    };
 
     initData();
   }, []);
@@ -59,12 +59,9 @@ const FlipPage = (props) => {
       const listProducts = await FetchService.get('products', props.token);
       const {listProductsSold, listProductsHaventSold} = formatListProducts(listProducts.data);
       isErrorApi && setIsErrorApi(false);
-      setListData({
-        ...listData,
-        listProducts: {
-          sold: listProductsSold,
-          haventsold: listProductsHaventSold,
-        },
+      setListProducts({
+        sold: listProductsSold,
+        haventsold: listProductsHaventSold,
       });
     } catch (error) {
       console.debug(error);
@@ -92,7 +89,6 @@ const FlipPage = (props) => {
           console.debug(error);
         }
       }
-
       if (categories.data.length > 0 && brands.data.length > 0) {
         const listCategories = [];
         categories.data.forEach((category) => {
@@ -105,9 +101,7 @@ const FlipPage = (props) => {
           const newBrand = toUppercaseKeys(brand);
           listBrands.push(newBrand);
         });
-
         setListData({
-          ...listData,
           categories: listCategories,
           brands: listBrands,
         });
@@ -150,9 +144,9 @@ const FlipPage = (props) => {
   };
 
   const updateListProducts = (uri) => {
-    const newProductsSold = [...listData.listProducts.sold];
+    const newProductsSold = [...listProducts.sold];
     const newProductsHaventSold = [];
-    listData.listProducts.haventsold.forEach((product) => {
+    listProducts.haventsold.forEach((product) => {
       if (product.uri === uri) {
         newProductsSold.push({
           ...product,
@@ -162,12 +156,9 @@ const FlipPage = (props) => {
         newProductsHaventSold.push(product);
       }
     });
-    setListData({
-      ...listData,
-      listProducts: {
-        sold: newProductsSold,
-        haventsold: newProductsHaventSold,
-      },
+    setListProducts({
+      sold: newProductsSold,
+      haventsold: newProductsHaventSold,
     });
   };
 
@@ -200,8 +191,8 @@ const FlipPage = (props) => {
       <Animated.View
         style={[backAnimatedStyle, styles.flipCard, displayBackStyle]}>
         <ListProducts
-          listProductsSold={listData.listProducts.sold}
-          listProductsHaventSold={listData.listProducts.haventsold}
+          listProductsSold={listProducts.sold}
+          listProductsHaventSold={listProducts.haventsold}
           updateListProducts={updateListProducts}
           isErrorApi={isErrorApi}
           flipCard={flipCard}
