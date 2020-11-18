@@ -3,7 +3,6 @@ import React, {useState} from 'react';
 import {
   Alert,
   Image,
-  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -141,10 +140,9 @@ const ListProducts = (props) => {
       ? 'List produits à vendre'
       : 'List produits vendus';
 
-  const styleScrollView = Platform.OS === 'android' ? {marginBottom: 50} : {paddingBottom: 10};
   return (
     <SafeAreaView style={{width: '100%', height: '100%', position: 'relative'}}>
-      <ScrollView style={styleScrollView}>
+      <ScrollView>
         <View
           style={{
             justifyContent: 'center',
@@ -164,6 +162,7 @@ const ListProducts = (props) => {
         {showList === 'haventSold'
           ? renderProductsHaventSold()
           : renderProductsSold()}
+          <View style={{marginBottom: 50}}></View>
       </ScrollView>
       <View style={styles.menuBottom}>
         <TouchableOpacity

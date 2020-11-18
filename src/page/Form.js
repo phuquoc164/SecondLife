@@ -211,10 +211,9 @@ const Form = (props) => {
     }
   };
 
-  const styleScrollView = Platform.OS === 'android' ? {marginBottom: 50} : {paddingBottom: 10};
   const renderFormArticle = () => (
     <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
-      <ScrollView style={styleScrollView}>
+      <ScrollView>
         <View style={{paddingHorizontal: 20}}>
           <Image
             source={require('../assets/images/logo.png')}
@@ -775,6 +774,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.black,
     borderRadius: 7,
     borderWidth: 1,
+    marginBottom: 50,
   },
   btnSubmitText: {
     fontSize: 25,

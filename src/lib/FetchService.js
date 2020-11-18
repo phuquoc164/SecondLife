@@ -39,7 +39,7 @@ export default class FetchService {
     const header = new Headers({
       Accept: 'application/json',
       'content-type': 'application/json',
-      'x-token': token
+      'x-token': token,
     });
     const setting = {
       method: 'GET',
@@ -58,9 +58,9 @@ export default class FetchService {
         return res;
       })
       .then((body) => {
-        if (response && response.status === 200 ) {
+        if (response && response.status === 200) {
           if (!!body && !body.error) {
-            const refreshToken = response.headers.get("refresh-token");
+            const refreshToken = response.headers.get('refresh-token');
             return Promise.resolve({data: body, refreshToken});
           } else {
             return Promise.reject(body.error);
@@ -70,12 +70,18 @@ export default class FetchService {
       });
   };
 
-  static post = (endPoint, data, token) => {
-    const header = new Headers({
+  static post = (endPoint, data, token = null) => {
+    let header = new Headers({
       Accept: 'application/json',
       'content-type': 'application/json',
-      'x-token': token,
     });
+    if (token) {
+      header = new Headers({
+        Accept: 'application/json',
+        'content-type': 'application/json',
+        'x-token': token,
+      });
+    }
     const setting = {
       method: 'POST',
       headers: header,
@@ -104,7 +110,7 @@ export default class FetchService {
         }
         return Promise.reject(response.status);
       });
-  }
+  };
 
   static delete = (endPoint, token) => {
     const header = new Headers({
@@ -114,12 +120,12 @@ export default class FetchService {
     });
     const setting = {
       method: 'DELETE',
-      headers: header
+      headers: header,
     };
 
     const url = DOMAIN + endPoint;
 
-    let response; 
+    let response;
     return fetch(url, setting)
       .then((res) => {
         response = res;
@@ -139,5 +145,5 @@ export default class FetchService {
         }
         return Promise.reject(response.status);
       });
-  }
+  };
 }

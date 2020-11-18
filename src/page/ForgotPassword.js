@@ -11,6 +11,7 @@ import {
 
 /** App */
 import {colors} from '../assets/colors';
+import FetchService from '../lib/FetchService';
 import {validateEmail} from '../lib/Helpers';
 
 const ForgotPassword = (props) => {
@@ -25,11 +26,20 @@ const ForgotPassword = (props) => {
       setEmail({...email, error: true});
       return;
     }
-    // send request api
-    setShowIconValidate(true);
-    setTimeout(() => {
-      props.handleSendLinkReset();
-    }, 2000);
+    FetchService.post('reset-password', {email})
+      .then((response) => {
+        setShowIconValidate(response.success);
+        setTimeout(() => {
+          props.handleSendLinkReset();
+        }, 2000);
+      })
+      .catch((error) => {
+        console.debug(error);
+        setShowIconValidate(false);
+        setTimeout(() => {
+          props.handleSendLinkReset();
+        }, 2000);
+      });
   };
 
   return (
