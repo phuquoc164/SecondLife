@@ -76,7 +76,7 @@ const Form = (props) => {
         console.debug('Camera permission denied');
         Alert.alert(
           'Demande de permission',
-          'Nous avons besoin de la permission d\'accéder à votre caméra.',
+          "Nous avons besoin de la permission d'accéder à votre caméra.",
           [
             {text: 'Annuler', style: 'cancel'},
             {text: 'Paramètres', onPress: () => Linking.openSettings()},
@@ -122,7 +122,7 @@ const Form = (props) => {
         console.debug('Photo permission denied');
         Alert.alert(
           'Demande de permission',
-          'Nous avons besoin de la permission d\'accéder à votre bibliothèque média.',
+          "Nous avons besoin de la permission d'accéder à votre bibliothèque média.",
           [
             {text: 'Annuler', style: 'cancel'},
             {text: 'Paramètres', onPress: () => Linking.openSettings()},
@@ -515,9 +515,11 @@ const Form = (props) => {
                 items={props.categories}
                 placeholder="Sélectionnez une catégorie"
                 showError={showError}
-                onSelected={(selected) =>
-                  setArticle({...article, category: selected})
-                }
+                onSelected={(selected) => {
+                  if (selected.Id !== 'erreur_api') {
+                    setArticle({...article, category: selected});
+                  }
+                }}
                 autoGenerateAlphabeticalIndex={false}
                 showAlphabeticalIndex={false}
                 renderSearch={true}
@@ -533,9 +535,11 @@ const Form = (props) => {
                 items={props.brands}
                 placeholder="Sélectionnez une marque"
                 showError={showError}
-                onSelected={(selected) =>
-                  setArticle({...article, brand: selected})
-                }
+                onSelected={(selected) => {
+                  if (selected.Id !== 'erreur_api') {
+                    setArticle({...article, brand: selected});
+                  }
+                }}
                 autoGenerateAlphabeticalIndex={true}
                 showAlphabeticalIndex={true}
                 renderSearch={false}

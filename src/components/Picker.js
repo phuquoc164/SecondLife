@@ -31,7 +31,7 @@ const Picker = (props) => {
   );
 
   const renderListItem = (defaultSelected, item) => {
-    if (item.Id === 'no_data') {
+    if (item.Id === 'erreur_api') {
       return (
         <View style={{...styles.styleListItem, borderBottomWidth: 0}}>
           <Text style={{textAlign: 'center'}}>{item.Name}</Text>
@@ -112,7 +112,7 @@ const Picker = (props) => {
         selected={props.dataSelected}
         autoGenerateAlphabeticalIndex={props.autoGenerateAlphabeticalIndex}
         showAlphabeticalIndex={props.showAlphabeticalIndex}
-        requireSelection={true}
+        requireSelection={false}
         renderListItem={renderListItem}
         renderSearch={renderSearch}
       />
@@ -133,7 +133,7 @@ const Picker = (props) => {
       selected={props.dataSelected}
       autoGenerateAlphabeticalIndex={props.autoGenerateAlphabeticalIndex}
       showAlphabeticalIndex={props.showAlphabeticalIndex}
-      requireSelection={true}
+      requireSelection={false}
       renderListItem={renderListItem}
     />
   );
