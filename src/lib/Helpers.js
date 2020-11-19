@@ -60,3 +60,23 @@ export const createSku = () => {
     return v.toString(16);
   });
 };
+
+export const formatListProducts = (listProducts) => {
+  const listProductsSold = [];
+  const listProductsHaventSold = [];
+
+  listProducts.forEach(product => {
+    const data = {
+      ...product.customer,
+      ...product.product,
+      uri: product.uri.sold,
+    };
+    if (product["product"].sold) {
+      listProductsSold.push(data);
+    } else {
+      listProductsHaventSold.push(data);
+    }
+  });
+
+  return {listProductsSold, listProductsHaventSold};
+}
