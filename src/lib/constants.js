@@ -25,8 +25,8 @@ export const initialArticle = {
 
 export const initialListData = [
   {
-    Id: 'no_data',
-    Name: 'Pas de données',
+    Id: 'erreur_api',
+    Name: 'Une erreur API est survenue',
   },
 ];
 

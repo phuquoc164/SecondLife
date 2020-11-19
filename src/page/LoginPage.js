@@ -40,7 +40,7 @@ const LoginPage = (props) => {
       console.debug(error);
       Alert.alert(
         'Problème de connexion',
-        "Votre id ou votre mot de passe n'est pas correct. Veuillez réessayer!",
+        'Votre identifiant ou votre mot de passe est invalide.',
       );
     });
   };

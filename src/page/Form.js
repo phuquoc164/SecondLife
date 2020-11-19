@@ -1,5 +1,5 @@
 /** React */
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -15,34 +15,20 @@ import {
   View,
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 /** App */
 import ResultPage from './ResultPage';
 import CustomDateTimePicker from '../components/CustomDateTimePicker';
 import {colors} from '../assets/colors';
-import {
-  initialArticle,
-  initialInformation,
-  initialListData,
-  listStates,
-  STORAGE_KEY,
-  STORAGE_USER,
-} from '../lib/constants';
-import {
-  createSku,
-  toUppercaseKeys,
-  validateEmail,
-  verifyData,
-} from '../lib/Helpers';
+import {initialArticle, initialInformation, listStates} from '../lib/constants';
+import {createSku, validateEmail, verifyData} from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
 import Picker from '../components/Picker';
 import ModalPhoto from '../components/ModalPhoto';
 
 const Form = (props) => {
   const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState(props.token);
   const [information, setInformation] = useState(initialInformation);
   const [article, setArticle] = useState(initialArticle);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -52,66 +38,6 @@ const Form = (props) => {
     isSuccess: false,
   });
   const [showError, setShowError] = useState(false);
-  const [listData, setListData] = useState({
-    categories: initialListData,
-    brands: initialListData,
-  });
-
-  useEffect(() => {
-    getData();
-  }, []);
-
-  const getData = async () => {
-    try {
-      const categories = await FetchService.get('categories', token);
-      const brands = await FetchService.get('brands', token);
-
-      // token va expiré, envoyer une requete pour renouveler le token
-      if (categories.refreshToken || brands.refreshToken) {
-        try {
-          const user = AsyncStorage.getItem(STORAGE_USER);
-          const userData = JSON.parse(user);
-          const {username, password} = userData;
-          const response = await FetchService.login(username, password);
-          if (response && response.token) {
-            await AsyncStorage.setItem(STORAGE_KEY, response.token);
-            setToken(token);
-          }
-        } catch (error) {
-          console.debug(error);
-        }
-      }
-
-      /** Initialiser le list categories et list des marques */
-      if (categories.data.length > 0 && brands.data.length > 0) {
-        const listCategories = [];
-        categories.data.forEach((category) => {
-          const newCategory = toUppercaseKeys(category);
-          newCategory['HasImage'] = true;
-          listCategories.push(newCategory);
-        });
-        const listBrands = [];
-        brands.data.forEach((brand) => {
-          const newBrand = toUppercaseKeys(brand);
-          listBrands.push(newBrand);
-        });
-
-        setListData({
-          categories: listCategories,
-          brands: listBrands,
-        });
-      }
-    } catch (error) {
-      console.debug("Error", error);
-      if (error === 'Not allowed to use this Resource') {
-        Alert.alert(
-          'Problème de connexion',
-          'Votre compte est connecté par autre appareil. Veuillez réconnecter!',
-          [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
-        );
-      }
-    }
-  };
 
   const handleTakePhoto = async () => {
     setShowModalPhoto(false);
@@ -120,7 +46,7 @@ const Form = (props) => {
       maxWidth: 1000,
       maxHeight: 1000,
       includeBase64: true,
-      quality: 0.9
+      quality: 0.9,
     };
     const permissionCamera =
       Platform.OS === 'ios'
@@ -149,8 +75,8 @@ const Form = (props) => {
       } else {
         console.debug('Camera permission denied');
         Alert.alert(
-          'Problème de permission',
-          'SecondLife a besoin de la permission de caméra',
+          'Demande de permission',
+          "Nous avons besoin de la permission d'accéder à votre caméra.",
           [
             {text: 'Annuler', style: 'cancel'},
             {text: 'Paramètres', onPress: () => Linking.openSettings()},
@@ -160,7 +86,6 @@ const Form = (props) => {
     } catch (err) {
       console.warn(err);
     }
-    
   };
 
   const handleSelectPhoto = async () => {
@@ -180,7 +105,6 @@ const Form = (props) => {
       const granted = await request(permissionPhoto);
       if (granted === RESULTS.GRANTED) {
         launchImageLibrary(options, (response) => {
-          console.log(response);
           if (response.didCancel) {
             console.debug('User cancelled image picker');
           } else if (response.error) {
@@ -197,8 +121,8 @@ const Form = (props) => {
       } else {
         console.debug('Photo permission denied');
         Alert.alert(
-          'Problème de permission',
-          'SecondLife a besoin de la permission pour accéder la bibliothèque de photo',
+          'Demande de permission',
+          "Nous avons besoin de la permission d'accéder à votre bibliothèque média.",
           [
             {text: 'Annuler', style: 'cancel'},
             {text: 'Paramètres', onPress: () => Linking.openSettings()},
@@ -206,13 +130,8 @@ const Form = (props) => {
         );
       }
     } catch (error) {
-
+      console.warn(err);
     }
-    if (Platform.OS === "ios") {
-      const granted = await request(PERMISSIONS.IOS.PHOTO_LIBRARY);
-      console.log(granted);
-    }
-    
   };
 
   const handleAddArticle = () => {
@@ -223,7 +142,7 @@ const Form = (props) => {
     if (isErrorInformation || isErrorArticle) {
       Alert.alert(
         'Formulaire invalide',
-        'Veuillez vérifier tous les champs rouges',
+        'Veuillez corriger les champs encadrés en rouge.',
       );
       setShowError(true);
       setLoading(false);
@@ -258,9 +177,12 @@ const Form = (props) => {
           },
         ],
       };
-      FetchService.post('products', data, token)
+      FetchService.post('products', data, props.token)
         .then((response) => {
           setResultPage({show: true, isSuccess: response.success});
+          if (response.success) {
+            props.handleAddProduct(data);
+          }
         })
         .catch((error) => {
           console.debug(error);
@@ -290,7 +212,7 @@ const Form = (props) => {
   };
 
   const renderFormArticle = () => (
-    <SafeAreaView style={{flexDirection: 'column'}}>
+    <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
       <ScrollView>
         <View style={{paddingHorizontal: 20}}>
           <Image
@@ -304,6 +226,7 @@ const Form = (props) => {
             }}
           />
           <Text style={styles.title}>Informations Client</Text>
+
           <View style={styles.group}>
             {/* Nom */}
             <View style={styles.inputGroup}>
@@ -589,12 +512,14 @@ const Form = (props) => {
               <Text style={styles.label}>Catégorie</Text>
               <Picker
                 dataSelected={article.category}
-                items={listData.categories}
+                items={props.categories}
                 placeholder="Sélectionnez une catégorie"
                 showError={showError}
-                onSelected={(selected) =>
-                  setArticle({...article, category: selected})
-                }
+                onSelected={(selected) => {
+                  if (selected.Id !== 'erreur_api') {
+                    setArticle({...article, category: selected});
+                  }
+                }}
                 autoGenerateAlphabeticalIndex={false}
                 showAlphabeticalIndex={false}
                 renderSearch={true}
@@ -607,12 +532,14 @@ const Form = (props) => {
               <Text style={styles.label}>Marque</Text>
               <Picker
                 dataSelected={article.brand}
-                items={listData.brands}
+                items={props.brands}
                 placeholder="Sélectionnez une marque"
                 showError={showError}
-                onSelected={(selected) =>
-                  setArticle({...article, brand: selected})
-                }
+                onSelected={(selected) => {
+                  if (selected.Id !== 'erreur_api') {
+                    setArticle({...article, brand: selected});
+                  }
+                }}
                 autoGenerateAlphabeticalIndex={true}
                 showAlphabeticalIndex={true}
                 renderSearch={false}
@@ -735,6 +662,26 @@ const Form = (props) => {
         handleTakePhoto={handleTakePhoto}
         handleSelectPhoto={handleSelectPhoto}
       />
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          width: '100%',
+          zIndex: 999,
+          backgroundColor: colors.black,
+          paddingVertical: 15,
+        }}
+        onPress={props.flipCard}>
+        <Text
+          style={{
+            textAlign: 'center',
+            fontWeight: 'bold',
+            color: colors.white,
+            textTransform: 'uppercase',
+          }}>
+          List Produits
+        </Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 
@@ -831,6 +778,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.black,
     borderRadius: 7,
     borderWidth: 1,
+    marginBottom: 50,
   },
   btnSubmitText: {
     fontSize: 25,
