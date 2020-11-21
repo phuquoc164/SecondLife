@@ -26,11 +26,13 @@ import {createSku, validateEmail, verifyData} from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
 import Picker from '../components/Picker';
 import ModalPhoto from '../components/ModalPhoto';
+import ModalScanner from "../components/ModalScanner";
 
 const Form = (props) => {
   const [loading, setLoading] = useState(false);
   const [information, setInformation] = useState(initialInformation);
   const [article, setArticle] = useState(initialArticle);
+  const [showScanner, setShowScanner] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showModalPhoto, setShowModalPhoto] = useState(false);
   const [resultPage, setResultPage] = useState({
@@ -180,9 +182,6 @@ const Form = (props) => {
       FetchService.post('products', data, props.token)
         .then((response) => {
           setResultPage({show: true, isSuccess: response.success});
-          if (response.success) {
-            props.handleAddProduct(data);
-          }
         })
         .catch((error) => {
           console.debug(error);
@@ -208,6 +207,18 @@ const Form = (props) => {
       return information[property] && information[property] !== '';
     } else if (type === 'article') {
       return article[property] && article[property] !== '';
+    }
+  };
+
+  const handleScanSuccess = (data) => {
+    setShowScanner(false);
+    if (data.data) {
+      setArticle({...article, reference: data.data})
+    } else {
+      Alert.alert(
+        'Problème de scanner',
+        'On ne peut pas récupérer la référence. Veuillez réessayer!',
+      );
     }
   };
 
@@ -465,6 +476,44 @@ const Form = (props) => {
           </View>
 
           <View style={styles.group}>
+            {/* Réference */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Référence</Text>
+              <View
+                style={{flexDirection: 'row'}}>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    flex: 1,
+                    borderColor:
+                      !showError || verifyTextInput('article', 'reference')
+                        ? colors.gray
+                        : colors.red,
+                  }}
+                  placeholder="ex : 5341ezf845"
+                  placeholderTextColor={colors.gray}
+                  value={article.reference}
+                  onChangeText={(reference) =>
+                    setArticle({...article, reference})
+                  }
+                />
+                <TouchableOpacity
+                  style={{
+                    marginLeft: 15,
+                  }}
+                  onPress={() => setShowScanner(true)}>
+                  <Image
+                    source={require('../assets/images/qr_code.png')}
+                    style={{
+                      width: 30,
+                      height: 30,
+                      resizeMode: 'contain',
+                      alignSelf: 'center',
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
             {/* Name */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Nom</Text>
@@ -662,26 +711,11 @@ const Form = (props) => {
         handleTakePhoto={handleTakePhoto}
         handleSelectPhoto={handleSelectPhoto}
       />
-      <TouchableOpacity
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          zIndex: 999,
-          backgroundColor: colors.black,
-          paddingVertical: 15,
-        }}
-        onPress={props.flipCard}>
-        <Text
-          style={{
-            textAlign: 'center',
-            fontWeight: 'bold',
-            color: colors.white,
-            textTransform: 'uppercase',
-          }}>
-          List Produits
-        </Text>
-      </TouchableOpacity>
+      <ModalScanner
+        visible={showScanner}
+        onCancel={() => setShowScanner(false)}
+        handleScanSuccess={handleScanSuccess}
+      />
     </SafeAreaView>
   );
 
@@ -785,7 +819,7 @@ const styles = StyleSheet.create({
     color: colors.white,
     textAlign: 'center',
     fontWeight: 'bold',
-  },
+  }
 });
 
 export default Form;
