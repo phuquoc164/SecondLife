@@ -25,7 +25,6 @@ const ListProducts = (props) => {
       const index = props.listProductsHaventSold.findIndex(
         (product) => product.sku === props.referenceScanned,
       );
-      console.log(flatlistRef, index, props.listProductsHaventSold, showMore);
       showList === 'sold' && setShowList('haventSold');
       if (index !== -1) {
         setShowMore(props.referenceScanned);
@@ -172,7 +171,6 @@ const ListProducts = (props) => {
             index,
           })}
           onScrollToIndexFailed={(info) => {
-            console.log(info);
             Alert.alert(
               'Erreur système',
               'SecondLife rencontre une erreur, veuillez chercher votre produit dans la liste.',

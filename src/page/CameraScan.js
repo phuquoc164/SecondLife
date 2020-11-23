@@ -23,7 +23,6 @@ const CameraScan = (props) => {
   });
 
   const handleReadQRCode = (event) => {
-    console.log(event);
     if (event.data) {
       if (props.original === 'scanProduct') {
         props.handleGetReferenceScanned(event.data);
@@ -31,7 +30,6 @@ const CameraScan = (props) => {
         const data = JSON.parse(event.data);
         FetchService.post('vouchers', data, props.token)
           .then((response) => {
-            console.log(response);
             setResultPage({
               show: true,
               isSuccess: response.success,
