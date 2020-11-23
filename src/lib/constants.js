@@ -14,6 +14,7 @@ export const initialInformation = {
 
 export const initialArticle = {
   photos: [],
+  reference: null,
   name: null,
   description: null,
   category: null,
