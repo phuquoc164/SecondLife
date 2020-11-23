@@ -1,10 +1,10 @@
 /** React */
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
+  FlatList,
   Image,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,9 +15,33 @@ import {
 import {colors} from '../assets/colors';
 import FetchService from '../lib/FetchService';
 
+let flatlistRef = null;
 const ListProducts = (props) => {
   const [showList, setShowList] = useState('haventSold');
   const [showMore, setShowMore] = useState(null);
+
+  useEffect(() => {
+    if (!!props.referenceScanned) {
+      const index = props.listProductsHaventSold.findIndex(
+        (product) => product.sku === props.referenceScanned,
+      );
+      console.log(flatlistRef, index, props.listProductsHaventSold, showMore);
+      showList === 'sold' && setShowList('haventSold');
+      if (index !== -1) {
+        setShowMore(props.referenceScanned);
+        flatlistRef.scrollToIndex({
+          animated: true,
+          index,
+        });
+      } else {
+        Alert.alert(
+          'Erreur système',
+          'SecondLife ne peut pas trouver votre produit. Veuillez réessayer ou chercher dans la liste des produits',
+        );
+      }
+      props.resetReferenceScanned();
+    }
+  }, [props.referenceScanned]);
 
   const toggleItem = (sku) => {
     if (showMore === sku) {
@@ -48,7 +72,7 @@ const ListProducts = (props) => {
       });
   };
 
-  const renderItem = (item) => {
+  const renderItem = ({item}) => {
     let styleItemShowed = {};
     if (showMore === item.sku) {
       styleItemShowed = {
@@ -90,6 +114,7 @@ const ListProducts = (props) => {
             </View>
             <Text>- Article</Text>
             <View style={{paddingLeft: 20}}>
+              <Text>{`Référence: ${item.sku}`}</Text>
               <Text>{`Name: ${item.name}`}</Text>
               <Text>{`Marque: ${item.brand}`}</Text>
               <Text>{`Prix: ${item.price} €`}</Text>
@@ -100,7 +125,7 @@ const ListProducts = (props) => {
                 <TouchableOpacity
                   style={styles.btn}
                   onPress={() => handleSellProduct(item.uri)}>
-                  <Text style={styles.btnText}>A vendu</Text>
+                  <Text style={styles.btnText}>Vendu</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -111,59 +136,84 @@ const ListProducts = (props) => {
   };
 
   const renderNoItem = () => (
-    <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24}}>
-      {props.isErrorApi
-        ? 'Une erreur API est survenue'
-        : "Il n'y a aucun produits"}
-    </Text>
+    <View style={{flex: 3}}>
+      <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24}}>
+        {props.isErrorApi
+          ? 'Une erreur API est survenue'
+          : "Il n'y a aucun produits"}
+      </Text>
+    </View>
   );
 
   const renderProductsSold = () =>
     props.listProductsSold.length > 0 ? (
-      <View style={styles.styleListItem}>
-        {props.listProductsSold.map((product) => renderItem(product))}
-      </View>
+      <SafeAreaView style={{flex: 3}}>
+        <FlatList
+          data={props.listProductsSold}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.sku}
+        />
+      </SafeAreaView>
     ) : (
       renderNoItem()
     );
 
   const renderProductsHaventSold = () =>
     props.listProductsHaventSold.length > 0 ? (
-      <View style={styles.styleListItem}>
-        {props.listProductsHaventSold.map((product) => renderItem(product))}
-      </View>
+      <SafeAreaView style={{flex: 3}}>
+        <FlatList
+          ref={(ref) => (flatlistRef = ref)}
+          data={props.listProductsHaventSold}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.sku}
+          getItemLayout={(data, index) => ({
+            length: 50,
+            offset: 50 * index,
+            index,
+          })}
+          onScrollToIndexFailed={(info) => {
+            console.log(info);
+            Alert.alert(
+              'Erreur système',
+              'SecondLife rencontre une erreur, veuillez chercher votre produit dans la liste.',
+            );
+          }}
+        />
+      </SafeAreaView>
     ) : (
       renderNoItem()
     );
 
-  const title = showList === 'haventSold'
-      ? 'List produits à vendre'
-      : 'List produits vendus';
-
   return (
-    <SafeAreaView style={{width: '100%', height: '100%', position: 'relative'}}>
-      <ScrollView>
-        <View
-          style={{
-            justifyContent: 'center',
-            paddingVertical: 20,
-            position: 'relative',
-          }}>
-          <Text style={styles.label}>{title}</Text>
-          <TouchableOpacity
-            onPress={props.flipCard}
-            style={{position: 'absolute', right: 10, top: 10}}>
-            <Image
-              source={require('../assets/images/cross-black.png')}
-              style={{width: 19.5, height: 19}}
-            />
-          </TouchableOpacity>
-        </View>
-        {showList === 'haventSold'
-          ? renderProductsHaventSold()
-          : renderProductsSold()}
-          <View style={{marginBottom: 50}}></View>
-      </ScrollView>
+    <SafeAreaView
+      style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        justifyContent: 'flex-start',
+      }}>
+      <Image
+        source={require('../assets/images/logo.png')}
+        style={{
+          flex: 1,
+          width: '50%',
+          resizeMode: 'contain',
+          alignSelf: 'center',
+          paddingTop: 40,
+        }}
+      />
+      <TouchableOpacity
+        onPress={props.returnHomePage}
+        style={{position: 'absolute', right: 10, top: 10}}>
+        <Image
+          source={require('../assets/images/cross-black.png')}
+          style={{width: 19.5, height: 19}}
+        />
+      </TouchableOpacity>
+      {showList === 'haventSold'
+        ? renderProductsHaventSold()
+        : renderProductsSold()}
+      <View style={{marginBottom: 50}}></View>
       <View style={styles.menuBottom}>
         <TouchableOpacity
           style={{
@@ -193,7 +243,7 @@ const ListProducts = (props) => {
               ...styles.btnText,
               color: showList === 'sold' ? colors.black : colors.white,
             }}>
-            A vendu
+            Vendu
           </Text>
         </TouchableOpacity>
       </View>
@@ -209,7 +259,8 @@ const styles = StyleSheet.create({
   item: {
     borderBottomWidth: 1,
     borderBottomColor: colors.gray,
-    paddingVertical: 15,
+    padding: 15,
+    backgroundColor: colors.white,
   },
   btnItem: {
     flexDirection: 'row',
