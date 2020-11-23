@@ -19,7 +19,7 @@ const ResultPage = (props) => {
           style={{width: 19.5, height: 19}}
         />
       </TouchableOpacity>
-      <View style={{flex: 1, width: '80%'}}>
+      <View style={{flex: 1, width: '65%', maxWidth: 300}}>
         <Image
           source={require('../assets/images/logo.png')}
           style={{
@@ -27,13 +27,12 @@ const ResultPage = (props) => {
             width: null,
             height: null,
             resizeMode: 'contain',
-            marginTop: -25,
           }}
         />
       </View>
       <View
         style={{
-          flex: 2,
+          flex: 3,
           flexDirection: 'column',
           justifyContent: 'space-between',
         }}>
@@ -62,7 +61,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 45,
+    paddingHorizontal: 45,
+    paddingTop: 25,
     position: "relative"
   },
   title: {

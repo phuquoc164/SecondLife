@@ -188,16 +188,15 @@ const ListProducts = (props) => {
         width: '100%',
         height: '100%',
         position: 'relative',
-        justifyContent: 'flex-start',
       }}>
       <Image
         source={require('../assets/images/logo.png')}
         style={{
           flex: 1,
           width: '50%',
+          maxWidth: 300,
           resizeMode: 'contain',
           alignSelf: 'center',
-          paddingTop: 40,
         }}
       />
       <TouchableOpacity

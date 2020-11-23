@@ -53,8 +53,10 @@ const LoginPage = (props) => {
           style={{
             flex: 1,
             width: '60%',
+            maxWidth: 300,
             resizeMode: 'contain',
-            marginVertical: 40,
+            marginTop: 20,
+            marginBottom: 40
           }}
         />
         <View style={styles.inputGroup}>

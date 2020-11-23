@@ -264,8 +264,8 @@ const Form = (props) => {
             style={{
               flex: 1,
               width: '50%',
+              maxWidth: 300,
               resizeMode: 'contain',
-              marginTop: -20,
               alignSelf: 'center',
             }}
           />

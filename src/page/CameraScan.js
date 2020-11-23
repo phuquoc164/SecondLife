@@ -48,12 +48,13 @@ const CameraScan = (props) => {
 
   const returnScanPage = () => (
     <View style={{flex: 1, position: 'relative'}}>
-      <View style={{flex: 1, marginTop: 20}}>
+      <View style={{flex: 1, marginTop: 10, marginBottom: 40}}>
         <Image
           source={require('../assets/images/logo.png')}
           style={{
             flex: 1,
             width: '50%',
+            maxWidth: 300,
             height: 'auto',
             resizeMode: 'contain',
             alignSelf: 'center',
