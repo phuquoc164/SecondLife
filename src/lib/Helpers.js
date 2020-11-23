@@ -53,25 +53,17 @@ export const toUppercaseKeys = (object) => {
   return newObject;
 };
 
-export const createSku = () => {
-  return 'xxxxxxxxxx'.replace(/[x]/g, function (c) {
-    const r = (Math.random() * 16) | 0,
-      v = c == 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};
-
 export const formatListProducts = (listProducts) => {
   const listProductsSold = [];
   const listProductsHaventSold = [];
 
-  listProducts.forEach(product => {
+  listProducts.forEach((product) => {
     const data = {
       ...product.customer,
       ...product.product,
       uri: product.uri.sold,
     };
-    if (product["product"].sold) {
+    if (product['product'].sold) {
       listProductsSold.push(data);
     } else {
       listProductsHaventSold.push(data);
@@ -79,4 +71,34 @@ export const formatListProducts = (listProducts) => {
   });
 
   return {listProductsSold, listProductsHaventSold};
+};
+
+export const formatListCustomers = (listCustomers) => {
+  const customers = [];
+  const listLastNames = [];
+  const listFirstNames = [];
+  const listEmails = [];
+  listCustomers.forEach((customer) => {
+    const key = `${customer.firstName} ${customer.lastName} - ${customer.email}`;
+    if (!customers[key]) {
+      customers[key] = customer;
+    }
+    if (!listLastNames.includes(customer.lastName)) {
+      listLastNames.push(customer.lastName);
+    }
+    if (!listFirstNames.includes(customer.firstName)) {
+      listFirstNames.push(customer.firstName);
+    }
+    if (!listEmails.includes(customer.email)) {
+      listEmails.push(customer.email);
+    }
+  });
+
+  return {customers, listLastNames, listFirstNames, listEmails};
+};
+
+export const filterArray = (array, filtered, limit = 5) => {
+  if (!filtered || filtered === "") return array.slice(0, limit);
+  const newArray = array.filter(singleData => singleData.toLowerCase().includes(filtered.toLowerCase()));
+  return newArray.slice(0, limit);
 }
