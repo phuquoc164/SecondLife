@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    zIndex: 9999,
+    zIndex: 999,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
