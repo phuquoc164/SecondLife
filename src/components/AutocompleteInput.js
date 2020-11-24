@@ -26,13 +26,18 @@ const AutocompleteInput = (props) => {
           borderBottomWidth: index === `${numberOptions - 1}` ? 0 : 1,
         }}
         onPress={() => {
-					inputRef.blur();
-					props.onChangeText(item);
-					props.handleAutocomplete && props.handleAutocomplete();
+          inputRef.blur();
+          props.onChangeText(item);
+          props.handleAutocomplete && props.handleAutocomplete();
           setShowSuggestions(false);
         }}
-				key={index}>
-        <Text>{item}</Text>
+        key={index}>
+        <Text
+          style={{
+            backgroundColor: colors.white,
+          }}>
+          {item}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -40,15 +45,19 @@ const AutocompleteInput = (props) => {
   return (
     <View style={props.containerStyle}>
       <Text style={props.labelStyle}>{props.label}</Text>
-      <View style={{position: 'relative'}}>
+      <View style={{position: 'relative', zIndex: 15}}>
         <TextInput
 					ref={ref => setInputRef(ref)}
           style={props.inputStyle}
           placeholder={props.placeholder}
           placeholderTextColor={colors.gray}
-          onFocus={() => setShowSuggestions(true)}
+          onFocus={() => {
+            setShowSuggestions(true);
+            props.onFocus();
+          }}
           onBlur={() => {
-						setShowSuggestions(false);
+            setShowSuggestions(false);
+            props.onBlur();
 						props.handleAutocomplete && props.handleAutocomplete();
 					}}
           value={props.value}
@@ -66,7 +75,7 @@ const AutocompleteInput = (props) => {
               position: 'absolute',
               top: 30,
               left: 0,
-              zIndex: 99999,
+              zIndex: 200,
               maxHeight: 150,
               width: '100%',
             }}>

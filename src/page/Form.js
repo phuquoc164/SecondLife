@@ -7,13 +7,13 @@ import {
   Linking,
   Platform,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
@@ -36,6 +36,7 @@ const Form = (props) => {
   const [showScanner, setShowScanner] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showModalPhoto, setShowModalPhoto] = useState(false);
+  const [keyboardDisplay, setKeyboardDisplay] = useState("never");
   const [resultPage, setResultPage] = useState({
     show: false,
     isSuccess: false,
@@ -257,7 +258,7 @@ const Form = (props) => {
 
   const renderFormArticle = () => (
     <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
-      <ScrollView keyboardShouldPersistTaps="always">
+      <KeyboardAwareScrollView keyboardShouldPersistTaps={keyboardDisplay}>
         <View style={{paddingHorizontal: 20}}>
           <Image
             source={require('../assets/images/logo.png')}
@@ -279,118 +280,126 @@ const Form = (props) => {
           </TouchableOpacity>
           <Text style={styles.title}>Informations Client</Text>
 
-          <View style={styles.group}>
-            {/* Nom */}
-            <AutocompleteInput
-              containerStyle={styles.inputGroup}
-              labelStyle={styles.label}
-              label="Nom"
-              inputStyle={{
-                ...styles.input,
-                borderColor:
-                  !showError || verifyTextInput('information', 'lastName')
-                    ? colors.gray
-                    : colors.red,
-              }}
-              placeholder="Nom client"
-              value={information.lastName}
-              onChangeText={(lastName) => {
-                listLastNamesFiltered.current = filterArray(
-                  listLastNames,
-                  lastName,
-                );
-                setInformation({...information, lastName});
-              }}
-              options={listLastNamesFiltered.current}
-            />
-
-            {/* Prénom */}
-            <AutocompleteInput
-              containerStyle={styles.inputGroup}
-              labelStyle={styles.label}
-              label="Prénom"
-              inputStyle={{
-                ...styles.input,
-                borderColor:
-                  !showError || verifyTextInput('information', 'firstName')
-                    ? colors.gray
-                    : colors.red,
-              }}
-              placeholder="Prénom client"
-              value={information.firstName}
-              onChangeText={(firstName) => {
-                listFirstNamesFiltered.current = filterArray(
-                  listFirstNames,
-                  firstName,
-                );
-                setInformation({...information, firstName});
-              }}
-              options={listFirstNamesFiltered.current}
-            />
-
-            {/* birthday */}
-            <View>
-              <Text style={styles.label}>Date de naissance</Text>
-              <TouchableOpacity
-                style={{
+          <View style={{zIndex: 100}}>
+            <View style={styles.group}>
+              {/* Nom */}
+              <AutocompleteInput
+                containerStyle={{...styles.inputGroup, zIndex: 10}}
+                labelStyle={styles.label}
+                label="Nom"
+                inputStyle={{
                   ...styles.input,
                   borderColor:
-                    !showError || verifyTextInput('information', 'birthday')
+                    !showError || verifyTextInput('information', 'lastName')
                       ? colors.gray
                       : colors.red,
                 }}
-                onPress={() => setShowCalendar(true)}>
-                <Text style={{color}}>{textBirthday}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.group}>
-            {/* Email */}
-            <AutocompleteInput
-              containerStyle={styles.inputGroup}
-              labelStyle={styles.label}
-              label="E-mail"
-              inputStyle={{
-                ...styles.input,
-                borderColor:
-                  !showError ||
-                  (information.email && validateEmail(information.email))
-                    ? colors.gray
-                    : colors.red,
-              }}
-              placeholder="E-mail client"
-              value={information.email}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              onChangeText={(email) => {
-                listEmailsFiltered.current = filterArray(listEmails, email);
-                setInformation({...information, email});
-              }}
-              options={listEmailsFiltered.current}
-              handleAutocomplete={handleAutocomplete}
-            />
-
-            {/* Telephone */}
-            <View style={{width: '100%'}}>
-              <Text style={styles.label}>Télephone</Text>
-              <TextInput
-                style={{
-                  ...styles.input,
-                  borderColor:
-                    !showError || verifyTextInput('information', 'telephone')
-                      ? colors.gray
-                      : colors.red,
+                onFocus={() => setKeyboardDisplay('always')}
+                onBlur={() => setKeyboardDisplay('never')}
+                placeholder="Nom client"
+                value={information.lastName}
+                onChangeText={(lastName) => {
+                  listLastNamesFiltered.current = filterArray(
+                    listLastNames,
+                    lastName,
+                  );
+                  setInformation({...information, lastName});
                 }}
-                autoCompleteType="tel"
-                placeholder="ex: 06 00 00 00 00"
-                placeholderTextColor={colors.gray}
-                value={information.telephone}
-                keyboardType="phone-pad"
-                onChangeText={(telephone) =>
-                  setInformation({...information, telephone})
-                }
+                options={listLastNamesFiltered.current}
               />
+
+              {/* Prénom */}
+              <AutocompleteInput
+                containerStyle={{...styles.inputGroup, zIndex: 9}}
+                labelStyle={styles.label}
+                label="Prénom"
+                inputStyle={{
+                  ...styles.input,
+                  borderColor:
+                    !showError || verifyTextInput('information', 'firstName')
+                      ? colors.gray
+                      : colors.red,
+                }}
+                onFocus={() => setKeyboardDisplay('always')}
+                onBlur={() => setKeyboardDisplay('never')}
+                placeholder="Prénom client"
+                value={information.firstName}
+                onChangeText={(firstName) => {
+                  listFirstNamesFiltered.current = filterArray(
+                    listFirstNames,
+                    firstName,
+                  );
+                  setInformation({...information, firstName});
+                }}
+                options={listFirstNamesFiltered.current}
+              />
+
+              {/* birthday */}
+              <View>
+                <Text style={styles.label}>Date de naissance</Text>
+                <TouchableOpacity
+                  style={{
+                    ...styles.input,
+                    borderColor:
+                      !showError || verifyTextInput('information', 'birthday')
+                        ? colors.gray
+                        : colors.red,
+                  }}
+                  onPress={() => setShowCalendar(true)}>
+                  <Text style={{color}}>{textBirthday}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={{...styles.group, zIndex: -1}}>
+              {/* Email */}
+              <AutocompleteInput
+                containerStyle={{...styles.inputGroup, zIndex: 7}}
+                labelStyle={styles.label}
+                label="E-mail"
+                inputStyle={{
+                  ...styles.input,
+                  borderColor:
+                    !showError ||
+                    (information.email && validateEmail(information.email))
+                      ? colors.gray
+                      : colors.red,
+                }}
+                onFocus={() => setKeyboardDisplay('always')}
+                onBlur={() => setKeyboardDisplay('never')}
+                placeholder="E-mail client"
+                value={information.email}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                onChangeText={(email) => {
+                  listEmailsFiltered.current = filterArray(listEmails, email);
+                  setInformation({...information, email});
+                }}
+                options={listEmailsFiltered.current}
+                handleAutocomplete={handleAutocomplete}
+              />
+
+              {/* Telephone */}
+              <View style={{width: '100%'}}>
+                <Text style={styles.label}>Télephone</Text>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    borderColor:
+                      !showError || verifyTextInput('information', 'telephone')
+                        ? colors.gray
+                        : colors.red,
+                  }}
+                  autoCompleteType="tel"
+                  placeholder="ex: 06 00 00 00 00"
+                  placeholderTextColor={colors.gray}
+                  value={information.telephone}
+                  keyboardType="phone-pad"
+                  onChangeText={(telephone) =>
+                    setInformation({...information, telephone})
+                  }
+                />
+              </View>
             </View>
           </View>
 
@@ -705,12 +714,14 @@ const Form = (props) => {
                   }
                 }}
                 value={article.price}
-                onBlur={() =>
-                  setArticle({
-                    ...article,
-                    price: (article.price + ' €').replace(',', '.'),
-                  })
-                }
+                onBlur={() => {
+                  if (article.price) {
+                    setArticle({
+                      ...article,
+                      price: (article.price + ' €').replace(',', '.'),
+                    });
+                  }
+                }}
                 keyboardType="decimal-pad"
                 onChangeText={(price) => {
                   setArticle({...article, price});
@@ -733,7 +744,7 @@ const Form = (props) => {
             )}
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <CustomDateTimePicker
         visible={showCalendar}
         onCancel={() => setShowCalendar(false)}
