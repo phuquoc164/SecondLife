@@ -65,6 +65,7 @@ const LoginPage = (props) => {
             <TextInput
               style={styles.input}
               name="username"
+              autoCorrect={false}
               autoCompleteType="username"
               autoCapitalize="none"
               value={username.value}
@@ -90,6 +91,7 @@ const LoginPage = (props) => {
               style={styles.input}
               name="password"
               autoCompleteType="password"
+              autoCorrect={false}
               autoCapitalize="none"
               secureTextEntry={true}
               value={password.value}
