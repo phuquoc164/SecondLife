@@ -29,6 +29,10 @@ import {filterArray, validateEmail, verifyData} from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
 import {colors} from '../assets/colors';
 
+const zIndexLastName = Platform.OS === 'ios' ? {zIndex: 10} : {};
+const zIndexFirstName = Platform.OS === 'ios' ? {zIndex: 9} : {};
+const zIndexEmail = Platform.OS === 'ios' ? {zIndex: 8} : {};
+
 const Form = (props) => {
   const [loading, setLoading] = useState(false);
   const [information, setInformation] = useState(initialInformation);
@@ -36,7 +40,7 @@ const Form = (props) => {
   const [showScanner, setShowScanner] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showModalPhoto, setShowModalPhoto] = useState(false);
-  const [keyboardDisplay, setKeyboardDisplay] = useState("never");
+  const [keyboardDisplay, setKeyboardDisplay] = useState('never');
   const [resultPage, setResultPage] = useState({
     show: false,
     isSuccess: false,
@@ -284,7 +288,7 @@ const Form = (props) => {
             <View style={styles.group}>
               {/* Nom */}
               <AutocompleteInput
-                containerStyle={{...styles.inputGroup, zIndex: 10}}
+                containerStyle={{...styles.inputGroup, ...zIndexLastName}}
                 labelStyle={styles.label}
                 label="Nom"
                 inputStyle={{
@@ -310,7 +314,7 @@ const Form = (props) => {
 
               {/* Prénom */}
               <AutocompleteInput
-                containerStyle={{...styles.inputGroup, zIndex: 9}}
+                containerStyle={{...styles.inputGroup, ...zIndexFirstName}}
                 labelStyle={styles.label}
                 label="Prénom"
                 inputStyle={{
@@ -354,7 +358,7 @@ const Form = (props) => {
             <View style={{...styles.group, zIndex: -1}}>
               {/* Email */}
               <AutocompleteInput
-                containerStyle={{...styles.inputGroup, zIndex: 7}}
+                containerStyle={{...styles.inputGroup, ...zIndexEmail}}
                 labelStyle={styles.label}
                 label="E-mail"
                 inputStyle={{

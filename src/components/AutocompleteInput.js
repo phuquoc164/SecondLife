@@ -45,7 +45,7 @@ const AutocompleteInput = (props) => {
   return (
     <View style={props.containerStyle}>
       <Text style={props.labelStyle}>{props.label}</Text>
-      <View style={{position: 'relative', zIndex: 15}}>
+      <View style={{position: 'relative'}}>
         <TextInput
 					ref={ref => setInputRef(ref)}
           style={props.inputStyle}
