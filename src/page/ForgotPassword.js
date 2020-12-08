@@ -19,7 +19,7 @@ const ForgotPassword = (props) => {
     value: '',
     error: false,
   });
-  const [showIconValidate, setShowIconValidate] = useState(false);
+  const [showIconValidate, setShowIconValidate] = useState(null);
 
   const handleSendData = () => {
     if (!validateEmail(email.value)) {
@@ -28,14 +28,14 @@ const ForgotPassword = (props) => {
     }
     FetchService.post('reset-password', {email})
       .then((response) => {
-        setShowIconValidate(response.success);
+        setShowIconValidate(response.success ? "valid" : "unvalid");
         setTimeout(() => {
           props.handleSendLinkReset();
         }, 2000);
       })
       .catch((error) => {
         console.debug(error);
-        setShowIconValidate(false);
+        setShowIconValidate("unvalid");
         setTimeout(() => {
           props.handleSendLinkReset();
         }, 2000);
@@ -49,8 +49,8 @@ const ForgotPassword = (props) => {
           source={require('../assets/images/logo.png')}
           style={{
             flex: 1,
-            width: null,
-            height: null,
+            width: '100%',
+            maxWidth: 300,
             resizeMode: 'contain',
           }}
         />
@@ -105,10 +105,16 @@ const ForgotPassword = (props) => {
       </View>
 
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        {showIconValidate && (
+        {showIconValidate && showIconValidate === 'valid' && (
           <Image
             source={require('../assets/images/check.png')}
             style={styles.iconCheck}
+          />
+        )}
+        {showIconValidate && showIconValidate === 'unvalid' && (
+          <Image
+            source={require('../assets/images/cross.png')}
+            style={{width: 90, height: 90}}
           />
         )}
       </View>
@@ -122,7 +128,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 45,
+    paddingHorizontal: 45,
+    paddingVertical: 20
   },
   title: {
     fontSize: 15,

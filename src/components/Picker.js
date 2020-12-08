@@ -89,7 +89,7 @@ const Picker = (props) => {
       <Text style={styles.label}>{props.titleSearch}</Text>
       <TouchableOpacity
         onPress={handleClose}
-        style={{position: 'absolute', right: 10, top: 10}}>
+        style={{position: 'absolute', right: 20, top: 20}}>
         <Image
           source={require('../assets/images/cross-black.png')}
           style={{width: 19.5, height: 19}}

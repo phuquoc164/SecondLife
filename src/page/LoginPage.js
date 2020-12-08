@@ -53,8 +53,10 @@ const LoginPage = (props) => {
           style={{
             flex: 1,
             width: '60%',
+            maxWidth: 300,
             resizeMode: 'contain',
-            marginVertical: 40,
+            marginTop: 20,
+            marginBottom: 40
           }}
         />
         <View style={styles.inputGroup}>
@@ -63,6 +65,7 @@ const LoginPage = (props) => {
             <TextInput
               style={styles.input}
               name="username"
+              autoCorrect={false}
               autoCompleteType="username"
               autoCapitalize="none"
               value={username.value}
@@ -88,6 +91,7 @@ const LoginPage = (props) => {
               style={styles.input}
               name="password"
               autoCompleteType="password"
+              autoCorrect={false}
               autoCapitalize="none"
               secureTextEntry={true}
               value={password.value}

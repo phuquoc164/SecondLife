@@ -1,5 +1,5 @@
 /** React */
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -7,37 +7,58 @@ import {
   Linking,
   Platform,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 /** App */
 import ResultPage from './ResultPage';
 import CustomDateTimePicker from '../components/CustomDateTimePicker';
-import {colors} from '../assets/colors';
-import {initialArticle, initialInformation, listStates} from '../lib/constants';
-import {createSku, validateEmail, verifyData} from '../lib/Helpers';
-import FetchService from '../lib/FetchService';
 import Picker from '../components/Picker';
 import ModalPhoto from '../components/ModalPhoto';
+import ModalScanner from '../components/ModalScanner';
+import AutocompleteInput from '../components/AutocompleteInput';
+import {initialArticle, initialInformation, listStates} from '../lib/constants';
+import {filterArray, validateEmail, verifyData} from '../lib/Helpers';
+import FetchService from '../lib/FetchService';
+import {colors} from '../assets/colors';
+
+const zIndexLastName = Platform.OS === 'ios' ? {zIndex: 10} : {};
+const zIndexFirstName = Platform.OS === 'ios' ? {zIndex: 9} : {};
+const zIndexEmail = Platform.OS === 'ios' ? {zIndex: 8} : {};
 
 const Form = (props) => {
   const [loading, setLoading] = useState(false);
   const [information, setInformation] = useState(initialInformation);
   const [article, setArticle] = useState(initialArticle);
+  const [showScanner, setShowScanner] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showModalPhoto, setShowModalPhoto] = useState(false);
+  const [keyboardDisplay, setKeyboardDisplay] = useState('never');
   const [resultPage, setResultPage] = useState({
     show: false,
     isSuccess: false,
   });
   const [showError, setShowError] = useState(false);
+  const {
+    customers,
+    listLastNames,
+    listFirstNames,
+    listEmails,
+  } = props.listCustomers;
+  const listLastNamesFiltered = useRef(
+    filterArray(listLastNames, information.lastName),
+  );
+  const listFirstNamesFiltered = useRef(
+    filterArray(listFirstNames, information.firstName),
+  );
+  const listEmailsFiltered = useRef(filterArray(listEmails, information.email));
 
   const handleTakePhoto = async () => {
     setShowModalPhoto(false);
@@ -147,7 +168,6 @@ const Form = (props) => {
       setShowError(true);
       setLoading(false);
     } else {
-      const sku = createSku();
       const data = {
         firstName: information.firstName,
         lastName: information.lastName,
@@ -160,14 +180,14 @@ const Form = (props) => {
         products: [
           {
             name: article.name,
-            sku: article.brand.Name + '-' + sku,
+            sku: article.reference,
             description: article.description,
             price: parseFloat(article.price.replace(' €', '')),
             category: article.category.Id.replace(
               '/{manufacturer}/',
               `/${article.brand.Name}/`,
             ),
-            reference: article.brand.Name + '-' + sku,
+            reference: article.reference,
             pictures: article.photos.map((photo, index) => ({
               name: `image${index + 1}`,
               content: photo,
@@ -211,78 +231,179 @@ const Form = (props) => {
     }
   };
 
+  const handleScanSuccess = (data) => {
+    setShowScanner(false);
+    if (data.data) {
+      setArticle({...article, reference: data.data});
+    } else {
+      Alert.alert(
+        'Problème de scanner',
+        'On ne peut pas récupérer la référence. Veuillez réessayer!',
+      );
+    }
+  };
+
+  const handleAutocomplete = () => {
+    const {firstName, lastName, email} = information;
+    if (firstName !== '' && lastName !== '' && email !== '') {
+      const key = `${firstName} ${lastName} - ${email}`;
+      if (customers[key]) {
+        const {address, city, phone, zipCode} = customers[key];
+        setInformation({
+          ...information,
+          address,
+          city,
+          telephone: phone,
+          postalCode: zipCode,
+        });
+      }
+    }
+  };
+
   const renderFormArticle = () => (
     <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
-      <ScrollView>
+      <KeyboardAwareScrollView keyboardShouldPersistTaps={keyboardDisplay}>
         <View style={{paddingHorizontal: 20}}>
           <Image
             source={require('../assets/images/logo.png')}
             style={{
               flex: 1,
               width: '50%',
+              maxWidth: 300,
               resizeMode: 'contain',
-              marginTop: -20,
               alignSelf: 'center',
             }}
           />
+          <TouchableOpacity
+            onPress={props.returnHomePage}
+            style={{position: 'absolute', right: 20, top: 20}}>
+            <Image
+              source={require('../assets/images/cross-black.png')}
+              style={{width: 19.5, height: 19}}
+            />
+          </TouchableOpacity>
           <Text style={styles.title}>Informations Client</Text>
 
-          <View style={styles.group}>
-            {/* Nom */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nom</Text>
-              <TextInput
-                style={{
+          <View style={{zIndex: 100}}>
+            <View style={styles.group}>
+              {/* Nom */}
+              <AutocompleteInput
+                containerStyle={{...styles.inputGroup, ...zIndexLastName}}
+                labelStyle={styles.label}
+                label="Nom"
+                inputStyle={{
                   ...styles.input,
                   borderColor:
                     !showError || verifyTextInput('information', 'lastName')
                       ? colors.gray
                       : colors.red,
                 }}
-                autoCompleteType="name"
+                onFocus={() => setKeyboardDisplay('always')}
+                onBlur={() => setKeyboardDisplay('never')}
                 placeholder="Nom client"
-                placeholderTextColor={colors.gray}
                 value={information.lastName}
-                onChangeText={(lastName) =>
-                  setInformation({...information, lastName})
-                }
+                onChangeText={(lastName) => {
+                  listLastNamesFiltered.current = filterArray(
+                    listLastNames,
+                    lastName,
+                  );
+                  setInformation({...information, lastName});
+                }}
+                options={listLastNamesFiltered.current}
               />
-            </View>
 
-            {/* Prénom */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Prénom</Text>
-              <TextInput
-                style={{
+              {/* Prénom */}
+              <AutocompleteInput
+                containerStyle={{...styles.inputGroup, ...zIndexFirstName}}
+                labelStyle={styles.label}
+                label="Prénom"
+                inputStyle={{
                   ...styles.input,
                   borderColor:
                     !showError || verifyTextInput('information', 'firstName')
                       ? colors.gray
                       : colors.red,
                 }}
+                onFocus={() => setKeyboardDisplay('always')}
+                onBlur={() => setKeyboardDisplay('never')}
                 placeholder="Prénom client"
-                placeholderTextColor={colors.gray}
                 value={information.firstName}
-                onChangeText={(firstName) =>
-                  setInformation({...information, firstName})
-                }
+                onChangeText={(firstName) => {
+                  listFirstNamesFiltered.current = filterArray(
+                    listFirstNames,
+                    firstName,
+                  );
+                  setInformation({...information, firstName});
+                }}
+                options={listFirstNamesFiltered.current}
               />
+
+              {/* birthday */}
+              <View>
+                <Text style={styles.label}>Date de naissance</Text>
+                <TouchableOpacity
+                  style={{
+                    ...styles.input,
+                    borderColor:
+                      !showError || verifyTextInput('information', 'birthday')
+                        ? colors.gray
+                        : colors.red,
+                  }}
+                  onPress={() => setShowCalendar(true)}>
+                  <Text style={{color}}>{textBirthday}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            {/* birthday */}
-            <View>
-              <Text style={styles.label}>Date de naissance</Text>
-              <TouchableOpacity
-                style={{
+            <View style={{...styles.group, zIndex: -1}}>
+              {/* Email */}
+              <AutocompleteInput
+                containerStyle={{...styles.inputGroup, ...zIndexEmail}}
+                labelStyle={styles.label}
+                label="E-mail"
+                inputStyle={{
                   ...styles.input,
                   borderColor:
-                    !showError || verifyTextInput('information', 'birthday')
+                    !showError ||
+                    (information.email && validateEmail(information.email))
                       ? colors.gray
                       : colors.red,
                 }}
-                onPress={() => setShowCalendar(true)}>
-                <Text style={{color}}>{textBirthday}</Text>
-              </TouchableOpacity>
+                onFocus={() => setKeyboardDisplay('always')}
+                onBlur={() => setKeyboardDisplay('never')}
+                placeholder="E-mail client"
+                value={information.email}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                onChangeText={(email) => {
+                  listEmailsFiltered.current = filterArray(listEmails, email);
+                  setInformation({...information, email});
+                }}
+                options={listEmailsFiltered.current}
+                handleAutocomplete={handleAutocomplete}
+              />
+
+              {/* Telephone */}
+              <View style={{width: '100%'}}>
+                <Text style={styles.label}>Télephone</Text>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    borderColor:
+                      !showError || verifyTextInput('information', 'telephone')
+                        ? colors.gray
+                        : colors.red,
+                  }}
+                  autoCompleteType="tel"
+                  placeholder="ex: 06 00 00 00 00"
+                  placeholderTextColor={colors.gray}
+                  value={information.telephone}
+                  keyboardType="phone-pad"
+                  onChangeText={(telephone) =>
+                    setInformation({...information, telephone})
+                  }
+                />
+              </View>
             </View>
           </View>
 
@@ -360,54 +481,6 @@ const Form = (props) => {
             </View>
           </View>
 
-          <View style={styles.group}>
-            {/* Email */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>E-mail</Text>
-              <TextInput
-                style={{
-                  ...styles.input,
-                  borderColor:
-                    !showError ||
-                    (information.email && validateEmail(information.email))
-                      ? colors.gray
-                      : colors.red,
-                }}
-                autoCompleteType="email"
-                placeholder="E-mail client"
-                placeholderTextColor={colors.gray}
-                autoCapitalize="none"
-                value={information.email}
-                keyboardType="email-address"
-                onChangeText={(email) =>
-                  setInformation({...information, email})
-                }
-              />
-            </View>
-
-            {/* Telephone */}
-            <View style={{width: '100%'}}>
-              <Text style={styles.label}>Télephone</Text>
-              <TextInput
-                style={{
-                  ...styles.input,
-                  borderColor:
-                    !showError || verifyTextInput('information', 'telephone')
-                      ? colors.gray
-                      : colors.red,
-                }}
-                autoCompleteType="tel"
-                placeholder="ex: 06 00 00 00 00"
-                placeholderTextColor={colors.gray}
-                value={information.telephone}
-                keyboardType="phone-pad"
-                onChangeText={(telephone) =>
-                  setInformation({...information, telephone})
-                }
-              />
-            </View>
-          </View>
-
           {/* ============================================= */}
           <Text style={styles.title}>Ajouter un article</Text>
           <View style={styles.group}>
@@ -465,6 +538,43 @@ const Form = (props) => {
           </View>
 
           <View style={styles.group}>
+            {/* Réference */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Référence</Text>
+              <View style={{flexDirection: 'row'}}>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    flex: 1,
+                    borderColor:
+                      !showError || verifyTextInput('article', 'reference')
+                        ? colors.gray
+                        : colors.red,
+                  }}
+                  placeholder="ex : 5341ezf845"
+                  placeholderTextColor={colors.gray}
+                  value={article.reference}
+                  onChangeText={(reference) =>
+                    setArticle({...article, reference})
+                  }
+                />
+                <TouchableOpacity
+                  style={{
+                    marginLeft: 15,
+                  }}
+                  onPress={() => setShowScanner(true)}>
+                  <Image
+                    source={require('../assets/images/qr_code.png')}
+                    style={{
+                      width: 30,
+                      height: 30,
+                      resizeMode: 'contain',
+                      alignSelf: 'center',
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
             {/* Name */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Nom</Text>
@@ -608,12 +718,14 @@ const Form = (props) => {
                   }
                 }}
                 value={article.price}
-                onBlur={() =>
-                  setArticle({
-                    ...article,
-                    price: (article.price + ' €').replace(',', '.'),
-                  })
-                }
+                onBlur={() => {
+                  if (article.price) {
+                    setArticle({
+                      ...article,
+                      price: (article.price + ' €').replace(',', '.'),
+                    });
+                  }
+                }}
                 keyboardType="decimal-pad"
                 onChangeText={(price) => {
                   setArticle({...article, price});
@@ -636,7 +748,7 @@ const Form = (props) => {
             )}
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <CustomDateTimePicker
         visible={showCalendar}
         onCancel={() => setShowCalendar(false)}
@@ -662,26 +774,11 @@ const Form = (props) => {
         handleTakePhoto={handleTakePhoto}
         handleSelectPhoto={handleSelectPhoto}
       />
-      <TouchableOpacity
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          zIndex: 999,
-          backgroundColor: colors.black,
-          paddingVertical: 15,
-        }}
-        onPress={props.flipCard}>
-        <Text
-          style={{
-            textAlign: 'center',
-            fontWeight: 'bold',
-            color: colors.white,
-            textTransform: 'uppercase',
-          }}>
-          List Produits
-        </Text>
-      </TouchableOpacity>
+      <ModalScanner
+        visible={showScanner}
+        onCancel={() => setShowScanner(false)}
+        handleScanSuccess={handleScanSuccess}
+      />
     </SafeAreaView>
   );
 
@@ -694,9 +791,43 @@ const Form = (props) => {
 
   return resultPage.show ? (
     <ResultPage
-      handleAddOtherArticle={handleAddOtherArticle}
       isSuccess={resultPage.isSuccess}
       handleLogout={props.handleLogout}
+      returnHomePage={props.returnHomePage}
+      havebtnDeconnecte={true}
+      title={
+        resultPage.isSuccess
+          ? 'Votre article à été\najouté avec succès !'
+          : "Votre article n'a pas pu\nêtre ajouté"
+      }
+      btnComponent={() => {
+        let btnText = '+ Ajouter un autre article';
+        let btnStyle = {paddingVertical: 15};
+        if (!resultPage.isSuccess) {
+          btnText = 'Réessayer';
+          btnStyle = {paddingVertical: 10};
+        }
+        return (
+          <View style={{flex: 1, alignSelf: 'center'}}>
+            <TouchableOpacity
+              style={{
+                ...styles.btnSubmit,
+                ...btnStyle,
+                marginBottom: 0,
+                marginTop: 35,
+              }}
+              onPress={handleAddOtherArticle}>
+              <Text
+                style={{
+                  ...styles.btnSubmitText,
+                  fontSize: btnText === 'Réessayer' ? 25 : 20,
+                }}>
+                {btnText}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        );
+      }}
     />
   ) : (
     renderFormArticle()

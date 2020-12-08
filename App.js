@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginPage from './src/page/LoginPage';
 import {STORAGE_KEY, STORAGE_USER} from './src/lib/constants';
 import LaunchScreen from './src/page/LaunchScreen';
-import FlipPage from "./src/page/FlipPage";
+import MainPage from "./src/page/MainPage";
 
 const App = () => {
   const [data, setData] = useState({
@@ -79,7 +79,7 @@ const App = () => {
         {data.showLaunchScreen ? (
           <LaunchScreen />
         ) : data.isLogin ? (
-          <FlipPage handleLogout={handleLogout} token={data.token} />
+          <MainPage handleLogout={handleLogout} token={data.token} />
         ) : (
           <LoginPage handleLogin={handleLogin} />
         )}
