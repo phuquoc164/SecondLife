@@ -3,6 +3,8 @@ import React, {useEffect, useState} from 'react';
 import {View, ImageBackground, Alert, Platform} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {NavigationContainer, StackActions} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 
 /** App */
 import LoginPage from './src/page/LoginPage';
@@ -15,6 +17,12 @@ const App = () => {
     showLaunchScreen: true,
     isLogin: false,
     token: null,
+    // listCustomers: {
+    //   customers: [],
+    //   listLastNames: [],
+    //   listFirstNames: [],
+    //   listEmails: [],
+    // },
   });
 
   useEffect(() => {
@@ -22,9 +30,17 @@ const App = () => {
       try {
         const value = await AsyncStorage.getItem(STORAGE_KEY);
         if (value !== null) {
-          setTimeout(() => {
-            setData({isLogin: true, token: value, showLaunchScreen: false});
-          }, 1500);
+          // const listCustomers = await FetchService.get('customers', token);
+          // const { customers, listLastNames, listFirstNames, listEmails } = formatListCustomers(listCustomers.data);
+          setData({
+            isLogin: true,
+            token: value,
+            showLaunchScreen: false,
+            // listCustomers: { customers, listLastNames, listFirstNames, listEmails }
+          });
+          // setTimeout(() => {
+          //   setData({isLogin: true, token: value, showLaunchScreen: false});
+          // }, 1500);
         } else {
           setData({
             ...data,
@@ -68,7 +84,25 @@ const App = () => {
     }
   };
 
+  if (data.showLaunchScreen) {
+    return <LaunchScreen />
+  }
+
   return (
+    // <NavigationContainer>
+    //   <Stack.Navigator>
+    //     {data.isLogin ?
+    //       <>
+    //         <Stack.Screen name="Home" component={Form} />
+    //         <Stack.Screen name="Profile" component={} />
+    //       </>
+    //       :
+    //       <>
+
+    //       </>
+    //     }
+    //   </Stack.Navigator>
+    // </NavigationContainer>
     <View style={{flex: 1}}>
       <ImageBackground
         source={require('./src/assets/images/background.png')}

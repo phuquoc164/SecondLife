@@ -51,7 +51,7 @@ const MainPage = (props) => {
   const [productAdded, setProductAdded] = useState(null);
   const [referenceScanned, setReferenceScanned] = useState(null);
   const [isErrorApi, setIsErrorApi] = useState(false);
-  const [pageShowed, setPageShowed] = useState('homePage');
+  const [pageShowed, setPageShowed] = useState('addProduct');
   const [listProducts, setListProducts] = useState({
     sold: [],
     haventsold: [],
@@ -69,9 +69,9 @@ const MainPage = (props) => {
 
   useEffect(() => {
     const initData = async () => {
-      await getListProducts();
-      await getListCategoriesBrands();
-      await getListCustomers();
+      // await getListProducts();
+      // await getListCategoriesBrands();
+      // await getListCustomers();
     };
 
     initData();
@@ -199,90 +199,7 @@ const MainPage = (props) => {
     });
   };
 
-  /** Animation for changing page */
-  const flipCard = (page = 'homePage') => {
-    if (value >= 90 && page === 'homePage') {
-      Animated.spring(animatedValue, {
-        toValue: 0,
-        friction: 8,
-        tension: 10,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.spring(animatedValue, {
-        toValue: 180,
-        friction: 8,
-        tension: 10,
-        useNativeDriver: true,
-      }).start();
-    }
-    setPageShowed(page);
-  };
-
-  /**
-   * Render Main Page
-   */
-  const renderMainPage = () => (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-      }}>
-      <View style={{flex: 2}}>
-        <Image
-          source={require('../assets/images/logo.png')}
-          style={{
-            flex: 1,
-            width: '60%',
-            height: 'auto',
-            resizeMode: 'contain',
-            alignSelf: 'center',
-            paddingTop: 20
-          }}
-        />
-      </View>
-      <View
-        style={{
-          flexDirection: 'column',
-          flex: 5,
-          alignItems: 'center',
-          paddingVertical: 40,
-        }}>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => flipCard('addProduct')}>
-            <Text style={styles.btnText}>Ajouter un produit</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => flipCard('scanProduct')}>
-            <Text style={styles.btnText}>Scanner un produit</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => flipCard('scanVoucher')}>
-            <Text style={styles.btnText}>Scanner un bon d'achat</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => flipCard('listProducts')}>
-            <Text style={styles.btnText}>Ma liste de produits</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-
-  /** render the back pages */
-  const renderBackPage = () => {
+  const renderPage = () => {
     switch (pageShowed) {
       case 'addProduct':
         return (
@@ -293,14 +210,12 @@ const MainPage = (props) => {
             handleLogout={props.handleLogout}
             handleAddProduct={(product) => setProductAdded(product)}
             token={token}
-            returnHomePage={() => flipCard()}
           />
         );
       case 'scanProduct':
         return (
           <CameraScan
             original={pageShowed}
-            returnHomePage={() => flipCard()}
             handleGetReferenceScanned={(reference) => {
               setReferenceScanned(reference);
               setPageShowed("listProducts");
@@ -311,7 +226,6 @@ const MainPage = (props) => {
         return (
           <CameraScan
             original={pageShowed}
-            returnHomePage={() => flipCard()}
             token={token}
           />
         );
@@ -322,7 +236,6 @@ const MainPage = (props) => {
             listProductsHaventSold={listProducts.haventsold}
             updateListProducts={updateListProducts}
             isErrorApi={isErrorApi}
-            returnHomePage={() => flipCard()}
             referenceScanned={referenceScanned}
             resetReferenceScanned={() => setReferenceScanned(null)}
             token={token}
@@ -333,23 +246,26 @@ const MainPage = (props) => {
     }
   };
 
-  let displayFrontStyle = {display: 'flex'};
-  let displayBackStyle = {display: 'none'};
-  if (pageShowed !== 'homePage') {
-    displayFrontStyle = {display: 'none'};
-    displayBackStyle = {display: 'flex'};
-  }
-
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[styles.flipCard, frontAnimatedStyle, displayFrontStyle]}>
-        {renderMainPage()}
-      </Animated.View>
-      <Animated.View
-        style={[backAnimatedStyle, styles.flipCard, displayBackStyle]}>
-        {renderBackPage()}
-      </Animated.View>
+      <Animated.View>{renderPage()}</Animated.View>
+      <View style={styles.bottomBar}>
+        <TouchableOpacity style={styles.bottomBarItem}>
+          <Text>Ajouter</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.bottomBarItem}>
+          <Text>Scanner</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.bottomBarItem}>
+          <Text>Catalogue</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.bottomBarItem}>
+          <Text>Profil</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -358,6 +274,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   flipCard: {
     height: '100%',
@@ -375,6 +292,27 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.white,
     fontWeight: 'bold',
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    height: 50,
+    shadowRadius: 2,
+    shadowOffset: {width: 10, height: 10},
+    shadowOpacity: 1.0,
+    shadowColor: colors.black,
+    elevation: 10,
+    display: 'flex',
+    flexDirection: 'row',
+    backgroundColor: colors.white,
+  },
+  bottomBarItem: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

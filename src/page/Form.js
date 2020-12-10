@@ -263,25 +263,7 @@ const Form = (props) => {
   const renderFormArticle = () => (
     <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
       <KeyboardAwareScrollView keyboardShouldPersistTaps={keyboardDisplay}>
-        <View style={{paddingHorizontal: 20}}>
-          <Image
-            source={require('../assets/images/logo.png')}
-            style={{
-              flex: 1,
-              width: '50%',
-              maxWidth: 300,
-              resizeMode: 'contain',
-              alignSelf: 'center',
-            }}
-          />
-          <TouchableOpacity
-            onPress={props.returnHomePage}
-            style={{position: 'absolute', right: 20, top: 20}}>
-            <Image
-              source={require('../assets/images/cross-black.png')}
-              style={{width: 19.5, height: 19}}
-            />
-          </TouchableOpacity>
+        <View style={{paddingHorizontal: 20, paddingVertical: 20}}>
           <Text style={styles.title}>Informations Client</Text>
 
           <View style={{zIndex: 100}}>
