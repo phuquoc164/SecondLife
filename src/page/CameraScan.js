@@ -5,7 +5,7 @@ import {RNCamera} from 'react-native-camera';
 import {
   ActivityIndicator,
   Alert,
-  Image,
+  Dimensions,
   Text,
   TouchableOpacity,
   View,
@@ -47,40 +47,36 @@ const CameraScan = (props) => {
   };
 
   const returnScanPage = () => (
-    <View style={{flex: 1, position: 'relative'}}>
-      <View style={{flex: 1, marginTop: 10, marginBottom: 40}}>
-        <Image
-          source={require('../assets/images/logo.png')}
-          style={{
-            flex: 1,
-            width: '50%',
-            maxWidth: 300,
-            height: 'auto',
-            resizeMode: 'contain',
-            alignSelf: 'center',
-          }}
-        />
+    <View style={{position: 'relative', flex: 1}}>
+      <View style={{position: 'absolute', top: '45%', right: '45%'}}>
+        <ActivityIndicator color={colors.black} size="large" />
       </View>
-      <TouchableOpacity
-        onPress={props.returnHomePage}
-        style={{position: 'absolute', right: 20, top: 20}}>
-        <Image
-          source={require('../assets/images/cross-black.png')}
-          style={{width: 19.5, height: 19}}
-        />
-      </TouchableOpacity>
-
-      <View style={{flex: 4}}>
-        <View style={{position: 'absolute', top: '50%', right: '50%'}}>
-          <ActivityIndicator color={colors.black} size="large" />
-        </View>
-        <QRCodeScanner
-          onRead={handleReadQRCode}
-          flashMode={RNCamera.Constants.FlashMode.auto}
-          showMarker={true}
-          cameraStyle={{flex: 1}}
-        />
-      </View>
+      <QRCodeScanner
+        onRead={handleReadQRCode}
+        flashMode={RNCamera.Constants.FlashMode.auto}
+        showMarker={true}
+        customMarker={
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              backgroundColor: 'transparent',
+            }}>
+            <View
+              style={{
+                height: 250,
+                width: 250,
+                borderWidth: 2,
+                borderColor: colors.green,
+                backgroundColor: 'transparent',
+              }}
+            />
+          </View>
+        }
+        topViewStyle={{height: 0, flex: 0}}
+        bottomViewStyle={{height: 0, flex: 0}}
+        cameraStyle={{height: Dimensions.get('screen').height - 90}}
+      />
     </View>
   );
 
