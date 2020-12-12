@@ -24,6 +24,7 @@ const LoginPage = (props) => {
     value: '',
     error: false,
   });
+  const [isLoading, setIsLoading] = useState(false)
   const [passwordForgotten, setPasswordForgotten] = useState(false);
 
   const handleSendData = () => {
@@ -32,6 +33,7 @@ const LoginPage = (props) => {
       password.value === '' && setPassword({...password, error: true});
       return;
     }
+    setIsLoading(true);
     FetchService.login(username.value, password.value).then(response => {
       if (response && response.token) {
         props.handleLogin(response.token, {username: username.value, password: password.value});
@@ -43,6 +45,7 @@ const LoginPage = (props) => {
         'Votre identifiant ou votre mot de passe est invalide.',
       );
     });
+    setIsLoading(false);
   };
 
   const renderLoginForm = () => {
@@ -56,7 +59,7 @@ const LoginPage = (props) => {
             maxWidth: 300,
             resizeMode: 'contain',
             marginTop: 20,
-            marginBottom: 40
+            marginBottom: 40,
           }}
         />
         <View style={styles.inputGroup}>
@@ -83,7 +86,6 @@ const LoginPage = (props) => {
             )}
           </View>
         </View>
-
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Mot de passe</Text>
           <View style={{position: 'relative'}}>
@@ -109,13 +111,18 @@ const LoginPage = (props) => {
             )}
           </View>
         </View>
-
         <View style={{flex: 1}}>
-          <TouchableOpacity style={styles.button} onPress={handleSendData}>
-            <Text style={styles.buttonText}>Se connecter</Text>
-          </TouchableOpacity>
+          {isLoading ? (
+            <View style={styles.button}>
+              <ActivityIndicator color={colors.white} />
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.button} onPress={handleSendData}>
+              <Text style={styles.buttonText}>Se connecter</Text>
+            </TouchableOpacity>
+          )}
         </View>
-
+        =
         <View style={{flex: 1}}>
           <TouchableOpacity
             style={styles.buttonTransparent}
