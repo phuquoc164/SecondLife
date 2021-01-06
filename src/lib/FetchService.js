@@ -146,4 +146,40 @@ export default class FetchService {
         return Promise.reject(response.status);
       });
   };
+
+  static patch = (endPoint, data, token) => {
+    const header = new Headers({
+      Accept: 'application/json',
+      'content-type': 'application/json',
+      'x-token': token,
+    });
+
+    const setting = {
+      method: 'PATCH',
+      headers: header,
+      body: JSON.stringify(data),
+    };
+
+    const url = DOMAIN + endPoint;
+    let response;
+    return fetch(url, setting)
+      .then((res) => {
+        response = res;
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return res.json();
+        }
+        return res;
+      })
+      .then((body) => {
+        if (response && response.status === 200) {
+          if (!!body && !body.error) {
+            return Promise.resolve(body);
+          } else {
+            return Promise.reject(body.error);
+          }
+        }
+        return Promise.reject(response.status);
+      });
+  };
 }
