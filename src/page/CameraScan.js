@@ -23,26 +23,26 @@ const CameraScan = (props) => {
   });
 
   const handleReadQRCode = (event) => {
-    if (event.data) {
-      if (props.original === 'scanProduct') {
-        props.handleGetReferenceScanned(event.data);
-      } else if (props.original === 'scanVoucher') {
-        const data = JSON.parse(event.data);
-        FetchService.post('vouchers', data, props.token)
-          .then((response) => {
-            setResultPage({
-              show: true,
-              isSuccess: response.success,
-            });
-          })
-          .catch((error) => {
-            console.debug(error);
-            Alert.alert(
-              'Problème de système',
-              'SecondLife a rencontré une problème. Veuillez re-scanner!',
-            );
+    const data = JSON.parse(event.data);
+    if (data.type && data.type === 'product') {
+      props.handleGetReferenceScanned(data.reference);
+    } else if (data.type && data.type === 'voucher') {
+      FetchService.post('vouchers', data, props.token)
+        .then((response) => {
+          setResultPage({
+            show: true,
+            isSuccess: response.success,
           });
-      }
+        })
+        .catch((error) => {
+          console.debug(error);
+          Alert.alert(
+            'Problème de système',
+            'SecondLife a rencontré une problème. Veuillez re-scanner!',
+          );
+        });
+    } else {
+      Alert.alert('Erreur', 'On ne peut pas détecter votre qrcode');
     }
   };
 
@@ -59,7 +59,7 @@ const CameraScan = (props) => {
           <View
             style={{
               flex: 1,
-              justifyContent: "center",
+              justifyContent: 'center',
               backgroundColor: 'transparent',
             }}>
             <View
@@ -90,14 +90,13 @@ const CameraScan = (props) => {
           : "Ce bon d'achat a déjà\nété utilisé"
       }
       btnComponent={() => (
-        <View style={{flex: 1, alignSelf: 'center'}}>
+        <View style={{alignSelf: 'center', position: 'absolute', bottom: 80}}>
           <TouchableOpacity
             style={{
               width: 'auto',
               paddingHorizontal: 20,
               paddingVertical: 10,
               backgroundColor: colors.black,
-              borderRadius: 7,
               borderWidth: 1,
               marginTop: 20,
             }}
