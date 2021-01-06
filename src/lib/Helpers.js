@@ -6,7 +6,7 @@ export const validateEmail = (email) => {
 export const verifyData = (object) => {
   let isError = false;
   Object.keys(object).forEach((property) => {
-    if (!!object[property]) {
+    if (!!object[property] || property === "sold") {
       switch (typeof object[property]) {
         case 'string': {
           if (
@@ -28,8 +28,12 @@ export const verifyData = (object) => {
           }
           break;
         }
+        case 'boolean': {
+          break;
+        }
         default: {
           isError = true;
+          break;
         }
       }
     } else {
@@ -57,13 +61,15 @@ export const formatListProducts = (listProducts) => {
   const listProductsSold = [];
   const listProductsHaventSold = [];
 
-  listProducts.forEach((product) => {
+  listProducts.forEach((singleProduct) => {
+    const {product, customer, uri} = singleProduct;
     const data = {
-      ...product.customer,
-      ...product.product,
-      uri: product.uri.sold,
+      customer,
+      product,
+      uri: uri.sold,
+      sku: product.sku,
     };
-    if (product['product'].sold) {
+    if (product.sold) {
       listProductsSold.push(data);
     } else {
       listProductsHaventSold.push(data);
@@ -98,7 +104,40 @@ export const formatListCustomers = (listCustomers) => {
 };
 
 export const filterArray = (array, filtered, limit = 5) => {
-  if (!filtered || filtered === "") return array.slice(0, limit);
-  const newArray = array.filter(singleData => singleData.toLowerCase().includes(filtered.toLowerCase()));
+  if (!filtered || filtered === '') return array.slice(0, limit);
+  const newArray = array.filter((singleData) =>
+    singleData.toLowerCase().includes(filtered.toLowerCase()),
+  );
   return newArray.slice(0, limit);
-}
+};
+
+export const convertFormDatatoRequestData = (information, article) => ({
+  firstName: information.firstName,
+  lastName: information.lastName,
+  birthdayDate: information.birthdayDate,
+  address: information.address,
+  zipCode: information.zipCode,
+  city: information.city,
+  phone: information.phone,
+  email: information.email,
+  products: [
+    {
+      name: article.name,
+      sku: article.reference,
+      description: article.description,
+      voucherAmount: parseFloat(article.voucherAmount.replace(' €', '')),
+      price: parseFloat(article.price.replace(' €', '')),
+      category: article.category.Id.replace(
+        '/{manufacturer}/',
+        `/${article.brand.Name}/`,
+      ),
+      reference: article.reference,
+      pictures: article.pictures.map((photo, index) => ({
+        name: `image${index + 1}`,
+        content: photo,
+      })),
+      size: article.size,
+      state: article.state.Name,
+    },
+  ],
+});
