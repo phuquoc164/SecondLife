@@ -4,16 +4,16 @@ export const STORAGE_USER = 'storage_user';
 export const initialInformation = {
   firstName: null,
   lastName: null,
-  birthday: null,
+  birthdayDate: null,
   address: null,
-  postalCode: null,
+  zipCode: null,
   city: null,
   email: null,
-  telephone: null,
+  phone: null,
 };
 
 export const initialArticle = {
-  photos: [],
+  pictures: [],
   reference: null,
   name: null,
   description: null,
@@ -22,14 +22,8 @@ export const initialArticle = {
   size: null,
   state: null,
   price: null,
+  voucherAmount: null
 };
-
-export const initialListData = [
-  {
-    Id: 'erreur_api',
-    Name: 'Une erreur API est survenue',
-  },
-];
 
 export const categoryIcons = {
   Homme: {
