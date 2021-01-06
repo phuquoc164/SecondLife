@@ -1,6 +1,7 @@
 /** React */
 import React, {useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   StyleSheet,
@@ -24,7 +25,7 @@ const LoginPage = (props) => {
     value: '',
     error: false,
   });
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [passwordForgotten, setPasswordForgotten] = useState(false);
 
   const handleSendData = () => {
@@ -34,18 +35,29 @@ const LoginPage = (props) => {
       return;
     }
     setIsLoading(true);
-    FetchService.login(username.value, password.value).then(response => {
-      if (response && response.token) {
-        props.handleLogin(response.token, {username: username.value, password: password.value});
-      }
-    }).catch(error => {
-      console.debug(error);
-      Alert.alert(
-        'Problème de connexion',
-        'Votre identifiant ou votre mot de passe est invalide.',
-      );
-    });
-    setIsLoading(false);
+    FetchService.login(username.value, password.value)
+      .then((response) => {
+        if (response && response.token) {
+          props.handleLogin(response.token, {
+            username: username.value,
+            password: password.value,
+          });
+        } else {
+          setIsLoading(false);
+          Alert.alert(
+            'Problème de connexion',
+            'Votre identifiant ou votre mot de passe est invalide.',
+          );
+        }
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.debug(error);
+        Alert.alert(
+          'Problème de connexion',
+          'Votre identifiant ou votre mot de passe est invalide.',
+        );
+      });
   };
 
   const renderLoginForm = () => {
@@ -122,7 +134,6 @@ const LoginPage = (props) => {
             </TouchableOpacity>
           )}
         </View>
-        =
         <View style={{flex: 1}}>
           <TouchableOpacity
             style={styles.buttonTransparent}
