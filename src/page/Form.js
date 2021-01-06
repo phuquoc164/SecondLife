@@ -1,5 +1,5 @@
 /** React */
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -25,7 +25,7 @@ import ModalPhoto from '../components/ModalPhoto';
 import ModalScanner from '../components/ModalScanner';
 import AutocompleteInput from '../components/AutocompleteInput';
 import {initialArticle, initialInformation, listStates} from '../lib/constants';
-import {filterArray, validateEmail, verifyData} from '../lib/Helpers';
+import {convertFormDatatoRequestData, filterArray, validateEmail, verifyData} from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
 import {colors} from '../assets/colors';
 
@@ -35,6 +35,7 @@ const zIndexEmail = Platform.OS === 'ios' ? {zIndex: 8} : {};
 
 const Form = (props) => {
   const [loading, setLoading] = useState(false);
+  const [isModification, setIsModification] = useState(false);
   const [information, setInformation] = useState(initialInformation);
   const [article, setArticle] = useState(initialArticle);
   const [showScanner, setShowScanner] = useState(false);
@@ -44,21 +45,44 @@ const Form = (props) => {
   const [resultPage, setResultPage] = useState({
     show: false,
     isSuccess: false,
+    text: "",
   });
   const [showError, setShowError] = useState(false);
-  const {
-    customers,
-    listLastNames,
-    listFirstNames,
-    listEmails,
-  } = props.listCustomers;
-  const listLastNamesFiltered = useRef(
-    filterArray(listLastNames, information.lastName),
-  );
-  const listFirstNamesFiltered = useRef(
-    filterArray(listFirstNames, information.firstName),
-  );
+  const { customers, listLastNames, listFirstNames, listEmails } = props.listCustomers;
+  const listLastNamesFiltered = useRef(filterArray(listLastNames, information.lastName));
+  const listFirstNamesFiltered = useRef(filterArray(listFirstNames, information.firstName));
   const listEmailsFiltered = useRef(filterArray(listEmails, information.email));
+
+  useEffect(() => {
+    if (props.productModified && Object.keys(props.productModified).length > 0) {
+      const { customer, product } = props.productModified;
+      setInformation({
+        ...information,
+        ...customer
+      });
+      setArticle({
+        ...article,
+        ...product,
+        pictures: product.pictures.map((picture) => picture.content),
+        category: {
+          HasImage: true,
+          Id: product.category,
+          Name: product.category.split('/')[2],
+        },
+        brand: {
+          Id: 'product_modifiable',
+          Name: product.brand,
+        },
+        state: {
+          Id: product.state,
+          Name: product.state,
+        },
+        price: `${product.price}`,
+        voucherAmount: `${product.voucherAmount}`,
+      });
+      setIsModification(true);
+    }
+  }, [props.productModified])
 
   const handleTakePhoto = async () => {
     setShowModalPhoto(false);
@@ -89,7 +113,7 @@ const Form = (props) => {
           } else {
             setArticle({
               ...article,
-              photos: [...article.photos, response.base64],
+              pictures: [...article.pictures, response.base64],
             });
           }
         });
@@ -135,7 +159,7 @@ const Form = (props) => {
           } else {
             setArticle({
               ...article,
-              photos: [...article.photos, response.base64],
+              pictures: [...article.pictures, response.base64],
             });
           }
         });
@@ -168,45 +192,31 @@ const Form = (props) => {
       setShowError(true);
       setLoading(false);
     } else {
-      const data = {
-        firstName: information.firstName,
-        lastName: information.lastName,
-        birthdayDate: information.birthday,
-        address: information.address,
-        zipCode: information.postalCode,
-        city: information.city,
-        phone: information.telephone,
-        email: information.email,
-        products: [
-          {
-            name: article.name,
-            sku: article.reference,
-            description: article.description,
-            price: parseFloat(article.price.replace(' €', '')),
-            category: article.category.Id.replace(
-              '/{manufacturer}/',
-              `/${article.brand.Name}/`,
-            ),
-            reference: article.reference,
-            pictures: article.photos.map((photo, index) => ({
-              name: `image${index + 1}`,
-              content: photo,
-            })),
-            size: article.size,
-            state: article.state.Name,
-          },
-        ],
-      };
+      const data = convertFormDatatoRequestData(information, article);
       FetchService.post('products', data, props.token)
         .then((response) => {
-          setResultPage({show: true, isSuccess: response.success});
           if (response.success) {
+            setResultPage({
+              show: true,
+              isSuccess: true,
+              text: 'Votre article à été\najouté avec succès !',
+            });
             props.handleAddProduct(data);
+          } else {
+            setResultPage({
+              show: true,
+              isSuccess: false,
+              text: "Votre article n'a pas pu\nêtre ajouté",
+            });
           }
         })
         .catch((error) => {
           console.debug(error);
-          setResultPage({show: true, isSuccess: false});
+          setResultPage({
+            show: true,
+            isSuccess: false,
+            text: "Votre article n'a pas pu\nêtre ajouté",
+          });
         });
     }
   };
@@ -215,12 +225,12 @@ const Form = (props) => {
     if (resultPage.isSuccess) {
       setInformation(initialInformation);
       setArticle(initialArticle);
-      setShowError(false);
+      showError && setShowError(false);
     } else {
-      !!showError || setShowError(true);
+      !showError && setShowError(true);
     }
-    setLoading(false);
-    setResultPage({show: false, isSuccess: false});
+    loading && setLoading(false);
+    setResultPage({show: false, isSuccess: false, test: ""});
   };
 
   const verifyTextInput = (type, property) => {
@@ -253,17 +263,84 @@ const Form = (props) => {
           ...information,
           address,
           city,
-          telephone: phone,
-          postalCode: zipCode,
+          phone: phone,
+          zipCode: zipCode,
         });
       }
     }
   };
 
+  const handleCancelModification = () => {
+    setIsModification(false);
+    setInformation(initialInformation);
+    setArticle(initialArticle);
+    props.handleCancelModification();
+  }
+
+  const handleSaveModification = () => {
+    setLoading(true);
+    const isErrorInformation = verifyData(information);
+    const isErrorArticle = verifyData(article);
+
+    if (isErrorInformation || isErrorArticle) {
+      Alert.alert(
+        'Formulaire invalide',
+        'Veuillez corriger les champs encadrés en rouge.',
+      );
+      setShowError(true);
+      setLoading(false);
+    } else {
+      const data = convertFormDatatoRequestData(information, article);
+      
+      FetchService.patch(props.productModified.uri, data, props.token)
+        .then((response) => {
+          if (response.success) {
+            const productModified = {
+              customer: {...information},
+              product: {
+                ...article,
+                voucherAmount: parseFloat(
+                  article.voucherAmount.replace(' €', ''),
+                ),
+                price: parseFloat(article.price.replace(' €', '')),
+                category: article.category.Id.replace(
+                  '/{manufacturer}/',
+                  `/${article.brand.Name}/`,
+                ),
+                brand: article.brand.Name,
+                state: article.state.Name,
+                pictures: article.pictures.map((photo, index) => ({
+                  name: `image${index + 1}`,
+                  content: photo,
+                })),
+              },
+              sku: article.reference,
+              uri: props.productModified.uri,
+            };
+            props.handleSaveModification(productModified);
+          } else {
+            setResultPage({
+              show: true,
+              isSuccess: false,
+              text: "Votre article n'a pas pu\nêtre enregistré",
+            });
+          }
+        })
+        .catch((error) => {
+          console.debug(error);
+          setResultPage({
+            show: true,
+            isSuccess: false,
+            text: "Votre article n'a pas pu\nêtre enregistré",
+          });
+        });
+    }
+  }
+
   const renderFormArticle = () => (
     <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
       <KeyboardAwareScrollView keyboardShouldPersistTaps={keyboardDisplay}>
-        <View style={{paddingHorizontal: 20, paddingVertical: 20}}>
+        <View style={{padding: 20}}>
           <Text style={styles.title}>Informations Client</Text>
 
           <View style={{zIndex: 100}}>
@@ -320,14 +397,15 @@ const Form = (props) => {
                 options={listFirstNamesFiltered.current}
               />
 
-              {/* birthday */}
+              {/* birthdayDate */}
               <View>
                 <Text style={styles.label}>Date de naissance</Text>
                 <TouchableOpacity
                   style={{
                     ...styles.input,
                     borderColor:
-                      !showError || verifyTextInput('information', 'birthday')
+                      !showError ||
+                      verifyTextInput('information', 'birthdayDate')
                         ? colors.gray
                         : colors.red,
                   }}
@@ -365,24 +443,24 @@ const Form = (props) => {
                 handleAutocomplete={handleAutocomplete}
               />
 
-              {/* Telephone */}
+              {/* phone */}
               <View style={{width: '100%'}}>
                 <Text style={styles.label}>Télephone</Text>
                 <TextInput
                   style={{
                     ...styles.input,
                     borderColor:
-                      !showError || verifyTextInput('information', 'telephone')
+                      !showError || verifyTextInput('information', 'phone')
                         ? colors.gray
                         : colors.red,
                   }}
                   autoCompleteType="tel"
                   placeholder="ex: 06 00 00 00 00"
                   placeholderTextColor={colors.gray}
-                  value={information.telephone}
+                  value={information.phone}
                   keyboardType="phone-pad"
-                  onChangeText={(telephone) =>
-                    setInformation({...information, telephone})
+                  onChangeText={(phone) =>
+                    setInformation({...information, phone})
                   }
                 />
               </View>
@@ -424,18 +502,18 @@ const Form = (props) => {
                   style={{
                     ...styles.input,
                     borderColor:
-                      !showError || verifyTextInput('information', 'postalCode')
+                      !showError || verifyTextInput('information', 'zipCode')
                         ? colors.gray
                         : colors.red,
                   }}
                   autoCompleteType="postal-code"
                   placeholder="ex : 75002"
                   placeholderTextColor={colors.gray}
-                  value={information.postalCode}
+                  value={information.zipCode}
                   keyboardType="number-pad"
-                  onChangeText={(postalCode) => {
-                    if (postalCode.length <= 5) {
-                      setInformation({...information, postalCode});
+                  onChangeText={(zipCode) => {
+                    if (zipCode.length <= 5) {
+                      setInformation({...information, zipCode});
                     }
                   }}
                 />
@@ -471,11 +549,11 @@ const Form = (props) => {
               style={{
                 ...styles.photoView,
                 borderColor:
-                  !showError || article.photos.length > 0
+                  !showError || article.pictures.length > 0
                     ? colors.gray
                     : colors.red,
               }}>
-              {article.photos.map((photo, index) => (
+              {article.pictures.map((photo, index) => (
                 <View
                   key={index}
                   style={{width: '33.3%', aspectRatio: 1, padding: 5}}>
@@ -487,7 +565,7 @@ const Form = (props) => {
                   />
                 </View>
               ))}
-              {article.photos.length === 0 && (
+              {article.pictures.length === 0 && (
                 <View style={{width: '100%', alignItems: 'center'}}>
                   <TouchableOpacity
                     style={styles.btnAddPhotoText}
@@ -499,7 +577,7 @@ const Form = (props) => {
                   </TouchableOpacity>
                 </View>
               )}
-              {article.photos.length > 0 && article.photos.length < 5 && (
+              {article.pictures.length > 0 && article.pictures.length < 5 && (
                 <View
                   style={{
                     width: '33.3%',
@@ -677,9 +755,50 @@ const Form = (props) => {
           </View>
 
           <View style={styles.group}>
+            {/* voucher */}
+            <View style={{width: '100%', marginBottom: 10}}>
+              <Text style={styles.label}>Montant bon d'achat</Text>
+              <TextInput
+                style={{
+                  ...styles.input,
+                  borderColor:
+                    !showError || verifyTextInput('article', 'voucherAmount')
+                      ? colors.gray
+                      : colors.red,
+                }}
+                name="voucherAmount"
+                placeholder="0.00 €"
+                placeholderTextColor={colors.gray}
+                onFocus={() => {
+                  if (article.voucherAmount) {
+                    setArticle({
+                      ...article,
+                      voucherAmount: article.voucherAmount.replace(' €', ''),
+                    });
+                  }
+                }}
+                value={article.voucherAmount}
+                onBlur={() => {
+                  if (article.voucherAmount) {
+                    setArticle({
+                      ...article,
+                      voucherAmount: (article.voucherAmount + ' €').replace(
+                        ',',
+                        '.',
+                      ),
+                    });
+                  }
+                }}
+                keyboardType="decimal-pad"
+                onChangeText={(voucherAmount) => {
+                  setArticle({...article, voucherAmount});
+                }}
+              />
+            </View>
+
             {/* Price */}
             <View style={{width: '100%', marginBottom: 10}}>
-              <Text style={styles.label}>Prix</Text>
+              <Text style={styles.label}>Prix de vente</Text>
               <TextInput
                 style={{
                   ...styles.input,
@@ -715,20 +834,58 @@ const Form = (props) => {
               />
             </View>
           </View>
-          <View
-            style={{alignSelf: 'flex-end', marginTop: 10, marginBottom: 20}}>
-            {loading ? (
-              <View style={styles.btnSubmit}>
-                <ActivityIndicator color={colors.white} />
-              </View>
-            ) : (
+          {/* Btn submit */}
+          {isModification ? (
+            <View
+              style={{flexDirection: 'row', marginTop: 10, marginBottom: 20}}>
               <TouchableOpacity
-                style={styles.btnSubmit}
-                onPress={handleAddArticle}>
-                <Text style={styles.btnSubmitText}>Ajouter</Text>
+                onPress={handleCancelModification}
+                style={[
+                  styles.btnSubmit,
+                  {flex: 1, marginRight: 5, borderRadius: 0},
+                ]}>
+                <Text style={styles.btnSubmitText}>Annuler</Text>
               </TouchableOpacity>
-            )}
-          </View>
+              {loading ? (
+                <View
+                  style={[
+                    styles.btnSubmit,
+                    {flex: 1, marginLeft: 5, borderRadius: 0, justifyContent: "center"},
+                  ]}>
+                  <ActivityIndicator color={colors.white} />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleSaveModification}
+                  style={[
+                    styles.btnSubmit,
+                    {flex: 1, marginLeft: 5, borderRadius: 0},
+                  ]}>
+                  <Text style={styles.btnSubmitText}>Enregistrer</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <View
+              style={{
+                alignSelf: 'center',
+                marginTop: 10,
+                marginBottom: 20,
+                width: '60%',
+              }}>
+              {loading ? (
+                <View style={styles.btnSubmit}>
+                  <ActivityIndicator color={colors.white} />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.btnSubmit}
+                  onPress={handleAddArticle}>
+                  <Text style={styles.btnSubmitText}>Ajouter</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
       </KeyboardAwareScrollView>
       <CustomDateTimePicker
@@ -739,7 +896,7 @@ const Form = (props) => {
           if (date !== null) {
             setInformation({
               ...information,
-              birthday:
+              birthdayDate:
                 date.getDate() +
                 '-' +
                 (date.getMonth() + 1) +
@@ -766,8 +923,8 @@ const Form = (props) => {
 
   let color = colors.gray;
   let textBirthday = 'ex : 15-08-2000';
-  if (information.birthday) {
-    textBirthday = information.birthday;
+  if (information.birthdayDate) {
+    textBirthday = information.birthdayDate;
     color = colors.black;
   }
 
@@ -777,11 +934,7 @@ const Form = (props) => {
       handleLogout={props.handleLogout}
       returnHomePage={props.returnHomePage}
       havebtnDeconnecte={true}
-      title={
-        resultPage.isSuccess
-          ? 'Votre article à été\najouté avec succès !'
-          : "Votre article n'a pas pu\nêtre ajouté"
-      }
+      title={resultPage.text}
       btnComponent={() => {
         let btnText = '+ Ajouter un autre article';
         let btnStyle = {paddingVertical: 15};
@@ -790,7 +943,7 @@ const Form = (props) => {
           btnStyle = {paddingVertical: 10};
         }
         return (
-          <View style={{flex: 1, alignSelf: 'center'}}>
+          <View style={{alignSelf: 'center', position: 'absolute', bottom: 80}}>
             <TouchableOpacity
               style={{
                 ...styles.btnSubmit,
@@ -885,11 +1038,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   btnSubmit: {
-    width: 'auto',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 8,
     backgroundColor: colors.black,
-    borderRadius: 7,
     borderWidth: 1,
     marginBottom: 50,
   },
