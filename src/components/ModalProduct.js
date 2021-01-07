@@ -1,5 +1,5 @@
 /** React */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Image,
   Modal,
@@ -12,9 +12,11 @@ import {ScrollView} from 'react-native-gesture-handler';
 
 /** App */
 import {colors} from '../assets/colors';
+import ModalConfirmation from "./ModalConfirmation";
 
 const ModalProduct = (props) => {
   const {product, visible} = props;
+  const [modalConfirmation, setModalConfirmation] = useState(false);
 
   if (!product) {
     return <></>;
@@ -27,9 +29,8 @@ const ModalProduct = (props) => {
       animationType="slide"
       visible={visible}
       style={{position: 'relative'}}>
-      <SafeAreaView
-        style={{flex: 1, backgroundColor: colors.white, padding: 20}}>
-        <ScrollView style={{flex: 1}}>
+      <SafeAreaView style={{flex: 1, backgroundColor: colors.white}}>
+        <ScrollView style={{flex: 1, padding: 20}}>
           <TouchableOpacity
             style={{
               flexDirection: 'row',
@@ -124,7 +125,7 @@ const ModalProduct = (props) => {
             flexDirection: 'row',
           }}>
           <TouchableOpacity
-            onPress={props.handleSellProduct}
+            onPress={() => setModalConfirmation(true)}
             style={{
               backgroundColor: colors.black,
               flex: 1,
@@ -152,6 +153,16 @@ const ModalProduct = (props) => {
             </Text>
           </TouchableOpacity>
         </View>
+      )}
+      {!product.product.sold && (
+        <ModalConfirmation
+          visible={modalConfirmation}
+          handleSubmit={() => {
+            props.handleSellProduct();
+            setModalConfirmation(false);
+          }}
+          handleCancel={() => setModalConfirmation(false)}
+        />
       )}
     </Modal>
   );
