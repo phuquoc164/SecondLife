@@ -199,7 +199,7 @@ const Form = (props) => {
             setResultPage({
               show: true,
               isSuccess: true,
-              text: 'Votre article à été\najouté avec succès !',
+              text: 'Votre article a été\najouté avec succès !',
             });
             props.handleAddProduct(data);
           } else {
@@ -656,7 +656,7 @@ const Form = (props) => {
 
             {/* Description */}
             <View style={{width: '100%'}}>
-              <Text style={styles.label}>Déscription</Text>
+              <Text style={styles.label}>Description</Text>
               <TextInput
                 style={{
                   ...styles.inputMultiLine,
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   label: {
-    color: colors.gray,
+    color: "#808B96",
     fontWeight: '500',
     marginBottom: 5,
   },
