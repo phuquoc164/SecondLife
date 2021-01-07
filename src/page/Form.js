@@ -241,10 +241,11 @@ const Form = (props) => {
     }
   };
 
-  const handleScanSuccess = (data) => {
+  const handleScanSuccess = (event) => {
     setShowScanner(false);
-    if (data.data) {
-      setArticle({...article, reference: data.data});
+    const data = JSON.parse(event.data);
+    if (data.type && data.type === 'product') {
+      setArticle({...article, reference: `${data.reference}`});
     } else {
       Alert.alert(
         'Problème de scanner',
