@@ -59,7 +59,10 @@ const MainPage = (props) => {
         if (product.uri === uri) {
           newProductsSold.push({
             ...product,
-            sold: true,
+            product: {
+              ...product.product,
+              sold: true
+            }
           });
         } else {
           newProductsHaventSold.push(product);
@@ -71,7 +74,10 @@ const MainPage = (props) => {
         if (product.uri === uri) {
           newProductsHaventSold.push({
             ...product,
-            sold: true,
+            product: {
+              ...product.product,
+              sold: false,
+            },
           });
         } else {
           newProductsSold.push(product);
@@ -284,7 +290,7 @@ const styles = StyleSheet.create({
     zIndex: 99999,
     // shadowRadius: -2,
     borderRadius: 2,
-    shadowOffset: {width: 0, height: -10},
+    shadowOffset: {width: 0, height: 0},
     shadowOpacity: 2,
     shadowColor: colors.black,
     elevation: 5,
