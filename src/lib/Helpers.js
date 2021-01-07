@@ -7,33 +7,34 @@ export const verifyData = (object) => {
   let isError = false;
   Object.keys(object).forEach((property) => {
     if (!!object[property] || property === "sold") {
-      switch (typeof object[property]) {
-        case 'string': {
-          if (
-            (property === 'email' && !validateEmail(object[property])) ||
-            (property !== 'email' && object[property] === '')
-          ) {
-            isError = true;
+      if (property === "sold" || property === "description") {
+        return;
+      } else {
+        switch (typeof object[property]) {
+          case 'string': {
+            if (
+              (property === 'email' && !validateEmail(object[property])) ||
+              (property !== 'email' && object[property] === '')
+            ) {
+              isError = true;
+            }
+            break;
           }
-          break;
-        }
-        case 'object': {
-          if (
-            (Array.isArray(object[property]) &&
-              object[property].length === 0) ||
-            (!Array.isArray(object[property]) &&
-              Object.keys(object[property]).length === 0)
-          ) {
-            isError = true;
+          case 'object': {
+            if (
+              (Array.isArray(object[property]) &&
+                object[property].length === 0) ||
+              (!Array.isArray(object[property]) &&
+                Object.keys(object[property]).length === 0)
+            ) {
+              isError = true;
+            }
+            break;
           }
-          break;
-        }
-        case 'boolean': {
-          break;
-        }
-        default: {
-          isError = true;
-          break;
+          default: {
+            isError = true;
+            break;
+          }
         }
       }
     } else {
