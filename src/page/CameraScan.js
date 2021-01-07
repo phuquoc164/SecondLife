@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  Platform,
   Text,
   TouchableOpacity,
   View,
@@ -75,7 +76,12 @@ const CameraScan = (props) => {
         }
         topViewStyle={{height: 0, flex: 0}}
         bottomViewStyle={{height: 0, flex: 0}}
-        cameraStyle={{height: Dimensions.get('screen').height - 90}}
+        cameraStyle={{
+          height:
+            Platform.OS === 'ios'
+              ? Dimensions.get('screen').height - 60
+              : Dimensions.get('screen').height - 90,
+        }}
       />
     </View>
   );
