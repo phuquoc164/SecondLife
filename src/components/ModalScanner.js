@@ -1,6 +1,6 @@
 /** React */
 import React from 'react';
-import {ActivityIndicator, Image, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Dimensions, Image, Text, TouchableOpacity, View} from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { colors } from "../assets/colors";
@@ -23,14 +23,19 @@ const ModalScanner = (props) => (
         style={{width: 19.5, height: 19}}
       />
     </TouchableOpacity>
-    <View style={{position: 'absolute', top: "50%", right: "50%"}}>
-      <ActivityIndicator color={colors.black} size='large' />
+    <View style={{position: 'absolute', top: '50%', right: '50%'}}>
+      <ActivityIndicator color={colors.black} size="large" />
     </View>
     <QRCodeScanner
       onRead={props.handleScanSuccess}
       flashMode={RNCamera.Constants.FlashMode.auto}
+      cameraStyle={{
+        height: Dimensions.get('screen').height - 300,
+        marginTop: 30,
+      }}
+      topViewStyle={{height: 0, flex: 0}}
+      bottomViewStyle={{height: 0, flex: 0}}
       showMarker={true}
-      cameraStyle={{flex: 1, marginTop: -40}}
     />
   </CustomModal>
 );
