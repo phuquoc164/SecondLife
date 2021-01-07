@@ -46,8 +46,8 @@ const ListProducts = (props) => {
         listProducts[index].product.sold ? setShowList("sold") : setShowList("haventsold");
         setProductDetail({
           modal: true,
-          product: listProducts[index]
-        })
+          product: listProducts[index],
+        });
       } else {
         Alert.alert(
           'Erreur système',
@@ -73,16 +73,18 @@ const ListProducts = (props) => {
       })
       .catch((error) => {
         console.debug(error);
-        Alert.alert(
-          'Erreur système',
-          'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
-        );
+        setTimeout(() => {
+          Alert.alert(
+            'Erreur système',
+            'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
+          );
+        }, 100);
       });
   };
 
   /** send request to unsell product */
   const handleUnsellProduct = (item) => {
-    FetchService.patch(item.uri, {"products": [{"sold": 0}]}, props.token)
+    FetchService.patch(item.uri, {products: [{sold: 0}]}, props.token)
       .then((response) => {
         if (response.success) {
           props.updateListProducts(item.uri, 'haventsold');
@@ -113,7 +115,7 @@ const ListProducts = (props) => {
   const renderItem = ({item, type}) => {
     return (
       <RectButton
-        style={[styles.item, {opacity: type === "sold" ? 0.4 : 1}]}
+        style={[styles.item, {opacity: type === 'sold' ? 0.4 : 1}]}
         key={item.sku}
         onPress={() => handleSelectProduct(item)}>
         <View style={{width: 80, height: 80}}>
@@ -165,7 +167,7 @@ const ListProducts = (props) => {
               data={item}
               type="sold"
               handleUnsellProduct={handleUnsellProduct}>
-              {renderItem({item, type: "sold"})}
+              {renderItem({item, type: 'sold'})}
             </SwipeableComponent>
           )}
           keyExtractor={(item) => item.sku}
@@ -191,7 +193,7 @@ const ListProducts = (props) => {
                 productSwiped = product;
               }}
               handleModifyProduct={props.handleModifyProduct}>
-              {renderItem({item, type: "haventsold"})}
+              {renderItem({item, type: 'haventsold'})}
             </SwipeableComponent>
           )}
           keyExtractor={(item) => item.sku}
@@ -266,13 +268,13 @@ const ListProducts = (props) => {
         }}
         goBack={() => setProductDetail({modal: false, product: null})}
       />
-      <ModalConfirmation 
-        visible={modalConfirmation} 
+      <ModalConfirmation
+        visible={modalConfirmation}
         handleSubmit={() => {
           handleSellProduct(productSwiped);
           setModalConfirmation(false);
           productSwiped = null;
-        }} 
+        }}
         handleCancel={() => setModalConfirmation(false)}
       />
     </SafeAreaView>
