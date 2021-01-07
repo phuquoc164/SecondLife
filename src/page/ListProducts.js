@@ -19,6 +19,8 @@ import ModalConfirmation from '../components/ModalConfirmation';
 import SwipeableComponent from '../components/SwipeableComponent';
 import FetchService from '../lib/FetchService';
 
+let productSwiped = null;
+
 const ListProducts = (props) => {
   const [showList, setShowList] = useState('haventsold');
   const [modalConfirmation, setModalConfirmation] = useState(false);
@@ -186,10 +188,7 @@ const ListProducts = (props) => {
               type="haventsold"
               handleSellProduct={(product) => {
                 setModalConfirmation(true);
-                setProductDetail({
-                  modal: false,
-                  product
-                });
+                productSwiped = product;
               }}
               handleModifyProduct={props.handleModifyProduct}>
               {renderItem({item, type: "haventsold"})}
@@ -254,7 +253,13 @@ const ListProducts = (props) => {
         handleModifyProduct={() =>
           props.handleModifyProduct(productDetail.product)
         }
-        handleSellProduct={() => setModalConfirmation(true)}
+        handleSellProduct={() => {
+          handleSellProduct(productDetail.product);
+          setProductDetail({
+            modal: false,
+            product: null,
+          });
+        }}
         handleUnsellProduct={() => {
           handleUnsellProduct(productDetail.product);
           setProductDetail({modal: false, product: null});
@@ -264,12 +269,9 @@ const ListProducts = (props) => {
       <ModalConfirmation 
         visible={modalConfirmation} 
         handleSubmit={() => {
-          handleSellProduct(productDetail.product);
+          handleSellProduct(productSwiped);
           setModalConfirmation(false);
-          productDetail.modal && setProductDetail({
-            modal: false,
-            product: null
-          });
+          productSwiped = null;
         }} 
         handleCancel={() => setModalConfirmation(false)}
       />
