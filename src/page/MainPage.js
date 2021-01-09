@@ -1,6 +1,7 @@
 /** React */
 import React, {useEffect, useState} from 'react';
 import {
+  Alert,
   Animated,
   Image,
   StyleSheet,
@@ -15,8 +16,7 @@ import CameraScan from './CameraScan';
 import ListProducts from './ListProducts';
 import {colors} from '../assets/colors';
 import Profile from './Profile';
-import FetchService from "../lib/FetchService";
-import { formatListProducts } from "../lib/Helpers";
+import { getListCustomers, getListProducts } from "../lib/Helpers";
 
 const MainPage = (props) => {
   const [productAdded, setProductAdded] = useState(null);
@@ -24,30 +24,31 @@ const MainPage = (props) => {
   const [referenceScanned, setReferenceScanned] = useState(null);
   const [pageShowed, setPageShowed] = useState('addProduct');
   const [listProducts, setListProducts] = useState(props.listProducts);
+  const [listCustomers, setListCustomers] = useState(props.listCustomers);
 
   /** get list products when we add one product (for getting the uri of new product) */
   useEffect(() => {
+    console.log(productAdded);
     if (productAdded !== null) {
-      FetchService.get('products', props.token)
-        .then((listProducts) => {
-          if (
-            !!listProducts &&
-            !!listProducts.data &&
-            listProducts.data.length > 0
-          ) {
-            const { listProductsSold, listProductsHaventSold } = formatListProducts(listProducts.data);
-            setListProducts({
-              sold: listProductsSold,
-              haventsold: listProductsHaventSold,
-            });
-            setProductAdded(null);
-          }
-        })
-        .catch((error) => {
-          console.debug('list products', error);
-        });
+      updateData();
+      setProductAdded(null);
     }
   }, [productAdded]);
+
+  const updateData = async () => {
+    try {
+      const { customers, listLastNames, listFirstNames, listEmails } = await getListCustomers(props.token);
+      const { sold, haventsold } = await getListProducts(props.token);
+      setListProducts({sold, haventsold});
+      setListCustomers({customers, listLastNames, listFirstNames, listEmails});
+    } catch (error) {
+      console.debug("update data error", error);
+      Alert.alert(
+        'Erreur système',
+        'SecondLife ne peut pas mettre à jour des données',
+      );
+    }
+  }
 
   /** Update list products when we click the button vendu or button à vendre */
   const updateListProducts = (uri, target) => {
@@ -120,7 +121,7 @@ const MainPage = (props) => {
         return (
           <Animated.View style={{width: '100%'}}>
             <Form
-              listCustomers={props.listCustomers}
+              listCustomers={listCustomers}
               categories={props.categories}
               brands={props.brands}
               productModified={productModified}
