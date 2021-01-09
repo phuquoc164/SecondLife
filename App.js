@@ -1,6 +1,6 @@
 /** React */
 import React, {useEffect, useState} from 'react';
-import {View, ImageBackground, Alert, Platform, StatusBar} from 'react-native';
+import {View, ImageBackground, Alert, Platform} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -10,7 +10,7 @@ import MainPage from './src/page/MainPage';
 import LaunchScreen from './src/page/LaunchScreen';
 import {colors} from './src/assets/colors';
 import {STORAGE_KEY, STORAGE_USER} from './src/lib/constants';
-import { formatListCustomers, formatListProducts, toUppercaseKeys } from "./src/lib/Helpers";
+import {toUppercaseKeys, getListCustomers, getListProducts} from './src/lib/Helpers';
 import FetchService from "./src/lib/FetchService";
 
 const initialState = {
@@ -81,18 +81,6 @@ const App = () => {
     }
   }
 
-  /** get list customers */
-  const getListCustomers = async (token) => {
-    try {
-      const listCustomers = await FetchService.get('customers', token);
-      const { customers, listLastNames, listFirstNames, listEmails } = formatListCustomers(listCustomers.data);
-      return { customers, listLastNames, listFirstNames, listEmails, };
-    } catch (error) {
-      // this function run with getListCategoriesBrands, so we dont need to handle error here
-      console.debug('list customers', error);
-    }
-  };
-
   /** Get list categories and brand
    * if we detecte refresh token in header, we renew token
    */
@@ -126,6 +114,7 @@ const App = () => {
           newCategory['HasImage'] = true;
           listCategories.push(newCategory);
         });
+        brands.data.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1 );
         brands.data.forEach((brand) => {
           const newBrand = toUppercaseKeys(brand);
           listBrands.push(newBrand);
@@ -150,20 +139,6 @@ const App = () => {
           'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
         );
       }
-    }
-  };
-
-  /** Get List products */
-  const getListProducts = async (token) => {
-    try {
-      const listProducts = await FetchService.get('products', token);
-      const {listProductsSold, listProductsHaventSold} = formatListProducts(listProducts.data);
-      return {
-        sold: listProductsSold,
-        haventsold: listProductsHaventSold,
-      };
-    } catch (error) {
-      console.debug('list products', error);
     }
   };
 
