@@ -56,10 +56,7 @@ const Form = (props) => {
   useEffect(() => {
     if (props.productModified && Object.keys(props.productModified).length > 0) {
       const { customer, product } = props.productModified;
-      setInformation({
-        ...information,
-        ...customer
-      });
+      setInformation({ ...information, ...customer });
       setArticle({
         ...article,
         ...product,
@@ -82,7 +79,14 @@ const Form = (props) => {
       });
       setIsModification(true);
     }
-  }, [props.productModified])
+  }, [props.productModified]);
+
+  useEffect(() => {
+    const { listLastNames, listFirstNames, listEmails } = props.listCustomers;
+    listLastNamesFiltered.current = listLastNames;
+    listFirstNamesFiltered.current = listFirstNames;
+    listEmailsFiltered.current = listEmails;
+  }, [props.listCustomers]);
 
   const handleTakePhoto = async () => {
     setShowModalPhoto(false);
@@ -343,13 +347,13 @@ const Form = (props) => {
       <KeyboardAwareScrollView keyboardShouldPersistTaps={keyboardDisplay}>
         <View style={{padding: 20}}>
           <Text style={styles.title}>Informations Client</Text>
-
           <View style={{zIndex: 100}}>
             <View style={styles.group}>
               {/* Nom */}
               <AutocompleteInput
                 containerStyle={{...styles.inputGroup, ...zIndexLastName}}
                 labelStyle={styles.label}
+                autoCapitalize="characters"
                 label="Nom"
                 inputStyle={{
                   ...styles.input,
@@ -376,6 +380,7 @@ const Form = (props) => {
               <AutocompleteInput
                 containerStyle={{...styles.inputGroup, ...zIndexFirstName}}
                 labelStyle={styles.label}
+                autoCapitalize="words"
                 label="Prénom"
                 inputStyle={{
                   ...styles.input,
@@ -480,6 +485,7 @@ const Form = (props) => {
                       ? colors.gray
                       : colors.red,
                 }}
+                autoCapitalize="words"
                 autoCompleteType="street-address"
                 placeholder="Adresse client"
                 placeholderTextColor={colors.gray}
@@ -658,13 +664,7 @@ const Form = (props) => {
             <View style={{width: '100%'}}>
               <Text style={styles.label}>Description</Text>
               <TextInput
-                style={{
-                  ...styles.inputMultiLine,
-                  borderColor:
-                    !showError || verifyTextInput('article', 'description')
-                      ? colors.gray
-                      : colors.red,
-                }}
+                style={styles.inputMultiLine}
                 placeholder="Décrivez l'article"
                 placeholderTextColor={colors.gray}
                 value={article.description}
@@ -851,7 +851,12 @@ const Form = (props) => {
                 <View
                   style={[
                     styles.btnSubmit,
-                    {flex: 1, marginLeft: 5, borderRadius: 0, justifyContent: "center"},
+                    {
+                      flex: 1,
+                      marginLeft: 5,
+                      borderRadius: 0,
+                      justifyContent: 'center',
+                    },
                   ]}>
                   <ActivityIndicator color={colors.white} />
                 </View>
@@ -1009,6 +1014,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 0,
     borderBottomWidth: 1,
+    borderColor: colors.gray
   },
   photoView: {
     flexDirection: 'row',

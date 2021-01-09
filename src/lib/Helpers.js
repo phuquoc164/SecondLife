@@ -1,3 +1,5 @@
+import FetchService from "./FetchService";
+
 export const validateEmail = (email) => {
   const regex = /^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)/gm;
   return regex.test(email);
@@ -6,10 +8,8 @@ export const validateEmail = (email) => {
 export const verifyData = (object) => {
   let isError = false;
   Object.keys(object).forEach((property) => {
-    if (!!object[property] || property === "sold") {
-      if (property === "sold" || property === "description") {
-        return;
-      } else {
+    if (property !== 'sold' && property !== 'description') {
+      if (!!object[property]) {
         switch (typeof object[property]) {
           case 'string': {
             if (
@@ -36,9 +36,9 @@ export const verifyData = (object) => {
             break;
           }
         }
+      } else {
+        isError = true;
       }
-    } else {
-      isError = true;
     }
   });
 
@@ -112,6 +112,43 @@ export const filterArray = (array, filtered, limit = 5) => {
   return newArray.slice(0, limit);
 };
 
+/** get list customers */
+export const getListCustomers = async (token) => {
+  try {
+    const listCustomers = await FetchService.get('customers', token);
+    if (!!listCustomers && !!listCustomers.data && listCustomers.data.length > 0) {
+      const { customers, listLastNames, listFirstNames, listEmails } = formatListCustomers(listCustomers.data);
+      return { customers, listLastNames, listFirstNames, listEmails };
+    } else {
+      return {customers: [], listLastNames: [], listFirstNames: [], listEmails: []};
+    }
+  } catch (error) {
+    // this function run with getListCategoriesBrands, so we dont need to handle error here
+    console.debug('list customers', error);
+  }
+};
+
+/** Get List products */
+export const getListProducts = async (token) => {
+  try {
+    const listProducts = await FetchService.get('products', token);
+    console.log(listProducts);
+    if (!!listProducts && !!listProducts.data && listProducts.data.length > 0) {
+      const {listProductsSold, listProductsHaventSold} = formatListProducts( listProducts.data );
+      return {
+        sold: listProductsSold,
+        haventsold: listProductsHaventSold,
+      };
+    } 
+    return {
+      sold: [],
+      haventsold: [],
+    };
+  } catch (error) {
+    console.debug('list products', error);
+  }
+};
+
 export const convertFormDatatoRequestData = (information, article) => ({
   firstName: information.firstName,
   lastName: information.lastName,
@@ -125,7 +162,7 @@ export const convertFormDatatoRequestData = (information, article) => ({
     {
       name: article.name,
       sku: article.reference,
-      description: article.description,
+      description: article.description ? article.description : "",
       voucherAmount: parseFloat(article.voucherAmount.replace(' €', '')),
       price: parseFloat(article.price.replace(' €', '')),
       category: article.category.Id.replace(
