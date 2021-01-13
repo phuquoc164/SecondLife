@@ -26,34 +26,33 @@ export const initialArticle = {
 };
 
 export const categoryIcons = {
-  Homme: {
+  Hommes: {
     uri: require('../assets/images/Homme.png'),
     width: 31,
     height: 25,
   },
-  Femme: {
+  Femmes: {
     uri: require('../assets/images/Femme.png'),
     width: 18,
     height: 26,
-  },
-  Enfant: {
-    uri: require('../assets/images/Enfant.png'),
-    width: 23.5,
-    height: 23,
-  },
+  }
 };
 
 export const listStates = [
   {
-    Id: 'good',
-    Name: 'Bon',
+    Id: 'good_status',
+    Name: 'Bon état',
   },
   {
-    Id: 'like_new',
-    Name: 'Comme neuf',
+    Id: 'very_good_status',
+    Name: 'Très bon état',
   },
   {
-    Id: 'excellent',
-    Name: 'Excellent',
+    Id: 'good_without_tag',
+    Name: 'Neuf sans étiquette',
+  },
+  {
+    Id: 'good_with_tag',
+    Name: 'Neuf avec étiquette',
   },
 ];
