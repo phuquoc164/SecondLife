@@ -132,7 +132,6 @@ export const getListCustomers = async (token) => {
 export const getListProducts = async (token) => {
   try {
     const listProducts = await FetchService.get('products', token);
-    console.log(listProducts);
     if (!!listProducts && !!listProducts.data && listProducts.data.length > 0) {
       const {listProductsSold, listProductsHaventSold} = formatListProducts( listProducts.data );
       return {
@@ -165,10 +164,8 @@ export const convertFormDatatoRequestData = (information, article) => ({
       description: article.description ? article.description : "",
       voucherAmount: parseFloat(article.voucherAmount.replace(' €', '')),
       price: parseFloat(article.price.replace(' €', '')),
-      category: article.category.Id.replace(
-        '/{manufacturer}/',
-        `/${article.brand.Name}/`,
-      ),
+      category: article.category,
+      brand: article.brand.Name,
       reference: article.reference,
       pictures: article.pictures.map((photo, index) => ({
         name: `image${index + 1}`,
