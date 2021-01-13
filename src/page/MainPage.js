@@ -28,7 +28,6 @@ const MainPage = (props) => {
 
   /** get list products when we add one product (for getting the uri of new product) */
   useEffect(() => {
-    console.log(productAdded);
     if (productAdded !== null) {
       updateData();
       setProductAdded(null);
