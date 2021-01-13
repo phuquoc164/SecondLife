@@ -20,6 +20,7 @@ import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 /** App */
 import ResultPage from './ResultPage';
 import CustomDateTimePicker from '../components/CustomDateTimePicker';
+import PickerCategories from "../components/PickerCategories";
 import Picker from '../components/Picker';
 import ModalPhoto from '../components/ModalPhoto';
 import ModalScanner from '../components/ModalScanner';
@@ -61,11 +62,6 @@ const Form = (props) => {
         ...article,
         ...product,
         pictures: product.pictures.map((picture) => picture.content),
-        category: {
-          HasImage: true,
-          Id: product.category,
-          Name: product.category.split('/')[2],
-        },
         brand: {
           Id: 'product_modifiable',
           Name: product.brand,
@@ -74,8 +70,8 @@ const Form = (props) => {
           Id: product.state,
           Name: product.state,
         },
-        price: `${product.price}`,
-        voucherAmount: `${product.voucherAmount}`,
+        price: `${product.price} €`,
+        voucherAmount: `${product.voucherAmount} €`,
       });
       setIsModification(true);
     }
@@ -681,20 +677,13 @@ const Form = (props) => {
             {/* Catégorie */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Catégorie</Text>
-              <Picker
+              <PickerCategories
                 dataSelected={article.category}
                 items={props.categories}
-                placeholder="Sélectionnez une catégorie"
                 showError={showError}
-                onSelected={(selected) => {
-                  if (selected.Id !== 'erreur_api') {
-                    setArticle({...article, category: selected});
-                  }
-                }}
-                autoGenerateAlphabeticalIndex={false}
-                showAlphabeticalIndex={false}
-                renderSearch={true}
-                titleSearch="Catégorie"
+                onSelected={(selected) =>
+                  setArticle({...article, category: selected})
+                }
               />
             </View>
 
@@ -750,7 +739,7 @@ const Form = (props) => {
                 autoGenerateAlphabeticalIndex={false}
                 showAlphabeticalIndex={false}
                 renderSearch={true}
-                titleSearch="Etat"
+                titleSearch="état"
               />
             </View>
           </View>
