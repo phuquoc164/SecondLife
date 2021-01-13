@@ -108,10 +108,14 @@ const App = () => {
       
       const listCategories = [];
       const listBrands = [];
-      if (categories.data.length > 0 && brands.data.length > 0) {
-        categories.data.forEach((category) => {
-          const newCategory = toUppercaseKeys(category);
-          newCategory['HasImage'] = true;
+      if ( Object.keys(categories.data).length > 0 && brands.data.length > 0) {
+        Object.keys(categories.data).forEach(key => {
+          const newCategory = {
+            Id: key,
+            Name: key,
+            HasImage: true,
+            subValues: categories.data[key]
+          };
           listCategories.push(newCategory);
         });
         brands.data.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1 );
