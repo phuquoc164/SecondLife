@@ -215,7 +215,7 @@ const PickerCategories = (props) => {
             style={{width: 17.25, height: 17}}
           />
         </TouchableOpacity>
-        <Text style={styles.label}>{props.titleSearch}</Text>
+        <Text style={styles.label}>Catégories</Text>
         <TouchableOpacity
           onPress={handleClose}
           style={{position: 'absolute', right: 15, top: 15}}>
