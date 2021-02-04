@@ -45,9 +45,10 @@ const Picker = (props) => {
           justifyContent: 'space-between',
           alignItems: 'center',
         }}>
-        <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{flex: 1, flexDirection: 'column'}}>
           <Text
             style={{
+              fontSize: 18,
               fontWeight:
                 defaultSelected && defaultSelected.Name === item.Name
                   ? 'bold'
@@ -55,6 +56,9 @@ const Picker = (props) => {
             }}>
             {item.Name}
           </Text>
+          {item.subTitle && (
+            <Text style={{color: '#808B96', marginRight: 10}}>{item.subTitle}</Text>
+          )}
         </View>
         <Image
           source={require('../assets/images/chevron-left.png')}
