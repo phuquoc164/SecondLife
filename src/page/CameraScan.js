@@ -5,7 +5,8 @@ import {RNCamera} from 'react-native-camera';
 import {
   ActivityIndicator,
   Alert,
-  Image,
+  Dimensions,
+  Platform,
   Text,
   TouchableOpacity,
   View,
@@ -23,64 +24,65 @@ const CameraScan = (props) => {
   });
 
   const handleReadQRCode = (event) => {
-    if (event.data) {
-      if (props.original === 'scanProduct') {
-        props.handleGetReferenceScanned(event.data);
-      } else if (props.original === 'scanVoucher') {
-        const data = JSON.parse(event.data);
-        FetchService.post('vouchers', data, props.token)
-          .then((response) => {
-            setResultPage({
-              show: true,
-              isSuccess: response.success,
-            });
-          })
-          .catch((error) => {
-            console.debug(error);
-            Alert.alert(
-              'Problème de système',
-              'SecondLife a rencontré une problème. Veuillez re-scanner!',
-            );
+    const data = JSON.parse(event.data);
+    if (data.type && data.type === 'product') {
+      props.handleGetReferenceScanned(data.reference);
+    } else if (data.type && data.type === 'voucher') {
+      FetchService.post('vouchers', data, props.token)
+        .then((response) => {
+          setResultPage({
+            show: true,
+            isSuccess: response.success,
           });
-      }
+        })
+        .catch((error) => {
+          console.debug(error);
+          Alert.alert(
+            'Problème de système',
+            'SecondLife a rencontré une problème. Veuillez re-scanner!',
+          );
+        });
+    } else {
+      Alert.alert('Erreur', 'On ne peut pas détecter votre qrcode');
     }
   };
 
   const returnScanPage = () => (
-    <View style={{flex: 1, position: 'relative'}}>
-      <View style={{flex: 1, marginTop: 10, marginBottom: 40}}>
-        <Image
-          source={require('../assets/images/logo.png')}
-          style={{
-            flex: 1,
-            width: '50%',
-            maxWidth: 300,
-            height: 'auto',
-            resizeMode: 'contain',
-            alignSelf: 'center',
-          }}
-        />
+    <View style={{position: 'relative', flex: 1}}>
+      <View style={{position: 'absolute', top: '45%', right: '45%'}}>
+        <ActivityIndicator color={colors.black} size="large" />
       </View>
-      <TouchableOpacity
-        onPress={props.returnHomePage}
-        style={{position: 'absolute', right: 20, top: 20}}>
-        <Image
-          source={require('../assets/images/cross-black.png')}
-          style={{width: 19.5, height: 19}}
-        />
-      </TouchableOpacity>
-
-      <View style={{flex: 4}}>
-        <View style={{position: 'absolute', top: '50%', right: '50%'}}>
-          <ActivityIndicator color={colors.black} size="large" />
-        </View>
-        <QRCodeScanner
-          onRead={handleReadQRCode}
-          flashMode={RNCamera.Constants.FlashMode.auto}
-          showMarker={true}
-          cameraStyle={{flex: 1}}
-        />
-      </View>
+      <QRCodeScanner
+        onRead={handleReadQRCode}
+        flashMode={RNCamera.Constants.FlashMode.auto}
+        showMarker={true}
+        customMarker={
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              backgroundColor: 'transparent',
+            }}>
+            <View
+              style={{
+                height: 250,
+                width: 250,
+                borderWidth: 2,
+                borderColor: colors.green,
+                backgroundColor: 'transparent',
+              }}
+            />
+          </View>
+        }
+        topViewStyle={{height: 0, flex: 0}}
+        bottomViewStyle={{height: 0, flex: 0}}
+        cameraStyle={{
+          height:
+            Platform.OS === 'ios'
+              ? Dimensions.get('screen').height - 60
+              : Dimensions.get('screen').height - 90,
+        }}
+      />
     </View>
   );
 
@@ -94,14 +96,13 @@ const CameraScan = (props) => {
           : "Ce bon d'achat a déjà\nété utilisé"
       }
       btnComponent={() => (
-        <View style={{flex: 1, alignSelf: 'center'}}>
+        <View style={{alignSelf: 'center', position: 'absolute', bottom: 80}}>
           <TouchableOpacity
             style={{
               width: 'auto',
               paddingHorizontal: 20,
               paddingVertical: 10,
               backgroundColor: colors.black,
-              borderRadius: 7,
               borderWidth: 1,
               marginTop: 20,
             }}

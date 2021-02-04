@@ -76,7 +76,7 @@ const AutocompleteInput = (props) => {
               top: 30,
               left: 0,
               zIndex: 200,
-              maxHeight: 150,
+              maxHeight: 180,
               width: '100%',
             }}>
             {props.options.map((option, index) => renderItem(option, index))}

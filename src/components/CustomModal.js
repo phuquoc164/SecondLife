@@ -3,19 +3,21 @@ import React from 'react';
 import {Modal, View} from 'react-native';
 
 /** App */
-import { colors } from "../assets/colors";
+import {colors} from '../assets/colors';
 
 const CustomModal = (props) => (
   <Modal transparent={true} animationType="slide" visible={props.visible}>
     <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
+      style={[
+        {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        props.rootViewStyle ? props.rootViewStyle : {},
+      ]}>
       <View
         style={{
-          ...props.containerViewStyle,
           margin: 20,
           backgroundColor: colors.white,
           borderRadius: 2,
@@ -27,6 +29,7 @@ const CustomModal = (props) => (
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
           elevation: 5,
+          ...props.containerViewStyle,
         }}>
         {props.children}
       </View>

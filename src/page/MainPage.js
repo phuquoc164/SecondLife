@@ -1,6 +1,5 @@
 /** React */
 import React, {useEffect, useState} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Alert,
   Animated,
@@ -15,341 +14,251 @@ import {
 import Form from './Form';
 import CameraScan from './CameraScan';
 import ListProducts from './ListProducts';
-import {initialListData} from '../lib/constants';
-import FetchService from '../lib/FetchService';
-import {
-  formatListCustomers,
-  formatListProducts,
-  toUppercaseKeys,
-} from '../lib/Helpers';
 import {colors} from '../assets/colors';
-
-let value = 0;
-const animatedValue = new Animated.Value(0);
-
-const frontInterpolate = animatedValue.interpolate({
-  inputRange: [0, 180],
-  outputRange: ['0deg', '180deg'],
-});
-const backInterpolate = animatedValue.interpolate({
-  inputRange: [0, 180],
-  outputRange: ['180deg', '360deg'],
-});
-
-const frontAnimatedStyle = {
-  transform: [{rotateY: frontInterpolate}],
-};
-const backAnimatedStyle = {
-  transform: [{rotateY: backInterpolate}],
-};
+import Profile from './Profile';
+import { getListCustomers, getListProducts } from "../lib/Helpers";
 
 const MainPage = (props) => {
-  animatedValue.addListener((valueListener) => {
-    value = valueListener.value;
-  });
-  const [token, setToken] = useState(props.token);
   const [productAdded, setProductAdded] = useState(null);
+  const [productModified, setProductModified] = useState(null);
   const [referenceScanned, setReferenceScanned] = useState(null);
-  const [isErrorApi, setIsErrorApi] = useState(false);
-  const [pageShowed, setPageShowed] = useState('homePage');
-  const [listProducts, setListProducts] = useState({
-    sold: [],
-    haventsold: [],
-  });
-  const [listData, setListData] = useState({
-    categories: initialListData,
-    brands: initialListData,
-  });
-  const [listCustomers, setListCustomers] = useState({
-    customers: [],
-    listLastNames: [],
-    listFirstNames: [],
-    listEmails: [],
-  });
-
-  useEffect(() => {
-    const initData = async () => {
-      await getListProducts();
-      await getListCategoriesBrands();
-      await getListCustomers();
-    };
-
-    initData();
-  }, []);
+  const [pageShowed, setPageShowed] = useState('addProduct');
+  const [listProducts, setListProducts] = useState(props.listProducts);
+  const [listCustomers, setListCustomers] = useState(props.listCustomers);
 
   /** get list products when we add one product (for getting the uri of new product) */
   useEffect(() => {
     if (productAdded !== null) {
-      getListProducts();
+      updateData();
+      setProductAdded(null);
     }
   }, [productAdded]);
 
-  /** Get List products */
-  const getListProducts = async () => {
+  const updateData = async () => {
     try {
-      const listProducts = await FetchService.get('products', token);
-      const {listProductsSold, listProductsHaventSold} = formatListProducts(
-        listProducts.data,
+      const { customers, listLastNames, listFirstNames, listEmails } = await getListCustomers(props.token);
+      const { sold, haventsold } = await getListProducts(props.token);
+      setListProducts({sold, haventsold});
+      setListCustomers({customers, listLastNames, listFirstNames, listEmails});
+    } catch (error) {
+      console.debug("update data error", error);
+      Alert.alert(
+        'Erreur système',
+        'SecondLife ne peut pas mettre à jour des données',
       );
-      isErrorApi && setIsErrorApi(false);
-      setListProducts({
-        sold: listProductsSold,
-        haventsold: listProductsHaventSold,
-      });
-    } catch (error) {
-      console.debug(error);
-      setIsErrorApi(true);
     }
-  };
+  }
 
-  const getListCustomers = async () => {
-    try {
-      const listCustomers = await FetchService.get('customers', token);
-      const {
-        customers,
-        listLastNames,
-        listFirstNames,
-        listEmails,
-      } = formatListCustomers(listCustomers.data);
-      setListCustomers({
-        customers,
-        listLastNames,
-        listFirstNames,
-        listEmails,
-      });
-    } catch (error) {
-      console.debug(error);
-    }
-  };
-
-  /** Get list categories and brand
-   * if we detecte refresh token in header, we renew token
-   */
-  const getListCategoriesBrands = async () => {
-    try {
-      const categories = await FetchService.get('categories', token);
-      const brands = await FetchService.get('brands', token);
-
-      // token va expiré, envoyer une requete pour renouveler le token
-      if (categories.refreshToken) {
-        try {
-          const user = AsyncStorage.getItem(STORAGE_USER);
-          const userData = JSON.parse(user);
-          const {username, password} = userData;
-          const response = await FetchService.login(username, password);
-          if (response && response.token) {
-            await AsyncStorage.setItem(STORAGE_KEY, response.token);
-            setToken(response.token);
-          }
-        } catch (error) {
-          console.debug(error);
+  /** Update list products when we click the button vendu or button à vendre */
+  const updateListProducts = (uri, target) => {
+    let newProductsSold = [];
+    let newProductsHaventSold = [];
+    if (target === 'sold') {
+      newProductsSold = [...listProducts.sold];
+      listProducts.haventsold.forEach((product) => {
+        if (product.uri === uri) {
+          newProductsSold.push({
+            ...product,
+            product: {
+              ...product.product,
+              sold: true
+            }
+          });
+        } else {
+          newProductsHaventSold.push(product);
         }
-      }
-      if (categories.data.length > 0 && brands.data.length > 0) {
-        const listCategories = [];
-        categories.data.forEach((category) => {
-          const newCategory = toUppercaseKeys(category);
-          newCategory['HasImage'] = true;
-          listCategories.push(newCategory);
-        });
-        const listBrands = [];
-        brands.data.forEach((brand) => {
-          const newBrand = toUppercaseKeys(brand);
-          listBrands.push(newBrand);
-        });
-        setListData({
-          categories: listCategories,
-          brands: listBrands,
-        });
-      }
-    } catch (error) {
-      console.debug(error);
-      if (error === 'Not allowed to use this Resource') {
-        Alert.alert(
-          'Erreur système',
-          'Votre session à expirée, veuillez-vous re-connecter.',
-          [{text: 'Se déconnecter', onPress: () => props.handleLogout()}],
-        );
-      } else {
-        Alert.alert(
-          'Erreur système',
-          'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
-        );
-      }
+      });
+    } else {
+      newProductsHaventSold = [...listProducts.haventsold];
+      listProducts.sold.forEach((product) => {
+        if (product.uri === uri) {
+          newProductsHaventSold.push({
+            ...product,
+            product: {
+              ...product.product,
+              sold: false,
+            },
+          });
+        } else {
+          newProductsSold.push(product);
+        }
+      });
     }
-  };
-
-  /** Update list products when we click the button vendu */
-  const updateListProducts = (uri) => {
-    const newProductsSold = [...listProducts.sold];
-    const newProductsHaventSold = [];
-    listProducts.haventsold.forEach((product) => {
-      if (product.uri === uri) {
-        newProductsSold.push({
-          ...product,
-          sold: true,
-        });
-      } else {
-        newProductsHaventSold.push(product);
-      }
-    });
     setListProducts({
       sold: newProductsSold,
       haventsold: newProductsHaventSold,
     });
   };
 
-  /** Animation for changing page */
-  const flipCard = (page = 'homePage') => {
-    if (value >= 90 && page === 'homePage') {
-      Animated.spring(animatedValue, {
-        toValue: 0,
-        friction: 8,
-        tension: 10,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.spring(animatedValue, {
-        toValue: 180,
-        friction: 8,
-        tension: 10,
-        useNativeDriver: true,
-      }).start();
-    }
-    setPageShowed(page);
+  const handleModifyProduct = (product) => {
+    setProductModified(product);
+    setPageShowed('addProduct');
   };
 
-  /**
-   * Render Main Page
-   */
-  const renderMainPage = () => (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-      }}>
-      <View style={{flex: 2}}>
-        <Image
-          source={require('../assets/images/logo.png')}
-          style={{
-            flex: 1,
-            width: '60%',
-            height: 'auto',
-            resizeMode: 'contain',
-            alignSelf: 'center',
-            paddingTop: 20
-          }}
-        />
-      </View>
-      <View
-        style={{
-          flexDirection: 'column',
-          flex: 5,
-          alignItems: 'center',
-          paddingVertical: 40,
-        }}>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => flipCard('addProduct')}>
-            <Text style={styles.btnText}>Ajouter un produit</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => flipCard('scanProduct')}>
-            <Text style={styles.btnText}>Scanner un produit</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => flipCard('scanVoucher')}>
-            <Text style={styles.btnText}>Scanner un bon d'achat</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.btn}
-            onPress={() => flipCard('listProducts')}>
-            <Text style={styles.btnText}>Ma liste de produits</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
+  const handleCancelModification = () => {
+    setPageShowed('listProducts');
+  };
 
-  /** render the back pages */
-  const renderBackPage = () => {
+  const handleSaveModification = (productModified) => {
+    const newProductsHaventSold = [...listProducts.haventsold];
+    newProductsHaventSold.forEach((product, index) => {
+      if (product.uri === productModified.uri) {
+        newProductsHaventSold[index] = {...productModified};
+      }
+    });
+    setListProducts({
+      ...listProducts,
+      haventsold: newProductsHaventSold
+    })
+    setProductModified(productModified);
+    setPageShowed('listProducts');
+  }
+
+  const renderPage = () => {
     switch (pageShowed) {
       case 'addProduct':
         return (
-          <Form
-            listCustomers={listCustomers}
-            categories={listData.categories}
-            brands={listData.brands}
-            handleLogout={props.handleLogout}
-            handleAddProduct={(product) => setProductAdded(product)}
-            token={token}
-            returnHomePage={() => flipCard()}
-          />
+          <Animated.View style={{width: '100%'}}>
+            <Form
+              listCustomers={listCustomers}
+              categories={props.categories}
+              brands={props.brands}
+              productModified={productModified}
+              handleSaveModification={(productModified) => handleSaveModification(productModified)}
+              handleCancelModification={handleCancelModification}
+              handleAddProduct={(product) => setProductAdded(product)}
+              token={props.token}
+            />
+          </Animated.View>
         );
-      case 'scanProduct':
+      case 'scan':
         return (
-          <CameraScan
-            original={pageShowed}
-            returnHomePage={() => flipCard()}
-            handleGetReferenceScanned={(reference) => {
-              setReferenceScanned(reference);
-              setPageShowed("listProducts");
-            }}
-          />
-        );
-      case 'scanVoucher':
-        return (
-          <CameraScan
-            original={pageShowed}
-            returnHomePage={() => flipCard()}
-            token={token}
-          />
+          <Animated.View>
+            <CameraScan
+              token={props.token}
+              handleGetReferenceScanned={(reference) => {
+                setReferenceScanned(reference);
+                setPageShowed('listProducts');
+              }}
+            />
+          </Animated.View>
         );
       case 'listProducts':
         return (
-          <ListProducts
-            listProductsSold={listProducts.sold}
-            listProductsHaventSold={listProducts.haventsold}
-            updateListProducts={updateListProducts}
-            isErrorApi={isErrorApi}
-            returnHomePage={() => flipCard()}
-            referenceScanned={referenceScanned}
-            resetReferenceScanned={() => setReferenceScanned(null)}
-            token={token}
-          />
+          <Animated.View>
+            <ListProducts
+              listProductsSold={listProducts.sold}
+              listProductsHaventSold={listProducts.haventsold}
+              productModified={productModified}
+              updateListProducts={updateListProducts}
+              referenceScanned={referenceScanned}
+              resetReferenceScanned={() => setReferenceScanned(null)}
+              handleModifyProduct={handleModifyProduct}
+              token={props.token}
+            />
+          </Animated.View>
+        );
+      case 'profile':
+        return (
+          <Animated.View>
+            <Profile handleLogout={props.handleLogout} />
+          </Animated.View>
         );
       default:
         return;
     }
   };
 
-  let displayFrontStyle = {display: 'flex'};
-  let displayBackStyle = {display: 'none'};
-  if (pageShowed !== 'homePage') {
-    displayFrontStyle = {display: 'none'};
-    displayBackStyle = {display: 'flex'};
-  }
-
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[styles.flipCard, frontAnimatedStyle, displayFrontStyle]}>
-        {renderMainPage()}
-      </Animated.View>
-      <Animated.View
-        style={[backAnimatedStyle, styles.flipCard, displayBackStyle]}>
-        {renderBackPage()}
-      </Animated.View>
+      {renderPage()}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.bottomBarItem}
+          onPress={() => {
+            setPageShowed('addProduct');
+            setProductModified(null);
+          }}
+          disabled={pageShowed === 'addProduct'}>
+          <Image
+            source={
+              pageShowed === 'addProduct'
+                ? require('../assets/images/btn-add-active.png')
+                : require('../assets/images/btn-add.png')
+            }
+            style={{width: 24, height: 24}}
+          />
+          <Text
+            style={{
+              color: pageShowed === 'addProduct' ? colors.black : colors.gray,
+            }}>
+            Ajouter
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.bottomBarItem}
+          onPress={() => setPageShowed('scan')}
+          disabled={pageShowed === 'scan'}>
+          <Image
+            source={
+              pageShowed === 'scan'
+                ? require('../assets/images/btn-scan-active.png')
+                : require('../assets/images/btn-scan.png')
+            }
+            style={{width: 24, height: 24}}
+          />
+          <Text
+            style={{
+              color: pageShowed === 'scan' ? colors.black : colors.gray,
+            }}>
+            Scanner
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.bottomBarItem}
+          onPress={() => {
+            setPageShowed('listProducts');
+            setProductModified(null);
+          }}
+          disabled={pageShowed === 'listProducts'}>
+          <Image
+            source={
+              pageShowed === 'listProducts'
+                ? require('../assets/images/btn-list-active.png')
+                : require('../assets/images/btn-list.png')
+            }
+            style={{width: 24, height: 24}}
+          />
+          <Text
+            style={{
+              color: pageShowed === 'listProducts' ? colors.black : colors.gray,
+            }}>
+            Catalogue
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.bottomBarItem}
+          onPress={() => setPageShowed('profile')}
+          disabled={pageShowed === 'profile'}>
+          <Image
+            source={
+              pageShowed === 'profile'
+                ? require('../assets/images/btn-profile-active.png')
+                : require('../assets/images/btn-profile.png')
+            }
+            style={{width: 24, height: 24}}
+          />
+          <Text
+            style={{
+              color: pageShowed === 'profile' ? colors.black : colors.gray,
+            }}>
+            Profil
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -358,11 +267,8 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  flipCard: {
+    position: 'relative',
     height: '100%',
-    width: '100%',
-    backfaceVisibility: 'hidden',
   },
   btn: {
     width: 300,
@@ -375,6 +281,29 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: colors.white,
     fontWeight: 'bold',
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 60,
+    zIndex: 99999,
+    // shadowRadius: -2,
+    borderRadius: 2,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 2,
+    shadowColor: colors.black,
+    elevation: 5,
+    display: 'flex',
+    flexDirection: 'row',
+    backgroundColor: colors.white,
+    paddingVertical: 5,
+  },
+  bottomBarItem: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

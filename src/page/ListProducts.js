@@ -2,35 +2,51 @@
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
-  FlatList,
   Image,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  FlatList,
 } from 'react-native';
+import {RectButton} from 'react-native-gesture-handler';
 
 /** App */
 import {colors} from '../assets/colors';
+import ModalProduct from '../components/ModalProduct';
+import ModalConfirmation from '../components/ModalConfirmation';
+import SwipeableComponent from '../components/SwipeableComponent';
 import FetchService from '../lib/FetchService';
 
-let flatlistRef = null;
+let productSwiped = null;
+
 const ListProducts = (props) => {
-  const [showList, setShowList] = useState('haventSold');
-  const [showMore, setShowMore] = useState(null);
+  const [showList, setShowList] = useState('haventsold');
+  const [modalConfirmation, setModalConfirmation] = useState(false);
+  const [productDetail, setProductDetail] = useState({
+    modal: false,
+    product: null,
+  });
+
+  useEffect(() => {
+    if (!props.productModified && productDetail.modal) {
+      setProductDetail({modal: false, product: null});
+    } else if (props.productModified && !productDetail.modal) {
+      setProductDetail({modal: true, product: props.productModified});
+    }
+  }, [props.productModified]);
 
   useEffect(() => {
     if (!!props.referenceScanned) {
-      const index = props.listProductsHaventSold.findIndex(
-        (product) => product.sku === props.referenceScanned,
-      );
-      showList === 'sold' && setShowList('haventSold');
+      const listProducts = [...props.listProductsHaventSold, ...props.listProductsSold];
+
+      const index = listProducts.findIndex((product) => product.sku === props.referenceScanned);
       if (index !== -1) {
-        setShowMore(props.referenceScanned);
-        flatlistRef.scrollToIndex({
-          animated: true,
-          index,
+        listProducts[index].product.sold ? setShowList("sold") : setShowList("haventsold");
+        setProductDetail({
+          modal: true,
+          product: listProducts[index],
         });
       } else {
         Alert.alert(
@@ -42,19 +58,36 @@ const ListProducts = (props) => {
     }
   }, [props.referenceScanned]);
 
-  const toggleItem = (sku) => {
-    if (showMore === sku) {
-      setShowMore(null);
-    } else {
-      setShowMore(sku);
-    }
-  };
-
-  const handleSellProduct = (uri) => {
-    FetchService.delete(uri, props.token)
+  /** send request to sell Product */
+  const handleSellProduct = (item) => {
+    FetchService.delete(item.uri, props.token)
       .then((response) => {
         if (response.success) {
-          props.updateListProducts(uri);
+          props.updateListProducts(item.uri, 'sold');
+        } else {
+          Alert.alert(
+            'Erreur système',
+            'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
+          );
+        }
+      })
+      .catch((error) => {
+        console.debug(error);
+        setTimeout(() => {
+          Alert.alert(
+            'Erreur système',
+            'SecondLife rencontre une erreur, veuillez réessayer plus tard.',
+          );
+        }, 100);
+      });
+  };
+
+  /** send request to unsell product */
+  const handleUnsellProduct = (item) => {
+    FetchService.patch(item.uri, {products: [{sold: 0}]}, props.token)
+      .then((response) => {
+        if (response.success) {
+          props.updateListProducts(item.uri, 'haventsold');
         } else {
           Alert.alert(
             'Erreur système',
@@ -71,75 +104,53 @@ const ListProducts = (props) => {
       });
   };
 
-  const renderItem = ({item}) => {
-    let styleItemShowed = {};
-    if (showMore === item.sku) {
-      styleItemShowed = {
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray,
-        paddingBottom: 10,
-        marginBottom: 10,
-      };
-    }
+  /** hide the modal and set the detail product null */
+  const handleSelectProduct = (item) => {
+    setProductDetail({
+      modal: true,
+      product: item,
+    });
+  };
+
+  const renderItem = ({item, type}) => {
     return (
-      <View key={item.sku} style={styles.item}>
-        <TouchableOpacity
-          onPress={() => toggleItem(item.sku)}
-          style={{...styles.btnItem, ...styleItemShowed}}>
-          <Text
-            style={{
-              fontWeight: showMore === item.sku ? 'bold' : 'normal',
-            }}>{`${item.name} - ${item.firstName} ${item.lastName}`}</Text>
-          {showMore === item.sku ? (
+      <RectButton
+        style={[styles.item, {opacity: type === 'sold' ? 0.4 : 1}]}
+        key={item.sku}
+        onPress={() => handleSelectProduct(item)}>
+        <View style={{width: 80, height: 80}}>
+          <TouchableOpacity
+            onPress={() => handleSelectProduct(item)}
+            style={{flex: 1}}>
             <Image
-              source={require('../assets/images/chevron-down.png')}
-              style={{width: 14, height: 9}}
+              source={{
+                uri:
+                  'data:image/png;base64,' + item.product.pictures[0].content,
+              }}
+              style={{width: '100%', height: '100%', resizeMode: 'cover'}}
             />
-          ) : (
-            <Image
-              source={require('../assets/images/chevron-left.png')}
-              style={{width: 9, height: 13.5}}
-            />
-          )}
-        </TouchableOpacity>
-        {showMore === item.sku && (
-          <View>
-            <Text>- Information Générale</Text>
-            <View style={{paddingLeft: 20, marginBottom: 10}}>
-              <Text>{`Prénom: ${item.firstName}`}</Text>
-              <Text>{`Nom: ${item.lastName}`}</Text>
-              <Text>{`Email: ${item.email}`}</Text>
-              <Text>{`Phone: ${item.phone}`}</Text>
-            </View>
-            <Text>- Article</Text>
-            <View style={{paddingLeft: 20}}>
-              <Text>{`Référence: ${item.sku}`}</Text>
-              <Text>{`Name: ${item.name}`}</Text>
-              <Text>{`Marque: ${item.brand}`}</Text>
-              <Text>{`Prix: ${item.price} €`}</Text>
-              <Text>{`Créé: ${item.createdDate.split(' ')[0]}`}</Text>
-            </View>
-            {!item.sold && (
-              <View style={{alignSelf: 'center', marginTop: 20}}>
-                <TouchableOpacity
-                  style={styles.btn}
-                  onPress={() => handleSellProduct(item.uri)}>
-                  <Text style={styles.btnText}>Vendu</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        )}
-      </View>
+          </TouchableOpacity>
+        </View>
+        <View style={{paddingHorizontal: 20}}>
+          <Text style={styles.productTitle}>{item.product.name}</Text>
+          <Text style={styles.productSubtitle}>
+            {item.product.brand} -{' '}
+            <Text style={{fontWeight: 'bold'}}>{item.product.price} €</Text>
+          </Text>
+          <Text style={styles.productSubtitle}>{`${item.customer.firstName} ${
+            item.customer.lastName
+          } - ${item.product.createdDate
+            .split(' ')[0]
+            .replace(/-/g, '.')}`}</Text>
+        </View>
+      </RectButton>
     );
   };
 
   const renderNoItem = () => (
     <View style={{flex: 3}}>
       <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24}}>
-        {props.isErrorApi
-          ? 'Une erreur API est survenue'
-          : "Il n'y a aucun produits"}
+        Il n'y a aucun produits
       </Text>
     </View>
   );
@@ -149,7 +160,16 @@ const ListProducts = (props) => {
       <SafeAreaView style={{flex: 3}}>
         <FlatList
           data={props.listProductsSold}
-          renderItem={renderItem}
+          renderItem={({item, index}) => (
+            <SwipeableComponent
+              key={index}
+              index={index}
+              data={item}
+              type="sold"
+              handleUnsellProduct={handleUnsellProduct}>
+              {renderItem({item, type: 'sold'})}
+            </SwipeableComponent>
+          )}
           keyExtractor={(item) => item.sku}
         />
       </SafeAreaView>
@@ -161,21 +181,22 @@ const ListProducts = (props) => {
     props.listProductsHaventSold.length > 0 ? (
       <SafeAreaView style={{flex: 3}}>
         <FlatList
-          ref={(ref) => (flatlistRef = ref)}
           data={props.listProductsHaventSold}
-          renderItem={renderItem}
+          renderItem={({item, index}) => (
+            <SwipeableComponent
+              key={index}
+              index={index}
+              data={item}
+              type="haventsold"
+              handleSellProduct={(product) => {
+                setModalConfirmation(true);
+                productSwiped = product;
+              }}
+              handleModifyProduct={props.handleModifyProduct}>
+              {renderItem({item, type: 'haventsold'})}
+            </SwipeableComponent>
+          )}
           keyExtractor={(item) => item.sku}
-          getItemLayout={(data, index) => ({
-            length: 50,
-            offset: 50 * index,
-            index,
-          })}
-          onScrollToIndexFailed={(info) => {
-            Alert.alert(
-              'Erreur système',
-              'SecondLife rencontre une erreur, veuillez chercher votre produit dans la liste.',
-            );
-          }}
         />
       </SafeAreaView>
     ) : (
@@ -187,96 +208,94 @@ const ListProducts = (props) => {
       style={{
         width: '100%',
         height: '100%',
-        position: 'relative',
+        backgroundColor: colors.white,
       }}>
-      <Image
-        source={require('../assets/images/logo.png')}
-        style={{
-          flex: 1,
-          width: '50%',
-          maxWidth: 300,
-          resizeMode: 'contain',
-          alignSelf: 'center',
-        }}
-      />
-      <TouchableOpacity
-        onPress={props.returnHomePage}
-        style={{position: 'absolute', right: 10, top: 10}}>
-        <Image
-          source={require('../assets/images/cross-black.png')}
-          style={{width: 19.5, height: 19}}
-        />
-      </TouchableOpacity>
-      {showList === 'haventSold'
-        ? renderProductsHaventSold()
-        : renderProductsSold()}
-      <View style={{marginBottom: 50}}></View>
-      <View style={styles.menuBottom}>
+      {/* Top Menu*/}
+      <View style={styles.menuTop}>
+        {/* Button à vender */}
         <TouchableOpacity
           style={{
-            ...styles.btnMenuBottom,
-            backgroundColor:
-              showList === 'haventSold' ? colors.white : colors.black,
+            ...styles.btnMenuTop,
+            borderBottomWidth: showList === 'haventsold' ? 1 : 0,
           }}
-          onPress={() => setShowList('haventSold')}
-          disabled={showList === 'haventSold'}>
+          onPress={() => setShowList('haventsold')}
+          disabled={showList === 'haventsold'}>
           <Text
             style={{
               ...styles.btnText,
-              color: showList === 'haventSold' ? colors.black : colors.white,
+              color: showList === 'haventsold' ? colors.black : colors.gray,
             }}>
             à vendre
           </Text>
         </TouchableOpacity>
+        {/* Button vendu */}
         <TouchableOpacity
           style={{
-            ...styles.btnMenuBottom,
-            backgroundColor: showList === 'sold' ? colors.white : colors.black,
+            ...styles.btnMenuTop,
+            borderBottomWidth: showList === 'sold' ? 1 : 0,
           }}
           onPress={() => setShowList('sold')}
           disabled={showList === 'sold'}>
           <Text
             style={{
               ...styles.btnText,
-              color: showList === 'sold' ? colors.black : colors.white,
+              color: showList === 'sold' ? colors.black : colors.gray,
             }}>
             Vendu
           </Text>
         </TouchableOpacity>
       </View>
+      {showList === 'haventsold'
+        ? renderProductsHaventSold()
+        : renderProductsSold()}
+      <View style={{marginBottom: 60}}></View>
+      <ModalProduct
+        visible={productDetail.modal}
+        product={productDetail.product}
+        handleModifyProduct={() =>
+          props.handleModifyProduct(productDetail.product)
+        }
+        handleSellProduct={() => {
+          handleSellProduct(productDetail.product);
+          setProductDetail({
+            modal: false,
+            product: null,
+          });
+        }}
+        handleUnsellProduct={() => {
+          handleUnsellProduct(productDetail.product);
+          setProductDetail({modal: false, product: null});
+        }}
+        goBack={() => setProductDetail({modal: false, product: null})}
+      />
+      <ModalConfirmation
+        visible={modalConfirmation}
+        handleSubmit={() => {
+          handleSellProduct(productSwiped);
+          setModalConfirmation(false);
+          productSwiped = null;
+        }}
+        handleCancel={() => setModalConfirmation(false)}
+      />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  styleListItem: {
-    padding: 15,
-    backgroundColor: colors.white,
-  },
   item: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gray,
-    padding: 15,
-    backgroundColor: colors.white,
-  },
-  btnItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 10,
+    height: 80,
   },
-  label: {
+  productTitle: {
+    fontSize: 23,
+    fontWeight: 'bold',
     color: colors.black,
-    fontSize: 20,
-    fontWeight: '500',
-    marginBottom: 5,
-    textAlign: 'center',
   },
-  btn: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: colors.black,
-    borderRadius: 7,
-    borderWidth: 1,
+  productSubtitle: {
+    fontSize: 13,
+    color: '#AAAAAA',
   },
   btnText: {
     textAlign: 'center',
@@ -284,19 +303,16 @@ const styles = StyleSheet.create({
     color: colors.white,
     textTransform: 'uppercase',
   },
-  menuBottom: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    zIndex: 999,
+  menuTop: {
+    display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.black,
+    width: '100%',
+    marginBottom: 20,
   },
-  btnMenuBottom: {
+  btnMenuTop: {
     paddingVertical: 15,
-    width: '50%',
+    flex: 1,
+    borderBottomColor: colors.black,
   },
 });
 
