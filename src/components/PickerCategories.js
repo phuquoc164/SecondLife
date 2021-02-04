@@ -239,7 +239,6 @@ const PickerCategories = (props) => {
         requireSelection={false}
         renderListItem={renderListItem}
         renderSearch={renderSearch}
-        // onClosed={handle}
       />
     );
 }
