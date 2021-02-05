@@ -73,7 +73,7 @@ const ForgotPassword = (props) => {
         </View>
         <View style={{width: '100%', flex: 1, marginVertical: 50}}>
           <Text
-            style={{textTransform: 'uppercase', marginBottom: 5, fontSize: 15}}>
+            style={{textTransform: 'uppercase', marginBottom: 5, fontSize: 17}}>
             E-mail
           </Text>
           <View style={{position: 'relative'}}>
@@ -132,16 +132,16 @@ const styles = StyleSheet.create({
     paddingVertical: 20
   },
   title: {
-    fontSize: 15,
+    fontSize: 18,
     textTransform: 'uppercase',
-    marginBottom: 10,
+    marginBottom: 10
   },
   subTitle: {
     textAlign: 'justify',
-    fontSize: 11,
+    fontSize: 14,
   },
   input: {
-    height: 30,
+    height: 37,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderColor: colors.gray,

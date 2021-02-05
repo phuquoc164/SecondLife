@@ -169,10 +169,10 @@ const styles = StyleSheet.create({
   label: {
     textTransform: 'uppercase',
     marginBottom: 5,
-    fontSize: 15,
+    fontSize: 17
   },
   input: {
-    height: 30,
+    height: 37,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderColor: colors.gray,
@@ -202,6 +202,7 @@ const styles = StyleSheet.create({
   textPasswordForgotten: {
     textTransform: 'uppercase',
     textDecorationLine: 'underline',
+    fontSize: 15
   },
 });
 

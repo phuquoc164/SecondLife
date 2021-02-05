@@ -48,7 +48,7 @@ const Picker = (props) => {
         <View style={{flex: 1, flexDirection: 'column'}}>
           <Text
             style={{
-              fontSize: 18,
+              fontSize: item.subTitle ? 17 : 15,
               fontWeight:
                 defaultSelected && defaultSelected.Name === item.Name
                   ? 'bold'
@@ -57,7 +57,9 @@ const Picker = (props) => {
             {item.Name}
           </Text>
           {item.subTitle && (
-            <Text style={{color: '#808B96', marginRight: 10}}>{item.subTitle}</Text>
+            <Text style={{color: '#808B96', marginRight: 10}}>
+              {item.subTitle}
+            </Text>
           )}
         </View>
         <Image

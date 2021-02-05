@@ -1012,6 +1012,7 @@ const styles = StyleSheet.create({
     color: '#808B96',
     fontWeight: '500',
     marginBottom: 5,
+    fontSize: 15
   },
   input: {
     height: 30,

@@ -184,6 +184,7 @@ const PickerCategories = (props) => {
 
                 <Text
                 style={{
+                    fontSize: 15,
                     fontWeight:
                     defaultSelected && defaultSelected.Name === item.Name
                         ? 'bold'
@@ -245,7 +246,6 @@ const PickerCategories = (props) => {
 
 const styles = StyleSheet.create({
     input: {
-        // height: 30,
         paddingVertical: 5,
         paddingHorizontal: 0,
         borderBottomWidth: 1,
