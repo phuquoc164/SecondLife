@@ -5,35 +5,41 @@ export const validateEmail = (email) => {
   return regex.test(email);
 };
 
-export const verifyData = (object) => {
+export const verifyData = (object, hideSize = false) => {
   let isError = false;
   Object.keys(object).forEach((property) => {
     if (property !== 'sold' && property !== 'description') {
-      if (!!object[property]) {
-        switch (typeof object[property]) {
-          case 'string': {
-            if (
-              (property === 'email' && !validateEmail(object[property])) ||
-              (property !== 'email' && object[property] === '')
-            ) {
-              isError = true;
-            }
-            break;
-          }
-          case 'object': {
-            if (
-              (Array.isArray(object[property]) &&
-                object[property].length === 0) ||
-              (!Array.isArray(object[property]) &&
-                Object.keys(object[property]).length === 0)
-            ) {
-              isError = true;
-            }
-            break;
-          }
-          default: {
+      if (!!object[property] || property === 'size') {
+        if (property === 'size') {
+          if (!hideSize && (object["size"] === '' || !object["size"])) {
             isError = true;
-            break;
+          }
+        } else {
+          switch (typeof object[property]) {
+            case 'string': {
+              if (
+                (property === 'email' && !validateEmail(object[property])) ||
+                (property !== 'email' && object[property] === '')
+              ) {
+                isError = true;
+              }
+              break;
+            }
+            case 'object': {
+              if (
+                (Array.isArray(object[property]) &&
+                  object[property].length === 0) ||
+                (!Array.isArray(object[property]) &&
+                  Object.keys(object[property]).length === 0)
+              ) {
+                isError = true;
+              }
+              break;
+            }
+            default: {
+              isError = true;
+              break;
+            }
           }
         }
       } else {

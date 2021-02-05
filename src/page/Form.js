@@ -20,13 +20,18 @@ import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 /** App */
 import ResultPage from './ResultPage';
 import CustomDateTimePicker from '../components/CustomDateTimePicker';
-import PickerCategories from "../components/PickerCategories";
+import PickerCategories from '../components/PickerCategories';
 import Picker from '../components/Picker';
 import ModalPhoto from '../components/ModalPhoto';
 import ModalScanner from '../components/ModalScanner';
 import AutocompleteInput from '../components/AutocompleteInput';
 import {initialArticle, initialInformation, listStates} from '../lib/constants';
-import {convertFormDatatoRequestData, filterArray, validateEmail, verifyData} from '../lib/Helpers';
+import {
+  convertFormDatatoRequestData,
+  filterArray,
+  validateEmail,
+  verifyData,
+} from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
 import {colors} from '../assets/colors';
 
@@ -36,6 +41,7 @@ const zIndexEmail = Platform.OS === 'ios' ? {zIndex: 8} : {};
 
 const Form = (props) => {
   const [loading, setLoading] = useState(false);
+  const [hideSize, setHideSize] = useState(false);
   const [isModification, setIsModification] = useState(false);
   const [information, setInformation] = useState(initialInformation);
   const [article, setArticle] = useState(initialArticle);
@@ -46,18 +52,30 @@ const Form = (props) => {
   const [resultPage, setResultPage] = useState({
     show: false,
     isSuccess: false,
-    text: "",
+    text: '',
   });
   const [showError, setShowError] = useState(false);
-  const { customers, listLastNames, listFirstNames, listEmails } = props.listCustomers;
-  const listLastNamesFiltered = useRef(filterArray(listLastNames, information.lastName));
-  const listFirstNamesFiltered = useRef(filterArray(listFirstNames, information.firstName));
+  const {
+    customers,
+    listLastNames,
+    listFirstNames,
+    listEmails,
+  } = props.listCustomers;
+  const listLastNamesFiltered = useRef(
+    filterArray(listLastNames, information.lastName),
+  );
+  const listFirstNamesFiltered = useRef(
+    filterArray(listFirstNames, information.firstName),
+  );
   const listEmailsFiltered = useRef(filterArray(listEmails, information.email));
 
   useEffect(() => {
-    if (props.productModified && Object.keys(props.productModified).length > 0) {
-      const { customer, product } = props.productModified;
-      setInformation({ ...information, ...customer });
+    if (
+      props.productModified &&
+      Object.keys(props.productModified).length > 0
+    ) {
+      const {customer, product} = props.productModified;
+      setInformation({...information, ...customer});
       setArticle({
         ...article,
         ...product,
@@ -73,12 +91,13 @@ const Form = (props) => {
         price: `${product.price} €`,
         voucherAmount: `${product.voucherAmount} €`,
       });
+      setHideSize(product.category.includes('Accessoires'));
       setIsModification(true);
     }
   }, [props.productModified]);
 
   useEffect(() => {
-    const { listLastNames, listFirstNames, listEmails } = props.listCustomers;
+    const {listLastNames, listFirstNames, listEmails} = props.listCustomers;
     listLastNamesFiltered.current = listLastNames;
     listFirstNamesFiltered.current = listFirstNames;
     listEmailsFiltered.current = listEmails;
@@ -182,7 +201,7 @@ const Form = (props) => {
   const handleAddArticle = () => {
     setLoading(true);
     const isErrorInformation = verifyData(information);
-    const isErrorArticle = verifyData(article);
+    const isErrorArticle = verifyData(article, hideSize);
 
     if (isErrorInformation || isErrorArticle) {
       Alert.alert(
@@ -230,7 +249,7 @@ const Form = (props) => {
       !showError && setShowError(true);
     }
     loading && setLoading(false);
-    setResultPage({show: false, isSuccess: false, test: ""});
+    setResultPage({show: false, isSuccess: false, test: ''});
   };
 
   const verifyTextInput = (type, property) => {
@@ -276,12 +295,12 @@ const Form = (props) => {
     setInformation(initialInformation);
     setArticle(initialArticle);
     props.handleCancelModification();
-  }
+  };
 
   const handleSaveModification = () => {
     setLoading(true);
     const isErrorInformation = verifyData(information);
-    const isErrorArticle = verifyData(article);
+    const isErrorArticle = verifyData(article, hideSize);
 
     if (isErrorInformation || isErrorArticle) {
       Alert.alert(
@@ -292,7 +311,7 @@ const Form = (props) => {
       setLoading(false);
     } else {
       const data = convertFormDatatoRequestData(information, article);
-      
+
       FetchService.patch(props.productModified.uri, data, props.token)
         .then((response) => {
           if (response.success) {
@@ -336,7 +355,7 @@ const Form = (props) => {
           });
         });
     }
-  }
+  };
 
   const renderFormArticle = () => (
     <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
@@ -681,9 +700,10 @@ const Form = (props) => {
                 dataSelected={article.category}
                 items={props.categories}
                 showError={showError}
-                onSelected={(selected) =>
-                  setArticle({...article, category: selected})
-                }
+                onSelected={(selected) => {
+                  setHideSize(selected.includes('Accessoires'));
+                  setArticle({...article, category: selected});
+                }}
               />
             </View>
 
@@ -707,23 +727,25 @@ const Form = (props) => {
             </View>
 
             {/* Size */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Taille</Text>
-              <TextInput
-                style={{
-                  ...styles.input,
-                  borderColor:
-                    !showError || verifyTextInput('article', 'size')
-                      ? colors.gray
-                      : colors.red,
-                }}
-                name="size"
-                placeholder="Indiquez la taille de l'article"
-                placeholderTextColor={colors.gray}
-                value={article.size}
-                onChangeText={(size) => setArticle({...article, size})}
-              />
-            </View>
+            {!hideSize && (
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Taille</Text>
+                <TextInput
+                  style={{
+                    ...styles.input,
+                    borderColor:
+                      !showError || verifyTextInput('article', 'size')
+                        ? colors.gray
+                        : colors.red,
+                  }}
+                  name="size"
+                  placeholder="Indiquez la taille de l'article"
+                  placeholderTextColor={colors.gray}
+                  value={article.size}
+                  onChangeText={(size) => setArticle({...article, size})}
+                />
+              </View>
+            )}
 
             {/* State */}
             <View style={{width: '100%', marginBottom: 10}}>
@@ -987,7 +1009,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   label: {
-    color: "#808B96",
+    color: '#808B96',
     fontWeight: '500',
     marginBottom: 5,
   },
@@ -1003,7 +1025,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 0,
     borderBottomWidth: 1,
-    borderColor: colors.gray
+    borderColor: colors.gray,
   },
   photoView: {
     flexDirection: 'row',
