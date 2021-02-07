@@ -167,12 +167,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   label: {
+    fontWeight: "bold",
     textTransform: 'uppercase',
     marginBottom: 5,
     fontSize: 17
   },
   input: {
-    height: 37,
+    height: 40,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderColor: colors.gray,
