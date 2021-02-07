@@ -25,7 +25,7 @@ import Picker from '../components/Picker';
 import ModalPhoto from '../components/ModalPhoto';
 import ModalScanner from '../components/ModalScanner';
 import AutocompleteInput from '../components/AutocompleteInput';
-import {initialArticle, initialInformation, listStates} from '../lib/constants';
+import {initialArticle, initialInformation, listStates, tableArgus} from '../lib/constants';
 import {
   convertFormDatatoRequestData,
   filterArray,
@@ -34,6 +34,8 @@ import {
 } from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
 import {colors} from '../assets/colors';
+import CustomModal from "../components/CustomModal";
+import ArgusComponent from "../components/ArgusComponent";
 
 const zIndexLastName = Platform.OS === 'ios' ? {zIndex: 10} : {};
 const zIndexFirstName = Platform.OS === 'ios' ? {zIndex: 9} : {};
@@ -41,7 +43,23 @@ const zIndexEmail = Platform.OS === 'ios' ? {zIndex: 8} : {};
 
 const Form = (props) => {
   const [loading, setLoading] = useState(false);
+  const [loadingScreen, setLoadingScreen] = useState(false);
   const [hideSize, setHideSize] = useState(false);
+  const [priceConseil, setPriceConseil] = useState({
+    title: "Calcul de l'argus impossible",
+    price: null,
+    voucherAmount: null,
+    tooltipPrice: {
+      show: false,
+      text:
+        'Pour calculer le prix conseillé de votre article, merci de renseigner les informations suivantes: Catégorie, Marque et État. Notre argus est un prix conseillé et est utilisé à titre indicatif.',
+    },
+    tooltipVoucher: {
+      show: false,
+      text:
+        'Pour calculer le prix conseillé de votre article, merci de renseigner les informations suivantes: Catégorie, Marque et État. Notre argus est un prix conseillé et est utilisé à titre indicatif.',
+    },
+  });
   const [isModification, setIsModification] = useState(false);
   const [information, setInformation] = useState(initialInformation);
   const [article, setArticle] = useState(initialArticle);
@@ -356,6 +374,102 @@ const Form = (props) => {
         });
     }
   };
+
+  const handleUpdateArgusData = (selected, type) => {
+    let endPoint = "argus?name=" + (article.name ? article.name : "") + "&" ;
+    if (type === "category") {
+      setHideSize(selected.includes('Accessoires'));
+    }
+    setArticle({...article, [type]: selected});
+    let title = "Veuillez sélectionner ";
+    let tooltipTitle =
+      'Pour calculer le prix conseillé de votre article, merci de renseigner les informations suivantes: ';
+    tableArgus.forEach(typeArgus => {
+      if (typeArgus.type === type) {
+        endPoint += buildEndpoint(type, selected);
+      } else {
+        if (article[typeArgus.type] === "" || !article[typeArgus.type]) {
+          title += "une " + typeArgus.title.toLowerCase() + ", ";
+          tooltipTitle += typeArgus.title + ", "
+        } else {
+          endPoint += buildEndpoint(typeArgus.type, article[typeArgus.type]);
+        }
+      }
+    });
+    if (title === "Veuillez sélectionner ") {
+      endPoint = endPoint.slice(0,-1);
+      setLoadingScreen(true);
+      FetchService.get(endPoint, props.token).then(result => {
+        if (result.data.price && result.data.voucher && result.data.price !== 0 && result.data.voucher !== 0) {
+          setPriceConseil({
+            title: 'Prix conseillé: ',
+            price: result.data.price,
+            voucherAmount: result.data.voucher,
+            tooltipPrice: {
+              show: false,
+              text: "Nos prix conseillés sont basés sur l'état du produit, sa marque, ainsi que sa catégorie. Il ne vous engage en rien.",
+            },
+            tooltipVoucher: {
+              show: false,
+              text:
+                "Nos prix conseillés concernant la reprise bon d'achat sont basés sur l'état du produit, sa marque, ainsi que sa catégorie. Il ne vous engage en rien.",
+            },
+          });
+        } else {
+          setPriceConseil({
+            title: "Pas d'argus disponible",
+            price: null,
+            voucherAmount: null,
+            tooltipPrice: {
+              show: false,
+              text: "Pour calculer le prix conseillé de votre article, merci de renseigner les informations suivantes: Catégorie, Marque et État. Notre argus est un prix conseillé et est utilisé à titre indicatif.",
+            },
+            tooltipVoucher: {
+              show: false,
+              text: "Pour calculer le prix conseillé de votre article, merci de renseigner les informations suivantes: Catégorie, Marque et État. Notre argus est un prix conseillé et est utilisé à titre indicatif.",
+            },
+          });
+        }
+        setLoadingScreen(false);
+      }).catch(error => {
+        console.error(error);
+      })
+    } else {
+      title = title.slice(0, -2);
+      tooltipTitle =
+        tooltipTitle.slice(0, -2) +
+        '. Notre argus est un prix conseillé et est utilisé à titre indicatif.';
+
+      setPriceConseil({
+        title,
+        price: null,
+        voucherAmount: null,
+        tooltipPrice: {
+          show: false,
+          text: tooltipTitle
+        },
+        tooltipVoucher: {
+          show: false,
+          text: tooltipTitle
+        }
+      })
+    }
+  }
+
+  const buildEndpoint = (type, value) => {
+    if (type === "category") {
+      return  'category=' + value.split('/')[2] + "&";
+    } else if (type === "brand") {
+      return 'brand=' + value.Name + "&";
+    } else if (type === "state") {
+      return 'state=' + value.Id + "&";
+    }
+  }
+
+  const handleClickArgus = (type) => {
+    if (!priceConseil[type]) return;
+    setArticle({...article, [type]: `${priceConseil[type]} €`});
+  }
 
   const renderFormArticle = () => (
     <SafeAreaView style={{flexDirection: 'column', position: 'relative'}}>
@@ -700,10 +814,9 @@ const Form = (props) => {
                 dataSelected={article.category}
                 items={props.categories}
                 showError={showError}
-                onSelected={(selected) => {
-                  setHideSize(selected.includes('Accessoires'));
-                  setArticle({...article, category: selected});
-                }}
+                onSelected={(selected) =>
+                  handleUpdateArgusData(selected, 'category')
+                }
               />
             </View>
 
@@ -715,11 +828,9 @@ const Form = (props) => {
                 items={props.brands}
                 placeholder="Sélectionnez une marque"
                 showError={showError}
-                onSelected={(selected) => {
-                  if (selected.Id !== 'erreur_api') {
-                    setArticle({...article, brand: selected});
-                  }
-                }}
+                onSelected={(selected) =>
+                  handleUpdateArgusData(selected, 'brand')
+                }
                 autoGenerateAlphabeticalIndex={true}
                 showAlphabeticalIndex={true}
                 renderSearch={false}
@@ -756,7 +867,7 @@ const Form = (props) => {
                 placeholder="Indiquez l'état de l'article"
                 showError={showError}
                 onSelected={(selected) =>
-                  setArticle({...article, state: selected})
+                  handleUpdateArgusData(selected, 'state')
                 }
                 autoGenerateAlphabeticalIndex={false}
                 showAlphabeticalIndex={false}
@@ -768,83 +879,58 @@ const Form = (props) => {
 
           <View style={styles.group}>
             {/* voucher */}
-            <View style={{width: '100%', marginBottom: 10}}>
-              <Text style={styles.label}>Montant bon d'achat</Text>
-              <TextInput
-                style={{
-                  ...styles.input,
-                  borderColor:
-                    !showError || verifyTextInput('article', 'voucherAmount')
-                      ? colors.gray
-                      : colors.red,
-                }}
-                name="voucherAmount"
-                placeholder="0.00 €"
-                placeholderTextColor={colors.gray}
-                onFocus={() => {
-                  if (article.voucherAmount) {
-                    setArticle({
-                      ...article,
-                      voucherAmount: article.voucherAmount.replace(' €', ''),
-                    });
-                  }
-                }}
-                value={article.voucherAmount}
-                onBlur={() => {
-                  if (article.voucherAmount) {
-                    setArticle({
-                      ...article,
-                      voucherAmount: (article.voucherAmount + ' €').replace(
-                        ',',
-                        '.',
-                      ),
-                    });
-                  }
-                }}
-                keyboardType="decimal-pad"
-                onChangeText={(voucherAmount) => {
-                  setArticle({...article, voucherAmount});
-                }}
-              />
-            </View>
+            <ArgusComponent
+              labelStyle={styles.label}
+              inputStyle={{
+                ...styles.input,
+                borderColor:
+                  !showError || verifyTextInput('article', 'voucherAmount')
+                    ? colors.gray
+                    : colors.red,
+              }}
+              name="voucherAmount"
+              value={article.voucherAmount}
+              argusTitle={priceConseil.title}
+              argusPrice={priceConseil.voucherAmount}
+              tooltip={priceConseil.tooltipVoucher}
+              onUpdateData={(value, name) =>
+                setArticle({...article, [name]: value})
+              }
+              handleClickArgus={(type) => handleClickArgus(type)}
+              toggleTooltip={(show) =>
+                setPriceConseil({
+                  ...priceConseil,
+                  tooltipVoucher: {...priceConseil.tooltipVoucher, show},
+                })
+              }
+            />
 
             {/* Price */}
-            <View style={{width: '100%', marginBottom: 10}}>
-              <Text style={styles.label}>Prix de vente</Text>
-              <TextInput
-                style={{
-                  ...styles.input,
-                  borderColor:
-                    !showError || verifyTextInput('article', 'price')
-                      ? colors.gray
-                      : colors.red,
-                }}
-                name="price"
-                placeholder="0.00 €"
-                placeholderTextColor={colors.gray}
-                onFocus={() => {
-                  if (article.price) {
-                    setArticle({
-                      ...article,
-                      price: article.price.replace(' €', ''),
-                    });
-                  }
-                }}
-                value={article.price}
-                onBlur={() => {
-                  if (article.price) {
-                    setArticle({
-                      ...article,
-                      price: (article.price + ' €').replace(',', '.'),
-                    });
-                  }
-                }}
-                keyboardType="decimal-pad"
-                onChangeText={(price) => {
-                  setArticle({...article, price});
-                }}
-              />
-            </View>
+            <ArgusComponent
+              labelStyle={styles.label}
+              inputStyle={{
+                ...styles.input,
+                borderColor:
+                  !showError || verifyTextInput('article', 'price')
+                    ? colors.gray
+                    : colors.red,
+              }}
+              name="price"
+              value={article.price}
+              argusTitle={priceConseil.title}
+              argusPrice={priceConseil.price}
+              tooltip={priceConseil.tooltipPrice}
+              onUpdateData={(value, name) =>
+                setArticle({...article, [name]: value})
+              }
+              handleClickArgus={(type) => handleClickArgus(type)}
+              toggleTooltip={(show) =>
+                setPriceConseil({
+                  ...priceConseil,
+                  tooltipPrice: {...priceConseil.tooltipPrice, show},
+                })
+              }
+            />
           </View>
           {/* Btn submit */}
           {isModification ? (
@@ -935,6 +1021,25 @@ const Form = (props) => {
         onCancel={() => setShowScanner(false)}
         handleScanSuccess={handleScanSuccess}
       />
+      <CustomModal
+        visible={loadingScreen}
+        rootViewStyle={{backgroundColor: 'rgba(0,0,0,0.4)'}}
+        containerViewStyle={{
+          alignItems: 'center',
+          position: 'relative',
+          backgroundColor: 'transparent',
+          borderRadius: 0,
+          shadowOpacity: 0,
+          shadowRadius: 0,
+          elevation: 0,
+        }}>
+        <View style={{justifyContent: 'center'}}>
+          <ActivityIndicator color={colors.white} size="large" />
+          <Text style={{color: colors.white, marginVertical: 10, fontSize: 18}}>
+            Chargement...
+          </Text>
+        </View>
+      </CustomModal>
     </SafeAreaView>
   );
 
