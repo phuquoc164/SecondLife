@@ -49,6 +49,7 @@ const Form = (props) => {
     title: "Calcul de l'argus impossible",
     price: null,
     voucherAmount: null,
+    buyPrice: null,
     tooltipPrice: {
       show: false,
       text:
@@ -109,7 +110,7 @@ const Form = (props) => {
         price: `${product.price} €`,
         voucherAmount: `${product.voucherAmount} €`,
       });
-      setHideSize(product.category.includes('Accessoires'));
+      setHideSize(product.category.includes('Accessoires') || product.category.includes('Sacs'));
       setIsModification(true);
     }
   }, [props.productModified]);
@@ -378,7 +379,7 @@ const Form = (props) => {
   const handleUpdateArgusData = (selected, type) => {
     let endPoint = "argus?name=" + (article.name ? article.name : "") + "&" ;
     if (type === "category") {
-      setHideSize(selected.includes('Accessoires'));
+      setHideSize(selected.includes('Accessoires') || selected.includes('Sacs'));
     }
     setArticle({...article, [type]: selected});
     let title = "Veuillez sélectionner ";
@@ -405,6 +406,7 @@ const Form = (props) => {
             title: 'Prix conseillé: ',
             price: result.data.price,
             voucherAmount: result.data.voucher,
+            buyPrice: result.data.buyPrice,
             tooltipPrice: {
               show: false,
               text: "Nos prix conseillés sont basés sur l'état du produit, sa marque, ainsi que sa catégorie. Il ne vous engage en rien.",
@@ -932,6 +934,22 @@ const Form = (props) => {
               }
             />
           </View>
+          {priceConseil.buyPrice && priceConseil.buyPrice !== 0 && (
+            <View
+            style={{
+              ...styles.group,
+              flexDirection: 'row',
+            }}>
+            <Text style={{fontSize: 15}}>
+              <Image
+                source={require('../assets/images/exclamation.png')}
+                style={{width: 20, height: 20}}
+              />{' '}
+              Si l'article n'est pas vendu, notre partenaire Once Again s'engage
+              à le racheter au prix de {priceConseil.buyPrice} €
+            </Text>
+          </View>
+          )}
           {/* Btn submit */}
           {isModification ? (
             <View
@@ -1094,7 +1112,7 @@ const Form = (props) => {
 const styles = StyleSheet.create({
   title: {
     fontSize: 20,
-    marginBottom: 5,
+    marginBottom: 15,
     fontWeight: 'bold',
   },
   group: {
@@ -1117,7 +1135,8 @@ const styles = StyleSheet.create({
     color: '#808B96',
     fontWeight: '500',
     marginBottom: 5,
-    fontSize: 15
+    fontSize: 16,
+    fontWeight: "bold"
   },
   input: {
     height: 30,
