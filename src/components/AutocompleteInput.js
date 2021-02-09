@@ -20,7 +20,7 @@ const AutocompleteInput = (props) => {
     return (
       <TouchableOpacity
         style={{
-          paddingVertical: 5,
+          paddingVertical: 9,
           paddingHorizontal: 10,
           borderColor: colors.gray,
           borderBottomWidth: index === `${numberOptions - 1}` ? 0 : 1,
@@ -76,7 +76,7 @@ const AutocompleteInput = (props) => {
               top: 30,
               left: 0,
               zIndex: 200,
-              maxHeight: 180,
+              maxHeight: 240,
               width: '100%',
             }}>
             {props.options.map((option, index) => renderItem(option, index))}
