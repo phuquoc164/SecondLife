@@ -39,14 +39,12 @@ const ListProducts = (props) => {
 
   useEffect(() => {
     if (!!props.referenceScanned) {
-      const listProducts = [...props.listProductsHaventSold, ...props.listProductsSold];
-
-      const index = listProducts.findIndex((product) => product.sku === props.referenceScanned);
-      if (index !== -1) {
-        listProducts[index].product.sold ? setShowList("sold") : setShowList("haventsold");
+      const product = props.listProductsHaventSold.filter((product) => product.sku === `${props.referenceScanned}`);
+      if (product.length > 0) {
+        setShowList("haventsold");
         setProductDetail({
           modal: true,
-          product: listProducts[index],
+          product: product[0],
         });
       } else {
         Alert.alert(
