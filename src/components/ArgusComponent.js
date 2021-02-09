@@ -38,7 +38,7 @@ const ArgusComponent = (props) => {
           onPress={() => props.handleClickArgus(name)}>
           <Text style={{fontSize: 12, fontStyle: "italic"}}>{argusTitle}</Text>
         </TouchableOpacity>
-        {argusPrice && <Text style={{marginRight: 5}}>: {argusPrice} €</Text>}
+        {argusPrice && <Text style={{marginRight: 5, fontSize: 12, fontStyle: "italic"}}>{argusPrice} €</Text>}
         <Tooltip
           animated={true}
           // (Optional) When true, tooltip will animate
