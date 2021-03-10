@@ -171,6 +171,15 @@ const Form = props => {
 		}
 	};
 
+	const handleDeletePhoto = index => {
+		const newPictures = [...article.pictures];
+		newPictures.splice(index, 1);
+		setArticle({
+			...article,
+			pictures: newPictures
+		});
+	};
+
 	const handleAddArticle = () => {
 		setLoading(true);
 		const isErrorInformation = verifyData(information);
@@ -592,7 +601,21 @@ const Form = props => {
 								borderColor: !showError || article.pictures.length > 0 ? colors.gray : colors.red
 							}}>
 							{article.pictures.map((photo, index) => (
-								<View key={index} style={{ width: "33.3%", aspectRatio: 1, padding: 5 }}>
+								<View key={index} style={{ width: "33.3%", aspectRatio: 1, padding: 5, position: "relative" }}>
+									<TouchableOpacity
+										onPress={() => handleDeletePhoto(index)}
+										style={{
+											position: "absolute",
+											top: -2,
+											right: -2,
+											zIndex: 2,
+											backgroundColor: colors.white,
+											borderRadius: 50,
+											padding: 4
+										}}>
+										<Image source={require("../assets/images/cross-black.png")} style={{ width: 10.5, height: 10 }} />
+									</TouchableOpacity>
+
 									<Image
 										source={{
 											uri: "data:image/png;base64," + photo
