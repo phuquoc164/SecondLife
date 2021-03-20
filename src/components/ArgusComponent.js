@@ -31,7 +31,7 @@ const ArgusComponent = props => {
 			/>
 
 			<View style={{ flexDirection: "row", alignItems: "center", width: "100%", marginTop: 3 }}>
-				<TouchableOpacity style={{ marginRight: 5, maxWidth: "90%" }} onPress={() => props.handleClickArgus(name)}>
+				<TouchableOpacity style={{ marginRight: 3, maxWidth: "90%" }} onPress={() => props.handleClickArgus(name)}>
 					<Text style={{ fontSize: 12, fontStyle: "italic" }}>{argusTitle}</Text>
 				</TouchableOpacity>
 				{argusPrice && <Text style={{ marginRight: 5, fontSize: 12, fontStyle: "italic" }}>{argusPrice} €</Text>}

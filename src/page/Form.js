@@ -28,6 +28,15 @@ const Form = props => {
 	const [loading, setLoading] = useState(false);
 	const [loadingScreen, setLoadingScreen] = useState(false);
 	const [hideSize, setHideSize] = useState(false);
+	const [categories, _setCategories] = useState({
+		options: [],
+		ids: {}
+	});
+	const categoriesRef = useRef(categories);
+	const [ranks, setRanks] = useState({
+		options: [],
+		selected: null
+	});
 	const [priceConseil, setPriceConseil] = useState({
 		title: "Calcul de l'argus impossible",
 		price: null,
@@ -61,7 +70,12 @@ const Form = props => {
 	const listLastNamesFiltered = useRef(filterArray(listLastNames, information.lastName));
 	const listFirstNamesFiltered = useRef(filterArray(listFirstNames, information.firstName));
 	const listEmailsFiltered = useRef(filterArray(listEmails, information.email));
+	console.log(categoriesRef.current.options);
 
+	const setCategories = (categories) => {
+		categoriesRef.current = categories;
+		_setCategories(categories);
+	}
 	useEffect(() => {
 		if (props.productModified && Object.keys(props.productModified).length > 0) {
 			const { customer, product } = props.productModified;
@@ -325,26 +339,89 @@ const Form = props => {
 		}
 	};
 
-	const handleUpdateArgusData = (selected, type) => {
+	const handleSelectBrand = (selected) => {
+		setLoadingScreen(true);
+		FetchService.get("categories?brand=" + selected.Id, props.token).then(result => {
+			if (result.data.length > 0) {
+				const listCategories = [];
+				const listCategoryIds = {};
+
+				result.data.forEach(category => {
+					const newCategory = {
+						Id: category.name,
+						Name: category.name,
+						HasImage: true,
+						children: category.children
+					};
+					listCategories.push(newCategory);
+					let categoryName = category.name;
+					category.children.forEach(child => {
+						categoryName += "/" + child.name;
+						if (child.children) {
+							child.children.forEach(c => {
+								listCategoryIds[categoryName + "/" + c.name] = c.id;
+							});
+						} else {
+							listCategoryIds[categoryName] = child.id;
+						}
+						categoryName = category.name;
+					});
+				});
+				setCategories({
+					options: listCategories,
+					ids: listCategoryIds
+				});
+				setRanks({
+					options: [],
+					selected: null
+				});
+				setArticle({ ...article, category: null, brand: selected });
+				setLoadingScreen(false);
+			}
+		}).catch(error => {
+			console.error(error);
+			setLoadingScreen(false);
+			Alert.alert("Erreur système", "On ne peut pas récupérer la liste des catégories. Veuillez-vous réessayer!");
+		})
+	}
+
+	const handleUpdateArgusData = (selected, type, currentRanks = []) => {
 		let endPoint = "argus?name=" + (article.name ? article.name : "") + "&";
 		if (type === "category") {
 			setHideSize(selected.includes("Accessoires") || selected.includes("Sacs"));
 		}
-		setArticle({ ...article, [type]: selected });
+		if (type === "rank") {
+			setRanks({ ...ranks, selected: selected });
+		} else {
+			setArticle({ ...article, [type]: selected });
+		}
 		let title = "Veuillez sélectionner ";
 		let tooltipTitle = "Pour calculer le prix conseillé de votre article, merci de renseigner les informations suivantes: ";
+
 		tableArgus.forEach(typeArgus => {
 			if (typeArgus.type === type) {
 				endPoint += buildEndpoint(type, selected);
 			} else {
-				if (article[typeArgus.type] === "" || !article[typeArgus.type]) {
-					title += "une " + typeArgus.title.toLowerCase() + ", ";
-					tooltipTitle += typeArgus.title + ", ";
+				if (typeArgus.type === "rank") {
+					if ((type === "category" && currentRanks.length > 0) || ranks.options.length > 0) {
+						if (type !== "category" && ranks.selected && ranks.selected !== "") {
+							endPoint += buildEndpoint(typeArgus.type, ranks.selected);
+						} else if (type === "category" && currentRanks.length > 0) {
+							title += "une " + typeArgus.title.toLowerCase() + ", ";
+							tooltipTitle += typeArgus.title + ", ";
+						}
+					}
 				} else {
-					endPoint += buildEndpoint(typeArgus.type, article[typeArgus.type]);
+					if (article[typeArgus.type] === "" || !article[typeArgus.type]) {
+						title += "une " + typeArgus.title.toLowerCase() + ", ";
+						tooltipTitle += typeArgus.title + ", ";
+					} else {
+						endPoint += buildEndpoint(typeArgus.type, article[typeArgus.type]);
+					}
 				}
 			}
 		});
+
 		if (title === "Veuillez sélectionner ") {
 			endPoint = endPoint.slice(0, -1);
 			setLoadingScreen(true);
@@ -355,7 +432,7 @@ const Form = props => {
 							title: "Prix conseillé: ",
 							price: result.data.price,
 							voucherAmount: result.data.voucher,
-							buyPrice: result.data.buyPrice,
+							buyPrice: result.data.buyPrice === 0 ? null : result.data.buyPrice,
 							tooltipPrice: {
 								show: false,
 								text: "Nos prix conseillés sont basés sur l'état du produit, sa marque, ainsi que sa catégorie. Il ne vous engage en rien."
@@ -371,6 +448,7 @@ const Form = props => {
 							title: "Pas d'argus disponible",
 							price: null,
 							voucherAmount: null,
+							buyPrice: null,
 							tooltipPrice: {
 								show: false,
 								text:
@@ -396,6 +474,7 @@ const Form = props => {
 				title,
 				price: null,
 				voucherAmount: null,
+				buyPrice: null,
 				tooltipPrice: {
 					show: false,
 					text: tooltipTitle
@@ -410,11 +489,13 @@ const Form = props => {
 
 	const buildEndpoint = (type, value) => {
 		if (type === "category") {
-			return "category=" + value.split("/")[2] + "&";
+			return "category=" + categories.ids[value] + "&";
 		} else if (type === "brand") {
-			return "brand=" + value.Name + "&";
+			return "brand=" + value.Id + "&";
 		} else if (type === "state") {
 			return "state=" + value.Id + "&";
+		} else if (type === "rank") {
+			return "rank=" + value.Name + "&";
 		}
 	};
 
@@ -712,17 +793,6 @@ const Form = props => {
 					</View>
 
 					<View style={styles.group}>
-						{/* Catégorie */}
-						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Catégorie</Text>
-							<PickerCategories
-								dataSelected={article.category}
-								items={props.categories}
-								showError={showError}
-								onSelected={selected => handleUpdateArgusData(selected, "category")}
-							/>
-						</View>
-
 						{/* Brands */}
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Marque</Text>
@@ -731,12 +801,47 @@ const Form = props => {
 								items={props.brands}
 								placeholder="Sélectionnez une marque"
 								showError={showError}
-								onSelected={selected => handleUpdateArgusData(selected, "brand")}
+								onSelected={selected => handleSelectBrand(selected)}
 								autoGenerateAlphabeticalIndex={true}
 								showAlphabeticalIndex={true}
 								renderSearch={false}
 							/>
 						</View>
+
+						{/* Catégorie */}
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Catégorie</Text>
+							<PickerCategories
+								brand={article.brand}
+								dataSelected={article.category}
+								items={categoriesRef.current.options}
+								showError={showError}
+								onSelected={(selected, ranks) => {
+									setRanks({
+										options: ranks.map(rank => ({ Id: rank, Name: rank })),
+										selected: null
+									});
+									handleUpdateArgusData(selected, "category", ranks);
+								}}
+							/>
+						</View>
+
+						{ranks.options.length > 0 && (
+							<View style={{ width: "100%", marginBottom: 10 }}>
+								<Text style={styles.label}>Grade</Text>
+								<Picker
+									dataSelected={ranks.selected}
+									items={ranks.options}
+									placeholder="Indiquez la grade"
+									showError={showError}
+									onSelected={selected => handleUpdateArgusData(selected, "rank")}
+									autoGenerateAlphabeticalIndex={false}
+									showAlphabeticalIndex={false}
+									renderSearch={true}
+									titleSearch="Grade"
+								/>
+							</View>
+						)}
 
 						{/* Size */}
 						{!hideSize && (
@@ -818,7 +923,8 @@ const Form = props => {
 							}
 						/>
 					</View>
-					{priceConseil.buyPrice && priceConseil.buyPrice !== 0 && (
+
+					{priceConseil.buyPrice && (
 						<View
 							style={{
 								...styles.group,
@@ -830,6 +936,7 @@ const Form = props => {
 							</Text>
 						</View>
 					)}
+
 					{/* Btn submit */}
 					{isModification ? (
 						<View style={{ flexDirection: "row", marginTop: 10, marginBottom: 20 }}>

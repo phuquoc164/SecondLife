@@ -110,7 +110,6 @@ const MainPage = props => {
 					<Animated.View style={{ width: "100%" }}>
 						<Form
 							listCustomers={listCustomers}
-							categories={props.categories}
 							brands={props.brands}
 							productModified={productModified}
 							handleSaveModification={productModified => handleSaveModification(productModified)}

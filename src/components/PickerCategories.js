@@ -38,30 +38,43 @@ const PickerCategories = props => {
 		}
 	}, [props.dataSelected]);
 
+	useEffect(() => {
+		setData({
+			selectedPicker: null,
+			dataSelected: props.dataSelected,
+			items: props.items,
+			step: 1
+		});
+	}, [props.items])
+
 	const handleSelectData = item => {
+		console.log(item);
 		const newItems = [];
 		if (data.step === 1) {
-			Object.keys(item.subValues).forEach(key => {
+			item.children.forEach(child => {
 				newItems.push({
-					Id: key,
-					Name: key,
-					subValues: item.subValues[key]
+					Id: child.name,
+					Name: child.name,
+					children: child.children,
+					ranks: child.ranks ? child.ranks : []
 				});
 			});
-			const selectedPicker = item.Name === data.selectedPicker.Name ? getSelectedPicker(1) : { Id: null, Name: null };
+			const selectedPicker = (data.selectedPicker && item.Name === data.selectedPicker.Name) ? getSelectedPicker(1) : { Id: null, Name: null };
 			setData({
 				selectedPicker: selectedPicker,
 				dataSelected: item.Name,
 				items: newItems,
 				step: 2
 			});
-		} else if (data.step === 2) {
-			item.subValues.forEach(key => {
+		} else if (data.step === 2 && item.children) {
+			item.children.forEach(child => {
 				newItems.push({
-					Id: key,
-					Name: key
+					Id: child.name,
+					Name: child.name,
+					ranks: child.ranks ? child.ranks : []
 				});
 			});
+			// get the data of second step
 			if (itemsOfSecondStep.length === 0) {
 				itemsOfSecondStep = [...data.items];
 			}
@@ -105,7 +118,7 @@ const PickerCategories = props => {
 	const handleSubmitData = selected => {
 		if (Object.keys(selected).length > 0) {
 			const dataSelected = data.dataSelected + "/" + selected.Name;
-			props.onSelected(dataSelected);
+			props.onSelected(dataSelected, selected.ranks);
 			const selectedPicker = data.dataSelected.split("/")[0];
 			setData({
 				selectedPicker: {
@@ -143,7 +156,7 @@ const PickerCategories = props => {
 	);
 
 	const renderListItem = (defaultSelected, item) => {
-		if (data.step === 1 || data.step === 2) {
+		if (data.step === 1 || (data.step === 2 && item.children)) {
 			return <TouchableOpacity onPress={() => handleSelectData(item)}>{renderListItemBase(defaultSelected, item)}</TouchableOpacity>;
 		}
 		return renderListItemBase(defaultSelected, item);
@@ -200,7 +213,7 @@ const PickerCategories = props => {
 			</TouchableOpacity>
 		</View>
 	);
-
+	
 	return (
 		<PickerModal
 			renderSelectView={(disabled, selected, showModal) => renderSelectView(showModal, data.dataSelected, "Sélectionnez une catégorie")}

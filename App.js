@@ -23,7 +23,6 @@ const initialState = {
 		listFirstNames: [],
 		listEmails: []
 	},
-	categories: [],
 	brands: [],
 	listProducts: {
 		sold: [],
@@ -35,25 +34,37 @@ const App = () => {
 	const [data, setData] = useState(initialState);
 	useEffect(() => {
 		const getData = async () => {
-			const oldToken = await getToken();
-			if (oldToken !== null) {
-				const { categories, brands, token } = await getListCategoriesBrands(oldToken);
-				const { customers, listLastNames, listFirstNames, listEmails } = await getListCustomers(oldToken);
-				const { sold, haventsold } = await getListProducts(oldToken);
-				setData({
-					showLaunchScreen: false,
-					isLogin: true,
-					token,
-					listCustomers: { customers, listLastNames, listFirstNames, listEmails },
-					categories,
-					brands,
-					listProducts: { sold, haventsold }
-				});
-			} else {
-				setData({
-					...data,
-					showLaunchScreen: false
-				});
+			try {
+				const oldToken = await getToken();
+				if (oldToken !== null) {
+					const { brands, token } = await getListBrands(oldToken);
+					const { customers, listLastNames, listFirstNames, listEmails } = await getListCustomers(oldToken);
+					const { sold, haventsold } = await getListProducts(oldToken);
+					setData({
+						showLaunchScreen: false,
+						isLogin: true,
+						token,
+						listCustomers: { customers, listLastNames, listFirstNames, listEmails },
+						brands,
+						listProducts: { sold, haventsold }
+					});
+				} else {
+					setData({
+						...data,
+						showLaunchScreen: false
+					});
+				}
+			} catch (error) {
+				console.debug("get data", error);
+				if (error === "Not allowed to use this Resource") {
+					Alert.alert("Erreur système", "Votre session à expirée, veuillez-vous re-connecter.", [
+						{ text: "Se déconnecter", onPress: () => handleLogout() }
+					]);
+				} else {
+					Alert.alert("Erreur système", "SecondLife rencontre une erreur, veuillez-vous re-connecter.", [
+						{ text: "Se déconnecter", onPress: () => handleLogout() }
+					]);
+				}
 			}
 		};
 		getData();
@@ -77,71 +88,48 @@ const App = () => {
 		}
 	};
 
-	/** Get list categories and brand
+	/** Get list brands
 	 * if we detecte refresh token in header, we renew token
 	 */
-	const getListCategoriesBrands = async token => {
-		try {
-			let newToken = token;
-			const categories = await FetchService.get("categories", token);
-			const brands = await FetchService.get("brands", token);
-
-			// token will expire, update the token
-			if (categories.refreshToken) {
-				try {
-					const user = AsyncStorage.getItem(STORAGE_USER);
-					const userData = JSON.parse(user);
-					const { username, password } = userData;
-					const response = await FetchService.login(username, password);
-					if (response && response.token) {
-						await AsyncStorage.setItem(STORAGE_KEY, response.token);
-						newToken = response.token;
-					}
-				} catch (error) {
-					console.debug(error);
+	const getListBrands = async token => {
+		let newToken = token;
+		const brands = await FetchService.get("brands", token);
+		
+		// token will expire, update the token
+		if (brands.refreshToken) {
+			try {
+				const user = AsyncStorage.getItem(STORAGE_USER);
+				const userData = JSON.parse(user);
+				const { username, password } = userData;
+				const response = await FetchService.login(username, password);
+				if (response && response.token) {
+					await AsyncStorage.setItem(STORAGE_KEY, response.token);
+					newToken = response.token;
 				}
-			}
-
-			const listCategories = [];
-			const listBrands = [];
-			if (Object.keys(categories.data).length > 0 && brands.data.length > 0) {
-				Object.keys(categories.data).forEach(key => {
-					const newCategory = {
-						Id: key,
-						Name: key,
-						HasImage: true,
-						subValues: categories.data[key]
-					};
-					listCategories.push(newCategory);
-				});
-				brands.data.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
-				brands.data.forEach(brand => {
-					const newBrand = toUppercaseKeys(brand);
-					listBrands.push(newBrand);
-				});
-			}
-			return {
-				token: newToken,
-				categories: listCategories,
-				brands: listBrands
-			};
-		} catch (error) {
-			console.debug("categories, brand", error);
-			if (error === "Not allowed to use this Resource") {
-				Alert.alert("Erreur système", "Votre session à expirée, veuillez-vous re-connecter.", [
-					{ text: "Se déconnecter", onPress: () => props.handleLogout() }
-				]);
-			} else {
-				Alert.alert("Erreur système", "SecondLife rencontre une erreur, veuillez réessayer plus tard.");
+			} catch (error) {
+				console.debug(error);
 			}
 		}
+
+		const listBrands = [];
+		if (brands.data.length > 0) {
+			brands.data.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
+			brands.data.forEach(brand => {
+				const newBrand = toUppercaseKeys(brand);
+				listBrands.push(newBrand);
+			});
+		}
+		return {
+			token: newToken,
+			brands: listBrands,
+		};
 	};
 
 	const handleLogin = async (token, data) => {
 		try {
 			await AsyncStorage.setItem(STORAGE_KEY, token);
 			await AsyncStorage.setItem(STORAGE_USER, JSON.stringify(data));
-			const { categories, brands } = await getListCategoriesBrands(token);
+			const { brands } = await getListBrands(token);
 			const { customers, listLastNames, listFirstNames, listEmails } = await getListCustomers(token);
 			const { sold, haventsold } = await getListProducts(token);
 			setData({
@@ -149,7 +137,6 @@ const App = () => {
 				isLogin: true,
 				token,
 				listCustomers: { customers, listLastNames, listFirstNames, listEmails },
-				categories,
 				brands,
 				listProducts: { sold, haventsold }
 			});
@@ -184,7 +171,6 @@ const App = () => {
 					<MainPage
 						handleLogout={handleLogout}
 						token={data.token}
-						categories={data.categories}
 						brands={data.brands}
 						listCustomers={data.listCustomers}
 						listProducts={data.listProducts}

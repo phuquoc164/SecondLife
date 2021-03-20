@@ -40,10 +40,14 @@ export const categoryIcons = {
 
 export const listStates = [
 	{
-		Id: "good",
-		Name: "Bon état",
-		subTitle:
-			"Un article porté/utilisé quelques fois, montre des imperfections et des signes d'usure. Précise avec des photos et une description détaillée, les défauts de ton article"
+		Id: "good-with-tag",
+		Name: "Neuf avec étiquette",
+		subTitle: "Article neuf, jamais porté/utilisé, avec étiquettes ou dans son emballage d'origine"
+	},
+	{
+		Id: "good-without-tag",
+		Name: "Neuf sans étiquette",
+		subTitle: "Article neuf, jamais porté/utilisé, sans étiquettes ni emballage d'origine"
 	},
 	{
 		Id: "very-good",
@@ -52,14 +56,10 @@ export const listStates = [
 			"Un article très peu porté/utilisé qui peut avoir de légères imperfections, mais qui reste en très bon état. Précise avec des photos et une description détaillée, les défauts de ton article"
 	},
 	{
-		Id: "good-without-tag",
-		Name: "Neuf sans étiquette",
-		subTitle: "Article neuf, jamais porté/utilisé, sans étiquettes ni emballage d'origine"
-	},
-	{
-		Id: "good-with-tag",
-		Name: "Neuf avec étiquette",
-		subTitle: "Article neuf, jamais porté/utilisé, avec étiquettes ou dans son emballage d'origine"
+		Id: "good",
+		Name: "Bon état",
+		subTitle:
+			"Un article porté/utilisé quelques fois, montre des imperfections et des signes d'usure. Précise avec des photos et une description détaillée, les défauts de ton article"
 	}
 ];
 
@@ -75,5 +75,9 @@ export const tableArgus = [
 	{
 		type: "state",
 		title: "État"
+	},
+	{
+		type: "rank",
+		title: "Grade"
 	}
 ];
