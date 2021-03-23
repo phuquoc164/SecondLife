@@ -1,0 +1,7 @@
+{
+    "editor.fontSize": 14,
+    "prettier.jsxBracketSameLine": true,
+    "prettier.printWidth": 160,
+    "prettier.tabWidth": 4,
+    "prettier.trailingComma": "none"
+}
