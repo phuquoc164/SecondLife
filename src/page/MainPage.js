@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import { Alert, Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 /** App */
-import Form from "./Form";
-import CameraScan from "./CameraScan";
-import ListProducts from "./ListProducts";
-import { colors } from "../assets/colors";
-import Profile from "./Profile";
+import Form from './Form';
+import CameraScan from './CameraScan';
+import ListProducts from './ListProducts';
+import {colors} from '../lib/colors';
+import Profile from './Profile';
 import { getListCustomers, getListProducts } from "../lib/Helpers";
 
 const MainPage = props => {

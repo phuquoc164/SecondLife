@@ -1,6 +1,6 @@
-import React from "react";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
-import { colors } from "../assets/colors";
+import React from 'react';
+import {Dimensions, Text, TouchableOpacity, View} from 'react-native';
+import {colors} from '../lib/colors';
 
 const Profile = props => {
 	return (

@@ -5,12 +5,12 @@ import SplashScreen from "react-native-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /** App */
-import LoginPage from "./src/page/LoginPage";
-import MainPage from "./src/page/MainPage";
-import LaunchScreen from "./src/page/LaunchScreen";
-import { colors } from "./src/assets/colors";
-import { STORAGE_KEY, STORAGE_USER } from "./src/lib/constants";
-import { toUppercaseKeys, getListCustomers, getListProducts } from "./src/lib/Helpers";
+import LoginPage from './src/page/LoginPage';
+import MainPage from './src/page/MainPage';
+import LaunchScreen from './src/page/LaunchScreen';
+import {colors} from './src/lib/colors';
+import {STORAGE_KEY, STORAGE_USER} from './src/lib/constants';
+import {toUppercaseKeys, getListCustomers, getListProducts} from './src/lib/Helpers';
 import FetchService from "./src/lib/FetchService";
 
 const initialState = {

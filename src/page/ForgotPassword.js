@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 /** App */
-import { colors } from "../assets/colors";
-import FetchService from "../lib/FetchService";
-import { validateEmail } from "../lib/Helpers";
+import {colors} from '../lib/colors';
+import FetchService from '../lib/FetchService';
+import {validateEmail} from '../lib/Helpers';
 
 const ForgotPassword = props => {
 	const [email, setEmail] = useState({

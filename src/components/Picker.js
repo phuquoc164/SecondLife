@@ -4,7 +4,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import PickerModal from "react-native-picker-modal-view";
 
 /** App */
-import { colors } from "../assets/colors";
+import {colors} from '../lib/colors';
 
 const Picker = props => {
 	const renderSelectView = (showModal, typeData, labelNoSelect) => (

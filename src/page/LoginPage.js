@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 /** App */
+<<<<<<< Updated upstream
 import ForgotPassword from "./ForgotPassword";
 import { colors } from "../assets/colors";
 import FetchService from "../lib/FetchService";
@@ -171,5 +172,31 @@ const styles = StyleSheet.create({
 		fontSize: 15
 	}
 });
+=======
+import styles from '../assets/css/styles';
+
+const LoginPage = (props) => {
+  return (
+    <View style={[styles.greenScreen, styles.positionRelative]}>
+      <Image
+        source={require('../assets/images/Bounds.png')}
+        style={styles.boundImage}
+      />
+      <Image
+        source={require('../assets/images/thunder-lighting.png')}
+        style={styles.thunderImage}
+      />
+      <View style={styles.containerLogo}>
+        <Image
+          source={require('../assets/images/The-Second-Life-NOIR.png')}
+          style={styles.logoSplashScreen}
+        />
+      </View>
+    </View>
+  );
+};
+
+const stylesLogin = StyleSheet.create({});
+>>>>>>> Stashed changes
 
 export default LoginPage;

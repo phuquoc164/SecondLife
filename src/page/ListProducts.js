@@ -4,11 +4,11 @@ import { Alert, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, F
 import { RectButton } from "react-native-gesture-handler";
 
 /** App */
-import { colors } from "../assets/colors";
-import ModalProduct from "../components/ModalProduct";
-import ModalConfirmation from "../components/ModalConfirmation";
-import SwipeableComponent from "../components/SwipeableComponent";
-import FetchService from "../lib/FetchService";
+import {colors} from '../lib/colors';
+import ModalProduct from '../components/ModalProduct';
+import ModalConfirmation from '../components/ModalConfirmation';
+import SwipeableComponent from '../components/SwipeableComponent';
+import FetchService from '../lib/FetchService';
 
 let productSwiped = null;
 

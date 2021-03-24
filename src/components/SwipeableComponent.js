@@ -4,7 +4,7 @@ import { Animated, Text, View } from "react-native";
 import { RectButton, Swipeable } from "react-native-gesture-handler";
 
 /** App */
-import { colors } from "../assets/colors";
+import { colors } from "../lib/colors";
 
 let row = [];
 let prevOpenedRow;

@@ -3,8 +3,8 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 /** App */
-import { colors } from "../assets/colors";
-import CustomModal from "./CustomModal";
+import {colors} from '../lib/colors';
+import CustomModal from './CustomModal';
 
 const ModalConfirmation = props => (
 	<CustomModal

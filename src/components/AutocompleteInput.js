@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 /** App */
-import { colors } from "../assets/colors";
+import {colors} from '../lib/colors';
 
 const AutocompleteInput = props => {
 	const numberOptions = props.options.length;

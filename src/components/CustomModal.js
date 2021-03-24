@@ -3,7 +3,7 @@ import React from "react";
 import { Modal, View } from "react-native";
 
 /** App */
-import { colors } from "../assets/colors";
+import {colors} from '../lib/colors';
 
 const CustomModal = props => (
 	<Modal transparent={true} animationType="slide" visible={props.visible}>

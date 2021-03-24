@@ -5,9 +5,9 @@ import { RNCamera } from "react-native-camera";
 import { ActivityIndicator, Alert, Dimensions, Platform, Text, TouchableOpacity, View } from "react-native";
 
 /** App */
-import { colors } from "../assets/colors";
-import FetchService from "../lib/FetchService";
-import ResultPage from "./ResultPage";
+import {colors} from '../lib/colors';
+import FetchService from '../lib/FetchService';
+import ResultPage from './ResultPage';
 
 const CameraScan = props => {
 	const [resultPage, setResultPage] = useState({
