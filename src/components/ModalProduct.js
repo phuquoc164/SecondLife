@@ -11,7 +11,7 @@ import {
 import {ScrollView} from 'react-native-gesture-handler';
 
 /** App */
-import {colors} from '../assets/colors';
+import {colors} from '../lib/colors';
 import ModalConfirmation from "./ModalConfirmation";
 
 const ModalProduct = (props) => {

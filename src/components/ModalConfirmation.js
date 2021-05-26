@@ -1,68 +1,29 @@
 /** React */
-import React from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import styles from "../assets/css/styles";
 
 /** App */
-import {colors} from '../assets/colors';
-import CustomModal from './CustomModal';
+import CustomModal from "./CustomModal";
 
 const ModalConfirmation = (props) => (
-  <CustomModal
-    visible={props.visible}
-    containerViewStyle={{
-      width: 320,
-      borderRadius: 10,
-      paddingVertical: 20,
-      paddingHorizontal: 10,
-    }}
-    rootViewStyle={{backgroundColor: 'rgba(0,0,0, 0.8)'}}>
-    <View>
-      <Text
-        style={{
-          fontWeight: 'bold',
-          fontSize: 16,
-          textAlign: 'center',
+    <CustomModal
+        visible={props.visible}
+        containerViewStyle={{
+            width: "90%",
+            borderRadius: 10,
+            paddingHorizontal: 10
         }}>
-        {`Êtes-vous sûr de vouloir marquer\ncet article comme vendu ?`}
-      </Text>
-    </View>
-    <View
-      style={{
-        marginTop: 20,
-        width: '100%',
-        flexDirection: 'row',
-        paddingHorizontal: 10,
-      }}>
-      <TouchableOpacity
-        style={{flex: 1, backgroundColor: colors.black, marginRight: 20}}
-        onPress={props.handleSubmit}>
-        <Text
-          style={{
-            color: colors.white,
-            textAlign: 'center',
-            paddingVertical: 10,
-            fontSize: 16,
-            fontWeight: 'bold',
-          }}>
-          Oui
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{flex: 1, backgroundColor: colors.black, marginLeft: 20}}
-        onPress={props.handleCancel}>
-        <Text
-          style={{
-            color: colors.white,
-            textAlign: 'center',
-            paddingVertical: 10,
-            fontSize: 16,
-            fontWeight: 'bold',
-          }}>
-          Non
-        </Text>
-      </TouchableOpacity>
-    </View>
-  </CustomModal>
+        <Text style={[styles.fontSofiaMedium, styles.font24, styles.textCenter, styles.textDarkBlue, { marginTop: 20 }]}>Psss... Pas si vite!</Text>
+        <Text style={[styles.font60, styles.textCenter, { paddingVertical: 15 }]}>✋</Text>
+        <Text style={[styles.fontSofiaMedium, styles.font24, styles.textCenter, styles.textDarkBlue]}>{props.description}</Text>
+        <TouchableOpacity onPress={props.handleSubmit} style={[styles.greenScreen, { borderRadius: 10, marginHorizontal: 30, paddingVertical: 10, marginTop: 20 }]}>
+            <Text style={[styles.textWhite, styles.fontSofiaMedium, styles.font24, styles.textCenter]}>Confirmer</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={props.handleCancel} style={{ marginVertical: 20 }}>
+            <Text style={[styles.textGreen, styles.fontSofiaMedium, styles.font24, styles.textCenter]}>Annuler</Text>
+        </TouchableOpacity>
+    </CustomModal>
 );
 
 export default ModalConfirmation;

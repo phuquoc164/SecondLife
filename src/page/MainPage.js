@@ -14,7 +14,7 @@ import {
 import Form from './Form';
 import CameraScan from './CameraScan';
 import ListProducts from './ListProducts';
-import {colors} from '../assets/colors';
+import {colors} from '../lib/colors';
 import Profile from './Profile';
 import { getListCustomers, getListProducts } from "../lib/Helpers";
 

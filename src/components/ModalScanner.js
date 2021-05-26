@@ -3,7 +3,7 @@ import React from 'react';
 import {ActivityIndicator, Dimensions, Image, Text, TouchableOpacity, View} from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import QRCodeScanner from 'react-native-qrcode-scanner';
-import { colors } from "../assets/colors";
+import { colors } from "../lib/colors";
 
 /** App */
 import CustomModal from './CustomModal';

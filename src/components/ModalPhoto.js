@@ -3,7 +3,7 @@ import React from 'react';
 import {Image, Text, TouchableOpacity, View} from 'react-native';
 
 /** App */
-import {colors} from '../assets/colors';
+import {colors} from '../lib/colors';
 import CustomModal from "./CustomModal";
 
 const ModalPhoto = (props) => (

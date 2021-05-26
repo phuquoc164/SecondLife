@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 /** App */
-import {colors} from '../assets/colors';
+import {colors} from '../lib/colors';
 import FetchService from '../lib/FetchService';
 import ResultPage from './ResultPage';
 

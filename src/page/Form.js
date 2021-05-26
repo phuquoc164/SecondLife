@@ -19,7 +19,7 @@ import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 /** App */
 import ResultPage from './ResultPage';
-import CustomDateTimePicker from '../components/CustomDateTimePicker';
+// import CustomDateTimePicker from '../components/CustomDateTimePicker';
 import PickerCategories from "../components/PickerCategories";
 import Picker from '../components/Picker';
 import ModalPhoto from '../components/ModalPhoto';
@@ -28,7 +28,7 @@ import AutocompleteInput from '../components/AutocompleteInput';
 import {initialArticle, initialInformation, listStates} from '../lib/constants';
 import {convertFormDatatoRequestData, filterArray, validateEmail, verifyData} from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
-import {colors} from '../assets/colors';
+import {colors} from '../lib/colors';
 
 const zIndexLastName = Platform.OS === 'ios' ? {zIndex: 10} : {};
 const zIndexFirstName = Platform.OS === 'ios' ? {zIndex: 9} : {};
@@ -883,7 +883,7 @@ const Form = (props) => {
           )}
         </View>
       </KeyboardAwareScrollView>
-      <CustomDateTimePicker
+      {/* <CustomDateTimePicker
         visible={showCalendar}
         onCancel={() => setShowCalendar(false)}
         mode="date"
@@ -901,7 +901,7 @@ const Form = (props) => {
           }
           setShowCalendar(false);
         }}
-      />
+      /> */}
       <ModalPhoto
         visible={showModalPhoto}
         onCancel={() => setShowModalPhoto(false)}

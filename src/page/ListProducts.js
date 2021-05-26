@@ -13,11 +13,11 @@ import {
 import {RectButton} from 'react-native-gesture-handler';
 
 /** App */
-import {colors} from '../assets/colors';
 import ModalProduct from '../components/ModalProduct';
 import ModalConfirmation from '../components/ModalConfirmation';
 import SwipeableComponent from '../components/SwipeableComponent';
 import FetchService from '../lib/FetchService';
+import { colors } from '../lib/colors';
 
 let productSwiped = null;
 

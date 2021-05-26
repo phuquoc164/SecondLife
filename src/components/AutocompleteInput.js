@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 /** App */
-import {colors} from '../assets/colors';
+import {colors} from '../lib/colors';
 
 const AutocompleteInput = (props) => {
   const numberOptions = props.options.length;
