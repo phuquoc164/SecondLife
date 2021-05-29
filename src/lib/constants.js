@@ -30,6 +30,14 @@ export const stateDict = {
     "NEW-WITH-LABEL": "Neuf avec étiquette"
 };
 
+export const TITLE = {
+    clients: ["Clients", "Informations client", "Modifier les informations"],
+    catalog: ["Inventaire Once Again", "Catalogue rayon", "Mes dons\xa0 ♥️"],
+    voucher: ["Bon d'achat", "Historique"],
+    profil: ["Compte"],
+    products: ["Nouveau Lifer", "Trouver un client", "Informations client", "Ajouter un produit"]
+};
+
 // ==============================
 export const initialInformation = {
     firstName: null,
