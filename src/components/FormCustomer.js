@@ -6,7 +6,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 /** App */
 import styles from "../assets/css/styles";
 import { colors } from "../lib/colors";
-import { convertDateToString } from "../lib/Helpers";
+import { convertDateToApi, convertDateToString } from "../lib/Helpers";
 import CustomDateTimePicker from "./CustomDateTimePicker";
 
 let initialDate = new Date();
@@ -94,6 +94,7 @@ const FormCustomer = (props) => {
                         placeholderTextColor={colors.mediumGray}
                         keyboardType="email-address"
                         autoCompleteType="email"
+                        autoCapitalize="none"
                         value={customer.email}
                         onChangeText={(email) => setCustomer({ ...customer, email })}
                     />
@@ -112,7 +113,7 @@ const FormCustomer = (props) => {
                         onChangeText={(address) => setCustomer({ ...customer, address })}
                     />
                 </View>
-                <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginHorizontal: 30 }}>
+                <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginHorizontal: 20 }}>
                     <View style={componentStyle.smallContainer}>
                         <TextInput
                             editable={props.editable}
@@ -153,7 +154,7 @@ const FormCustomer = (props) => {
                 onCancel={() => setShowCalendar(false)}
                 onValidate={(birthday) => {
                     setShowCalendar(false);
-                    setCustomer({ ...customer, birthday: convertDateToString(birthday) });
+                    setCustomer({ ...customer, birthday: convertDateToApi(birthday) });
                     birthdayRef.current = {
                         value: birthday,
                         color: styles.textDarkBlue
@@ -174,7 +175,7 @@ const componentStyle = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray,
         borderRadius: 15,
-        marginHorizontal: 30,
+        marginHorizontal: 20,
         marginBottom: 10
     },
     imageContainer: {
@@ -195,7 +196,7 @@ const componentStyle = StyleSheet.create({
         paddingVertical: 7
     },
     btnSubmit: {
-        marginHorizontal: 30,
+        marginHorizontal: 20,
         borderRadius: 10,
         paddingVertical: 15
     }
