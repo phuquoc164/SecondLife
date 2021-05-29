@@ -8,30 +8,33 @@ import FormCustomer from "../../components/FormCustomer";
 import { AuthContext } from "../../lib/AuthContext";
 import { initialCustomer } from "../../lib/constants";
 import FetchService from "../../lib/FetchService";
-import { getSimpleDiff } from "../../lib/Helpers";
+import { convertDateToApi, getSimpleDiff } from "../../lib/Helpers";
 
 const ModifyCustomer = (props) => {
     const customer = props.route.params?.customer ? props.route.params.customer : initialCustomer;
     const { user } = React.useContext(AuthContext);
     const { token, store } = user;
-    
+
     const handleModifyCustomer = (newCustomer) => {
+        newCustomer.birthday = convertDateToApi(newCustomer.birthday);
         const diffs = getSimpleDiff(customer, newCustomer);
         const data = { store, ...diffs };
 
-        FetchService.patch(customer["@id"], data, token)
-            .then((result) => {
-                if (!!result) {
+        if (Object.keys(diffs).length > 0) {
+            FetchService.patch(customer["@id"], data, token)
+                .then((result) => {
+                    if (!!result) {
+                        props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customer: result } });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Modify Customer Error", error);
+                    // TODO: change text
+                    Alert.alert("Modify Customer Error");
+                });
+        }
+    };
 
-                }
-            })
-            .catch((error) => {
-                console.error("Modify Customer Error", error);
-                // TODO: change text
-                Alert.alert("Erreur");
-            });
-    }
-    
     return (
         <SafeAreaView style={styles.mainScreen}>
             <ScrollView>
@@ -40,12 +43,12 @@ const ModifyCustomer = (props) => {
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
 
 const componentStyle = StyleSheet.create({
     title: {
         paddingTop: 20,
         paddingBottom: 15
     }
-})
+});
 export default ModifyCustomer;
