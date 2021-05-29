@@ -33,9 +33,9 @@ const Picker = (props) => {
         </TouchableOpacity>
     );
 
-    const renderHeader = (handleClose) => (
+    const renderHeader = () => (
         <View style={styles.header}>
-            <TouchableOpacity onPress={handleClose} style={styles.backImageBtn}>
+            <TouchableOpacity onPress={props.handleClose} style={styles.backImageBtn}>
                 <Image source={require("../assets/images/back_btn.png")} style={styles.backImage} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{props.title}</Text>
@@ -50,8 +50,6 @@ const Picker = (props) => {
             options: newOptions
         });
     };
-
-	console.log(props.visible);
 
     return (
         <Modal animationType="slide" visible={props.visible}>

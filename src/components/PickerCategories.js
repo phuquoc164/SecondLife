@@ -1,255 +1,201 @@
 /** React */
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, StyleSheet } from "react-native";
-import PickerModal from "react-native-picker-modal-view";
+import { View, TouchableOpacity, Text, Image, Modal, SafeAreaView, Platform, FlatList, KeyboardAvoidingView } from "react-native";
 
 /** App */
+import styles from "../assets/css/styles";
 import { colors } from "../lib/colors";
-import { categoryIcons } from "../lib/constants";
 
 let itemsOfSecondStep = [];
-const PickerCategories = props => {
-	const getSelectedPicker = index => {
-		const key = props.dataSelected ? props.dataSelected.split("/")[index] : null;
-		return {
-			Id: key,
-			Name: key
-		};
-	};
+const PickerCategories = (props) => {
+    const { visible, title, items, categoryIds, prefix, selected, onSelected, handleClose } = props;
 
-	const [data, setData] = useState({
-		selectedPicker: getSelectedPicker(0),
-		dataSelected: props.dataSelected,
-		items: props.items,
-		step: 1
-	});
-	const [isSubmited, setIsSubmited] = useState(false);
+    const getSelectedPicker = (index) => {
+        if (selected) {
+            const selectedDatas = selected.split("/");
+            const prefixIndex = prefix[selectedDatas[0]];
+            const name = selectedDatas[index];
+            return {
+                "@id": categoryIds[prefixIndex + name],
+                name
+            }
+        }
+        return null;
+    };
 
-	useEffect(() => {
-		if (!isSubmited && props.dataSelected !== data.dataSelected) {
-			setData({
-				selectedPicker: getSelectedPicker(0),
-				dataSelected: props.dataSelected,
-				items: props.items,
-				step: 1
-			});
-		} else if (isSubmited) {
-			setIsSubmited(false);
-		}
-	}, [props.dataSelected]);
+    const [data, setData] = useState({
+        selectedPicker: getSelectedPicker(0),
+        selected,
+        items,
+        step: 1
+    });
+    const [isSubmited, setIsSubmited] = useState(false);
 
-	useEffect(() => {
-		setData({
-			selectedPicker: null,
-			dataSelected: props.dataSelected,
-			items: props.items,
-			step: 1
-		});
-	}, [props.items])
+    useEffect(() => {
+        if (!isSubmited && selected !== data.selected) {
+            setData({
+                selectedPicker: getSelectedPicker(0),
+                selected,
+                items,
+                step: 1
+            });
+        } else if (isSubmited) {
+            setIsSubmited(false);
+        }
+    }, [selected]);
 
-	const handleSelectData = item => {
-		console.log(item);
-		const newItems = [];
-		if (data.step === 1) {
-			item.children.forEach(child => {
-				newItems.push({
-					Id: child.name,
-					Name: child.name,
-					children: child.children,
-					ranks: child.ranks ? child.ranks : []
-				});
-			});
-			const selectedPicker = (data.selectedPicker && item.Name === data.selectedPicker.Name) ? getSelectedPicker(1) : { Id: null, Name: null };
-			setData({
-				selectedPicker: selectedPicker,
-				dataSelected: item.Name,
-				items: newItems,
-				step: 2
-			});
-		} else if (data.step === 2 && item.children) {
-			item.children.forEach(child => {
-				newItems.push({
-					Id: child.name,
-					Name: child.name,
-					ranks: child.ranks ? child.ranks : []
-				});
-			});
-			// get the data of second step
-			if (itemsOfSecondStep.length === 0) {
-				itemsOfSecondStep = [...data.items];
-			}
-			setData({
-				selectedPicker: getSelectedPicker(2),
-				dataSelected: data.dataSelected + "/" + item.Name,
-				items: newItems,
-				step: 3
-			});
-		}
-	};
+    useEffect(() => {
+        setData({
+            selectedPicker: null,
+            selected: selected,
+            items,
+            step: 1
+        });
+    }, [items]);
 
-	const handleBackButtonPressed = handleClose => {
-		if (data.step === 3) {
-			const selectedDatas = data.dataSelected.split("/");
-			setData({
-				selectedPicker: {
-					Id: selectedDatas[1],
-					Name: selectedDatas[1]
-				},
-				dataSelected: selectedDatas[0],
-				items: itemsOfSecondStep,
-				step: 2
-			});
-		} else if (data.step === 2) {
-			resetData();
-		} else if (data.step === 1) {
-			handleClose();
-		}
-	};
+    const handleSelectData = (item) => {
+        const newItems = [];
+        if (data.step === 1) {
+            item.children.forEach((child) => {
+                newItems.push({
+                    "@id": child["@id"],
+                    name: child.name,
+                    children: child.children
+                });
+            });
+			const selectedPicker = data.selectedPicker && item.name === data.selectedPicker.name ? getSelectedPicker(1) : null;
 
-	const resetData = () => {
-		setData({
-			selectedPicker: getSelectedPicker(0),
-			dataSelected: props.dataSelected,
-			items: props.items,
-			step: 1
-		});
-	};
+            setData({
+                selectedPicker,
+                selected: item.name,
+                items: newItems,
+                step: 2
+            });
+        } else if (data.step === 2 && item.children.length > 0) {
+            item.children.forEach((child) => {
+                newItems.push({
+                    "@id": child["@id"],
+                    name: child.name
+                });
+            });
 
-	const handleSubmitData = selected => {
-		if (Object.keys(selected).length > 0) {
-			const dataSelected = data.dataSelected + "/" + selected.Name;
-			props.onSelected(dataSelected, selected.ranks);
-			const selectedPicker = data.dataSelected.split("/")[0];
-			setData({
-				selectedPicker: {
-					Id: selectedPicker,
-					Name: selectedPicker
-				},
-				dataSelected: dataSelected,
-				items: props.items,
-				step: 1
-			});
-			setIsSubmited(true);
-		} else {
-			resetData();
-		}
-	};
+            // get the data of second step
+            if (itemsOfSecondStep.length === 0) {
+                itemsOfSecondStep = [...data.items];
+            }
 
-	const renderSelectView = (showModal, typeData, labelNoSelect) => (
-		<View style={{ position: "relative", flexDirection: "row", alignItems: "center" }}>
-			<TouchableOpacity
-				style={{
-					...styles.input,
-					width: "100%",
-					borderColor: !props.showError || typeData ? colors.gray : colors.red
-				}}
-				onPress={showModal}>
-				<Text
-					style={{
-						color: typeData ? colors.black : colors.gray
-					}}>
-					{typeData ? typeData : labelNoSelect}
-				</Text>
-			</TouchableOpacity>
-			<Image source={require("../assets/images/chevron-down.png")} style={styles.imageChevronDown} />
-		</View>
-	);
+            setData({
+                selectedPicker: getSelectedPicker(2),
+                selected: data.selected + "/" + item.name,
+                items: newItems,
+                step: 3
+            });
+        }
+    };
 
-	const renderListItem = (defaultSelected, item) => {
-		if (data.step === 1 || (data.step === 2 && item.children)) {
-			return <TouchableOpacity onPress={() => handleSelectData(item)}>{renderListItemBase(defaultSelected, item)}</TouchableOpacity>;
-		}
-		return renderListItemBase(defaultSelected, item);
-	};
+    const handleBackButtonPressed = () => {
+        if (data.step === 3) {
+            const selectedNames = data.selected.split("/");
+            setData({
+                selectedPicker: {
+                    "@id": categoryIds[selectedNames[1]],
+                    name: selectedNames[1]
+                },
+                selected: selectedNames[0],
+                items: itemsOfSecondStep,
+                step: 2
+            });
+        } else if (data.step === 2) {
+            resetData();
+        } else if (data.step === 1) {
+            handleClose();
+        }
+    };
 
-	const renderListItemBase = (defaultSelected, item) => (
-		<View style={styles.styleListItem}>
-			<View
-				style={{
-					flex: 1,
-					flexDirection: "row",
-					justifyContent: "space-between",
-					alignItems: "center"
-				}}>
-				<View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
-					{item.HasImage && (
-						<View style={{ width: 32, alignItems: "center", marginRight: 10 }}>
-							<Image
-								source={categoryIcons[item.Name].uri}
-								style={{
-									width: categoryIcons[item.Name].width,
-									height: categoryIcons[item.Name].height
-								}}
-							/>
-						</View>
-					)}
+    const resetData = () => {
+        setData({
+            selectedPicker: getSelectedPicker(0),
+            selected: selected,
+            items,
+            step: 1
+        });
+    };
 
-					<Text
-						style={{
-							fontSize: 15,
-							fontWeight: defaultSelected && defaultSelected.Name === item.Name ? "bold" : "normal"
-						}}>
-						{item.Name}
-					</Text>
-				</View>
-				<Image source={require("../assets/images/chevron-left.png")} style={{ width: 9, height: 13.5 }} />
-			</View>
-		</View>
-	);
+    const handleSubmitData = (item) => {
+        if (Object.keys(item).length > 0) {
+            const selected = data.selected + "/" + item.name;
+            onSelected(selected);
+            const name = data.selected.split("/")[0];
+            // reset data
+            setData({
+                selectedPicker: {
+                    "@id": categoryIds[prefix[name] + name],
+                    name
+                },
+                selected,
+                items,
+                step: 1
+            });
+            setIsSubmited(true);
+        } else {
+            resetData();
+        }
+    };
 
-	const renderSearch = handleClose => (
-		<View
-			style={{
-				alignItems: "center",
-				paddingVertical: 20,
-				position: "relative"
-			}}>
-			<TouchableOpacity onPress={() => handleBackButtonPressed(handleClose)} style={{ position: "absolute", left: 15, top: 29 }}>
-				<Image source={require("../assets/images/back.png")} style={{ width: 17.25, height: 17 }} />
-			</TouchableOpacity>
-			<Text style={styles.label}>Catégories</Text>
-			<TouchableOpacity onPress={handleClose} style={{ position: "absolute", right: 15, top: 15 }}>
-				<Image source={require("../assets/images/cross-black.png")} style={{ width: 19.5, height: 19 }} />
-			</TouchableOpacity>
-		</View>
-	);
-	
-	return (
-		<PickerModal
-			renderSelectView={(disabled, selected, showModal) => renderSelectView(showModal, data.dataSelected, "Sélectionnez une catégorie")}
-			onSelected={selected => handleSubmitData(selected)}
-			items={data.items}
-			selected={data.selectedPicker}
-			requireSelection={false}
-			renderListItem={renderListItem}
-			renderSearch={renderSearch}
-		/>
-	);
+    const renderItem = ({ item, index }) => {
+        if (data.step === 1 || (data.step === 2 && item.children.length > 0)) {
+            return (
+                <TouchableOpacity key={item["@id"]} onPress={() => handleSelectData(item)}>
+                    {renderListItemBase(item)}
+                </TouchableOpacity>
+            );
+        }
+        return (
+            <TouchableOpacity key={item["@id"]} onPress={() => handleSubmitData(item)}>
+                {renderListItemBase(item, false)}
+            </TouchableOpacity>
+        );
+    };
+
+    const renderListItemBase = (item, showArrow = true) => (
+        <View
+            style={{
+                padding: 15,
+                borderBottomWidth: 1,
+                borderBottomColor: colors.gray,
+                backgroundColor: colors.lightGray,
+                flex: 1,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center"
+            }}>
+            <Text style={[styles.textDarkBlue, styles.font18, data.selectedPicker && data.selectedPicker["@id"] === item["@id"] ? styles.fontSofiaSemiBold : styles.fontSofiaRegular]}>
+                {item.name}
+            </Text>
+            {showArrow && <Image source={require("../assets/images/chevron-left.png")} style={{ width: 25, height: 20.7, top: 3 }} />}
+        </View>
+    );
+
+    const renderHeader = () => (
+        <View style={styles.header}>
+            <TouchableOpacity onPress={handleBackButtonPressed} style={styles.backImageBtn}>
+                <Image source={require("../assets/images/back_btn.png")} style={styles.backImage} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{title}</Text>
+        </View>
+    );
+
+    return (
+        <Modal animationType="slide" visible={visible}>
+            {renderHeader()}
+            <SafeAreaView style={{ flex: 1, backgroundColor: colors.lightGray }}>
+                {/* {props.renderSearch && <InputSearch placeholder="Cherchez une marque" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />} */}
+                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} enabled>
+                    <FlatList data={data.items} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </Modal>
+    );
 };
-
-const styles = StyleSheet.create({
-	input: {
-		paddingVertical: 5,
-		paddingHorizontal: 0,
-		borderBottomWidth: 1
-	},
-	imageChevronDown: {
-		width: 14,
-		height: 9,
-		right: 15
-	},
-	styleListItem: {
-		paddingVertical: 15,
-		paddingHorizontal: 15,
-		borderBottomWidth: 1,
-		borderBottomColor: colors.gray
-	},
-	label: {
-		color: colors.black,
-		fontWeight: "bold",
-		fontSize: 20,
-		marginBottom: 5
-	}
-});
 
 export default PickerCategories;
