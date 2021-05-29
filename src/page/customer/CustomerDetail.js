@@ -17,8 +17,10 @@ const CustomerDetail = (props) => {
     React.useEffect(() => {
         if (props.route.params.customerId) {
             getCustomer(props.route.params.customerId);
+        } else if (props.route.params.cutomer) {
+            setCustomer({ ...props.route.params.cutomer, "@id": customer["@id"] });
         }
-    }, [props.route.params.customerId]);
+    }, [props.route.params]);
 
     const getCustomer = (customerId) => {
         FetchService.get(customerId, token)
@@ -29,6 +31,7 @@ const CustomerDetail = (props) => {
             })
             .catch((error) => {
                 console.error(error);
+                // TODO: change text
                 Alert.alert("Error");
             });
     };
@@ -70,9 +73,9 @@ const CustomerDetail = (props) => {
                 <View style={componentStyle.productsContainer}>
                     <TouchableOpacity
                         onPress={() =>
-                            props.navigation.navigate("Customer", {
+                            props.navigation.navigate("Voucher", {
                                 screen: "ActifVouchers",
-                                params: { customer }
+                                params: { customer, fromBottomMenu: false }
                             })
                         }
                         style={[componentStyle.singleProduct, { borderColor: colors.green }]}>
@@ -82,13 +85,13 @@ const CustomerDetail = (props) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() =>
-                            props.navigation.navigate("Customer", {
+                            props.navigation.navigate("Voucher", {
                                 screen: "InactifVouchers",
-                                params: { customer }
+                                params: { customer, fromBottomMenu: false }
                             })
                         }
                         style={[componentStyle.singleProduct, { borderColor: colors.darkBlue }]}>
-                        <Text style={[componentStyle.nbProducts, styles.darkBlue]}>{customer.vouchers.length}</Text>
+                        <Text style={[componentStyle.nbProducts, styles.darkBlue]}>{customer.vouchers.length - customer.availableVouchers.length}</Text>
                         <View style={[styles.divisionHorizontal, { backgroundColor: colors.darkBlue }]}></View>
                         <Text style={[styles.font18, styles.textGreen, styles.fontSofiaSemiBold, styles.textCenter, componentStyle.subText]}>Inactif</Text>
                     </TouchableOpacity>
