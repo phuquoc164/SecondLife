@@ -4,6 +4,8 @@ import { ActivityIndicator, View, Image, TextInput } from "react-native";
 
 /** App */
 import styles from "../assets/css/styles";
+import CustomModal from "../components/CustomModal";
+import { colors } from "./colors";
 
 /**
  * Verify if the champ have form of email
@@ -23,9 +25,29 @@ export const loading = () => (
     </View>
 );
 
+export const loadingScreen = (visible) => (
+    <CustomModal
+        visible={visible}
+        rootViewStyle={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+        containerViewStyle={{
+            alignItems: "center",
+            position: "relative",
+            backgroundColor: "transparent",
+            borderRadius: 0,
+            shadowOpacity: 0,
+            shadowRadius: 0,
+            elevation: 0
+        }}>
+        <View style={{ justifyContent: "center" }}>
+            <ActivityIndicator color={colors.white} size="large" />
+            <Text style={[styles.font18, styles.fontSofiaRegular, styles.textWhite, { marginVertical: 10 }]}>Chargement...</Text>
+        </View>
+    </CustomModal>
+);
+
 /**
  * component input filter
- * @param {*} props 
+ * @param {*} props
  */
 export const InputSearch = (props) => (
     <View style={styles.inputContainer}>
@@ -42,25 +64,32 @@ export const InputSearch = (props) => (
 );
 
 /**
- * format date 
- * @param date 
+ * format date
+ * @param date
  * @param withOptions
  */
 export const convertDateToString = (date, withOptions = false) => {
-    const options = (withOptions) ? { year: "numeric", month: "long", day: "numeric" } : {};
+    const options = withOptions ? { year: "numeric", month: "long", day: "numeric" } : {};
     return new Date(date).toLocaleDateString("fr-Fr", options);
-}
+};
+
+/**
+ * format date to send api
+ * @param {*} date 
+ * @returns 
+ */
+export const convertDateToApi = (date) => new Date(date).toISOString().slice(0,10); 
 
 export const getSimpleDiff = (oldObject, newObject) => {
     const diffs = {};
-    Object.keys(oldObject).forEach(key => {
+    Object.keys(oldObject).forEach((key) => {
         if (oldObject[key] !== newObject[key]) {
             diffs[key] = newObject[key];
         }
     });
 
     return diffs;
-}
+};
 
 export const verifyData = (object) => {
     let isError = false;
