@@ -10,17 +10,17 @@ import { AuthContext } from "../../lib/AuthContext";
 import { initialCustomer } from "../../lib/constants";
 
 const NewCustomer = (props) => {
-    const token = React.useContext(AuthContext);
-
+    const { user } = React.useContext(AuthContext);
     const handleAddCustomer = (newCustomer) => {
-        console.log("customers", newCustomer);
-        FetchService.post("/customers", newCustomer, token).then(result => {
-            console.log(result);
-        }).catch(error => {
-            // TODO: change text
-            console.error("New Customer Error", error);
-            Alert.alert("New Customer Error");
-        });
+        FetchService.post("/customers", { ...newCustomer, sotre: user.store }, user.token)
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => {
+                // TODO: change text
+                console.error("New Customer Error", error);
+                Alert.alert("New Customer Error");
+            });
     };
 
     return (
