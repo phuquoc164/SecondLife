@@ -29,7 +29,7 @@ const listItemsData = {
         title: "Bon d'achat",
         image: require(`../assets/images/voucher-item.png`),
         imageStyle: { width: 26, height: 26 },
-        screen: "Voucher"
+        screen: "ActifVouchers"
     }
 };
 
@@ -55,10 +55,13 @@ const BottomBarMenu = ({ state, navigation }) => {
                         if (name === "Home") {
                             navigation.navigate("Home", { params: { animation: false } });
                         } else {
-                            navigation.navigate(name, {
-                                screen: listItemsData[name].screen
-                            });
+                            navigation.navigate(name, { screen: listItemsData[name].screen });
                         }
+                    } else if (isFocused && !event.defaultPrevented && name === "Voucher") {
+                        navigation.navigate(name, {
+                            screen: listItemsData[name].screen,
+                            params: { fromBottomMenu: true }
+                        });
                     }
                 };
 
