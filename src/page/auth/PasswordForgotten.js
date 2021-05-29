@@ -8,7 +8,6 @@ import styles from "../../assets/css/styles";
 
 const PasswordForgotten = (props) => {
     const {navigation, route} = props;
-    console.log()
     return (
         <View style={[styles.positionRelative, stylesComponent.mainContainer]}>
             <TouchableOpacity onPress={navigation.goBack} style={{ position: "absolute", top: 20, left: 20 }}>

@@ -37,7 +37,7 @@ export default class FetchService {
 
     static get = (endPoint, token) => {
         const header = new Headers({
-            "Authorization": "Bearer " + token
+            Authorization: "Bearer " + token
         });
         const setting = {
             method: "GET",
@@ -77,7 +77,6 @@ export default class FetchService {
         return fetch(url, setting)
             .then((res) => {
                 response = res;
-                console.log(response.json());
                 const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {
                     return res.json();
@@ -138,10 +137,9 @@ export default class FetchService {
 
         const url = DOMAIN + endPoint;
         let response;
-        console.log(url, setting);
+
         return fetch(url, setting)
             .then((res) => {
-                console.log(res);
                 response = res;
                 const contentType = res.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {

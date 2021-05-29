@@ -68,9 +68,7 @@ const LoginPage = (props) => {
         setIsLoading(true);
         try {
             const resultToken = await FetchService.login(email.value, password.value);
-            console.log(resultToken.token);
             const profil = await FetchService.get("/users/me", resultToken.token);
-            console.log(profil);
             let subscription = "";
             if (!!profil) {
                 profil.company.subscriptions.forEach(sub => {
