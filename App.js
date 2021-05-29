@@ -3,7 +3,7 @@ import React, { useEffect, useReducer } from "react";
 import { Alert, Platform, View, Text, TouchableOpacity, Image } from "react-native";
 import SplashScreen from "react-native-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
@@ -11,7 +11,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import LoginPage from "./src/page/auth/LoginPage";
 import HomeScreen from "./src/page/HomeScreen";
 import SLSplashScreen from "./src/page/SLSplashScreen";
-import { STORAGE_USER } from "./src/lib/constants";
+import { STORAGE_USER, TITLE } from "./src/lib/constants";
 import PasswordForgotten from "./src/page/auth/PasswordForgotten";
 import { AuthContext, authReducer, authInitalState } from "./src/lib/AuthContext.js";
 import ListCustomers from "./src/page/customer/ListCustomers";
@@ -20,12 +20,16 @@ import styles from "./src/assets/css/styles";
 import BottomBarMenu from "./src/components/BottomBarMenu";
 import MenuHelper from "./src/components/MenuHelper";
 import ModifyCustomer from "./src/page/customer/ModifyCustomer";
-import ActifVouchers from "./src/page/customer/voucher/ActifVouchers";
-import InactifVouchers from "./src/page/customer/voucher/InactifVouchers";
 import MyAccount from "./src/page/profil/MyAccount";
 import NewCustomer from "./src/page/newProduct/NewCustomer";
 import CustomerDetailProduct from "./src/page/newProduct/CustomerDetailProduct";
 import FormProduct from "./src/page/newProduct/FormProduct";
+import ActifVouchers from "./src/page/voucher/ActifVouchers";
+import InactifVouchers from "./src/page/voucher/InactifVouchers";
+import MenuChangeCatalog from "./src/page/catalog/MenuChangeCatalog";
+import OnceAgain from "./src/page/catalog/OnceAgain";
+import Rayon from "./src/page/catalog/Rayon";
+import Donation from "./src/page/catalog/Donation";
 
 const RootStack = createStackNavigator();
 const Stack = createStackNavigator();
@@ -89,9 +93,9 @@ const App = () => {
         const { navigation, scene } = screenObject;
         const titleScreen = scene.descriptor.options.title ? scene.descriptor.options.title : title;
         const backButton = () => {
-            if (title === "Nouveau Lifer") {
+            if (title === TITLE.products[0]) {
                 return (
-                    <TouchableOpacity onPress={navigation.goBack} style={{ position: "absolute", top: 20, left: 20 }}>
+                    <TouchableOpacity onPress={navigation.goBack} style={{ position: "absolute", top: 27, left: 20, zIndex: 1 }}>
                         <Image source={require("./src/assets/images/arrow-right.png")} style={{ width: 35, height: 21 }} />
                     </TouchableOpacity>
                 );
@@ -105,13 +109,19 @@ const App = () => {
         };
         return (
             <View style={styles.header}>
-                {title === "Bons d'achat" && (
-                    <TouchableOpacity onPress={() => navigation.navigate("Customer", { screen: "InactifVouchers" })} style={styles.historyImageBtn}>
+                {title === TITLE.voucher[0] && (
+                    <TouchableOpacity onPress={() => navigation.navigate("Voucher", { screen: "InactifVouchers" })} style={styles.historyImageBtn}>
                         <Image source={require("./src/assets/images/history.png")} style={styles.historyImage} />
                     </TouchableOpacity>
                 )}
                 {hasBackBtn && !scene.descriptor.options.title && backButton()}
-                <Text style={styles.headerTitle}>{titleScreen}</Text>
+                {TITLE.catalog.includes(title) ? (
+                    <TouchableOpacity onPress={() => navigation.navigate("MenuChangeCatalog", { title })}>
+                        <Text style={styles.headerTitle}>{title}</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <Text style={styles.headerTitle}>{titleScreen}</Text>
+                )}
                 {hasInfoBtn && (
                     <TouchableOpacity onPress={() => navigation.navigate("MenuHelper")} style={styles.infoImageBtn}>
                         <Image source={require("./src/assets/images/info.png")} style={styles.infoImage} />
@@ -123,11 +133,9 @@ const App = () => {
 
     const customerScreen = () => (
         <Stack.Navigator initialRouteName="ListCustomers">
-            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, "Clients", false) }} name="ListCustomers" component={ListCustomers} />
-            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, "Informations client") }} name="CustomerDetail" component={CustomerDetail} />
-            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, "Modifier les informations") }} name="ModifyCustomer" component={ModifyCustomer} />
-            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, "Bons d'achat", false) }} name="ActifVouchers" component={ActifVouchers} />
-            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, "Historique") }} name="InactifVouchers" component={InactifVouchers} />
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.clients[0], false) }} name="ListCustomers" component={ListCustomers} />
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.clients[1]) }} name="CustomerDetail" component={CustomerDetail} />
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.clients[2]) }} name="ModifyCustomer" component={ModifyCustomer} />
         </Stack.Navigator>
     );
 
@@ -135,26 +143,33 @@ const App = () => {
         return <Text>Scanner</Text>;
     };
 
-    const catalogScreen = () => {
-        return <Text>Catalog</Text>;
-    };
+    const catalogScreen = () => (
+        <Stack.Navigator>
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.catalog[0], false) }} name="OnceAgain" component={OnceAgain} />
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.catalog[1], false) }} name="Rayon" component={Rayon} />
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.catalog[2], false) }} name="Donation" component={Donation} />
+        </Stack.Navigator>
+    );
 
-    const voucherScreen = () => {
-        return <Text>Voucher</Text>;
-    };
+    const voucherScreen = () => (
+        <Stack.Navigator>
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.voucher[0], false) }} name="ActifVouchers" component={ActifVouchers} />
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.voucher[1]) }} name="InactifVouchers" component={InactifVouchers} />
+        </Stack.Navigator>
+    );
 
     const profilScreen = () => (
         <Stack.Navigator initialRouteName="MyAccount">
-            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, "Compte", false, false) }} name="MyAccount" component={MyAccount} />
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.profil[0], false, false) }} name="MyAccount" component={MyAccount} />
         </Stack.Navigator>
     );
 
     const newProductScreen = () => (
         <Stack.Navigator>
-            <Stack.Screen name="NewCustomer" options={{ header: (screenObject) => headerSL(screenObject, "Nouveau Lifer") }} component={NewCustomer} />
-            <Stack.Screen name="ListCustomersAddProduct" options={{ header: (screenObject) => headerSL(screenObject, "Trouver un client", false) }} component={ListCustomers} />
-            <Stack.Screen name="CustomerDetailProduct" options={{ header: (screenObject) => headerSL(screenObject, "Inforrmtations client") }} component={CustomerDetailProduct} />
-            <Stack.Screen name="AddProduct" options={{ header: (screenObject) => headerSL(screenObject, "Ajouter un produit", false) }} component={FormProduct} />
+            <Stack.Screen name="NewCustomer" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[0]) }} component={NewCustomer} />
+            <Stack.Screen name="ListCustomersAddProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[1], false) }} component={ListCustomers} />
+            <Stack.Screen name="CustomerDetailProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[2]) }} component={CustomerDetailProduct} />
+            <Stack.Screen name="AddProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[3], false) }} component={FormProduct} />
         </Stack.Navigator>
     );
 
@@ -177,28 +192,34 @@ const App = () => {
                     <>
                         <RootStack.Navigator
                             modal="modal"
-                            screenOptions={{
+                            screenOptions={(navigationProps) => ({
                                 headerShown: false,
                                 cardStyle: { backgroundColor: "transparent" },
                                 cardOverlayEnabled: true,
-                                cardStyleInterpolator: ({ current: { progress } }) => ({
-                                    cardStyle: {
-                                        opacity: progress.interpolate({
-                                            inputRange: [0, 0.5, 0.9, 1],
-                                            outputRange: [0, 0.25, 0.7, 1]
-                                        })
-                                    },
-                                    overlayStyle: {
-                                        opacity: progress.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [0, 0.7],
-                                            extrapolate: "clamp"
-                                        })
+                                cardStyleInterpolator: ({ current: { progress } }) => {
+                                    if (navigationProps.route.name === "MenuChangeCatalog") {
+                                        return {};
                                     }
-                                })
-                            }}>
+                                    return {
+                                        cardStyle: {
+                                            opacity: progress.interpolate({
+                                                inputRange: [0, 0.5, 0.9, 1],
+                                                outputRange: [0, 0.25, 0.7, 1]
+                                            })
+                                        },
+                                        overlayStyle: {
+                                            opacity: progress.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [0, 0.7],
+                                                extrapolate: "clamp"
+                                            })
+                                        }
+                                    };
+                                }
+                            })}>
                             <RootStack.Screen name="MainScreen" component={mainScreen} />
                             <RootStack.Screen name="MenuHelper" component={MenuHelper} />
+                            <RootStack.Screen name="MenuChangeCatalog" component={MenuChangeCatalog} />
                         </RootStack.Navigator>
                     </>
                 ) : (
