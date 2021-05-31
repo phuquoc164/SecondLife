@@ -101,7 +101,7 @@ const ActifVouchers = (props) => {
     // TODO: modify the voucherSwiped
     handleMaskAsUsedVoucher = () => {
         const data = { used: true };
-        FetchService.patch(voucher["@id"], data, user.token)
+        FetchService.patch(voucherSwiped["@id"], data, user.token)
             .then((result) => {
                 if (!!result) {
                     const newAvailableVouchers = vouchers.available.filter((voucher) => voucher["@id"] !== voucherSwiped["@id"]);
