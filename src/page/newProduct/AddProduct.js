@@ -16,7 +16,7 @@ import Picker from "../../components/Picker";
 import ModalPhoto from "../../components/ModalPhoto";
 import PickerCategories from "../../components/PickerCategories";
 
-const FormProduct = (props) => {
+const AddProduct = (props) => {
     const { user } = React.useContext(AuthContext);
 
     const [loadingScreen, setLoadingScreen] = React.useState();
@@ -413,4 +413,4 @@ const componentStyle = StyleSheet.create({
         backgroundColor: "rgba(14, 227, 138, 0.22)"
     }
 });
-export default FormProduct;
+export default AddProduct;

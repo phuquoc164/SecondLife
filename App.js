@@ -23,7 +23,7 @@ import ModifyCustomer from "./src/page/customer/ModifyCustomer";
 import MyAccount from "./src/page/profil/MyAccount";
 import NewCustomer from "./src/page/newProduct/NewCustomer";
 import CustomerDetailProduct from "./src/page/newProduct/CustomerDetailProduct";
-import FormProduct from "./src/page/newProduct/FormProduct";
+import AddProduct from "./src/page/newProduct/AddProduct";
 import ActifVouchers from "./src/page/voucher/ActifVouchers";
 import InactifVouchers from "./src/page/voucher/InactifVouchers";
 import MenuChangeCatalog from "./src/page/catalog/MenuChangeCatalog";
@@ -169,7 +169,7 @@ const App = () => {
             <Stack.Screen name="NewCustomer" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[0]) }} component={NewCustomer} />
             <Stack.Screen name="ListCustomersAddProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[1], false) }} component={ListCustomers} />
             <Stack.Screen name="CustomerDetailProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[2]) }} component={CustomerDetailProduct} />
-            <Stack.Screen name="AddProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[3], false) }} component={FormProduct} />
+            <Stack.Screen name="AddProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[3], false) }} component={AddProduct} />
         </Stack.Navigator>
     );
 
