@@ -294,9 +294,6 @@ const stylesLogin = StyleSheet.create({
     passwordForgotten: {
         color: "#082FA480",
         marginBottom: 7
-    },
-    notuser: {
-        fontSize: 14
     }
 });
 
