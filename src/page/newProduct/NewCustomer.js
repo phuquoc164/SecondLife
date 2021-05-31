@@ -11,10 +11,13 @@ import { initialCustomer } from "../../lib/constants";
 
 const NewCustomer = (props) => {
     const { user } = React.useContext(AuthContext);
+
     const handleAddCustomer = (newCustomer) => {
-        FetchService.post("/customers", { ...newCustomer, sotre: user.store }, user.token)
+        FetchService.post("/customers", { ...newCustomer, store: user.store }, user.token)
             .then((result) => {
-                console.log(result);
+                if (!!result) {
+                    props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { customerId: result["@id"] } });
+                }
             })
             .catch((error) => {
                 // TODO: change text
