@@ -53,6 +53,7 @@ export const InputSearch = (props) => (
     <View style={styles.inputContainer}>
         <Image source={require("../assets/images/search.png")} style={styles.imageSearch} />
         <TextInput
+            numberOfLines={1}
             style={styles.inputSearch}
             autoCapitalize="none"
             placeholder={props.placeholder}
