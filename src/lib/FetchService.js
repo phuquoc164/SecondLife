@@ -84,7 +84,7 @@ export default class FetchService {
                 return res;
             })
             .then((body) => {
-                if (response && response.status === 200 && !!body) {
+                if (response && ((response.status === 200 && !!body) || response.status === 201)) {
                     return Promise.resolve(body);
                 }
                 return Promise.reject(response.status);
