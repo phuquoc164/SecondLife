@@ -174,7 +174,7 @@ export default StyleSheet.create({
     inputSearch: {
         paddingLeft: 40,
         paddingVertical: 10,
-        fontSize: 16,
+        fontSize: 15,
         fontFamily: "SofiaPro-Regular"
     },
     imageSearch: {
@@ -209,5 +209,52 @@ export default StyleSheet.create({
         alignItems: "flex-start",
         marginBottom: 10,
         height: 150
+    },
+
+    // page catalog
+    menuNavigationContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 10
+    },
+    menuNavigationLabel: {
+        color: colors.darkBlue,
+        borderBottomColor: colors.darkBlue,
+        borderBottomWidth: 1,
+        paddingVertical: 10,
+        textAlign: "center",
+        fontSize: 18,
+        fontFamily: "SofiaPro-Regular"
+    },
+    btnSend: {
+        backgroundColor: "#EEF7FF",
+        borderColor: colors.green,
+        borderWidth: 4,
+        borderRadius: 65,
+        height: 60,
+        position: "relative",
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    imageBtnSend: {
+        width: 56,
+        height: 54.3,
+        top: -0.5,
+        left: -0.5
+    },
+    singleProduct: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: colors.gray,
+        backgroundColor: colors.white,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        marginHorizontal: 20,
+        marginBottom: 15
     }
 });
