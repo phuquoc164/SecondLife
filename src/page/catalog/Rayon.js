@@ -13,42 +13,42 @@ const Rayon = (props) => {
     const [tabActive, setTabActive] = useState("sell");
     const [listProducts, setListProducts] = useState([
         {
-            id: 1,
+            '@id': 1,
             name: "Echarpe rouge",
             brand: "Hermes",
             seller: "Eugénie",
             date: "11.02.2021"
         },
         {
-            id: 2,
+            '@id': 2,
             name: "Echarpe rouge",
             brand: "Hermes",
             seller: "Eugénie",
             date: "11.02.2021"
         },
         {
-            id: 3,
+            '@id': 3,
             name: "Echarpe rouge",
             brand: "Hermes",
             seller: "Eugénie",
             date: "11.02.2021"
         },
         {
-            id: 4,
+            '@id': 4,
             name: "Echarpe rouge",
             brand: "Hermes",
             seller: "Eugénie",
             date: "11.02.2021"
         },
         {
-            id: 5,
+            '@id': 5,
             name: "Echarpe rouge",
             brand: "Hermes",
             seller: "Eugénie",
             date: "11.02.2021"
         },
         {
-            id: 6,
+            '@id': 6,
             name: "Echarpe rouge",
             brand: "Hermes",
             seller: "Eugénie",
@@ -63,42 +63,42 @@ const Rayon = (props) => {
         keyword: "",
         listProducts: [
             {
-                id: 1,
+                '@id': 1,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 2,
+                '@id': 2,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 3,
+                '@id': 3,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 4,
+                '@id': 4,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 5,
+                '@id': 5,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 6,
+                '@id': 6,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
@@ -109,20 +109,29 @@ const Rayon = (props) => {
 
     const { user } = React.useContext(AuthContext);
 
+    React.useEffect(() => {
+
+    }, [tabActive]);
+
+    // TODO: get listProducts
+    const getListProducts = (tabActive) => {
+        setIsLoading(true);
+    }
+
     /**
      * Render List products
      * @param {*} param0
      * @returns
      */
     const renderListProducts = ({ item }) => (
-        <View key={item.id} style={styles.singleProduct}>
+        <View key={item["@id"]} style={styles.singleProduct}>
             <View>
                 <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.name}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${item.seller} - ${item.date}`}</Text>
             </View>
             <TouchableOpacity onPress={() => handleSelectProduct(item)}>
-                {listProductsSelected.ids.includes(item.id) ? (
+                {listProductsSelected.ids.includes(item["@id"]) ? (
                     <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
                 ) : (
                     <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
@@ -141,7 +150,7 @@ const Rayon = (props) => {
                 ids: []
             });
         } else {
-            const ids = listProducts.map((product) => product.id);
+            const ids = listProducts.map((product) => product["@id"]);
             setListProductsSelected({
                 allInfo: listProducts,
                 ids
@@ -151,9 +160,9 @@ const Rayon = (props) => {
 
     /** Handle select or unselect one product */
     const handleSelectProduct = (item) => {
-        if (listProductsSelected.ids.includes(item.id)) {
-            const listNewProducts = listProductsSelected.allInfo.filter((product) => product.id !== item.id);
-            const listNewIds = listProductsSelected.ids.filter((id) => id !== item.id);
+        if (listProductsSelected.ids.includes(item["@id"])) {
+            const listNewProducts = listProductsSelected.allInfo.filter((product) => product["@id"] !== item["@id"]);
+            const listNewIds = listProductsSelected.ids.filter((id) => id !== item["@id"]);
             setListProductsSelected({
                 allInfo: listNewProducts,
                 ids: listNewIds
@@ -161,16 +170,13 @@ const Rayon = (props) => {
         } else {
             setListProductsSelected({
                 allInfo: [...listProductsSelected.allInfo, item],
-                ids: [...listProductsSelected.ids, item.id]
+                ids: [...listProductsSelected.ids, item["@id"]]
             });
         }
     };
 
     const filterData = (filter) => {};
 
-    if (isLoading) {
-        return <View style={styles.mainScreen}>{loading()}</View>;
-    }
     return (
         <View style={styles.mainScreen}>
             <View style={styles.menuNavigationContainer}>
@@ -186,7 +192,8 @@ const Rayon = (props) => {
                 </View>
             </View>
 
-            {tabActive === "sell" && (
+            {isLoading && loading()}
+            {!isLoading && tabActive === "sell" && (
                 <>
                     <InputSearch placeholder="Chercher une commande, un n° de suivi..." placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
 
@@ -218,6 +225,13 @@ const Rayon = (props) => {
                         <FlatList data={filter.listProducts} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
                     </SafeAreaView>
                 </>
+            )}
+
+            {!isLoading && tabActive === "sold" && (
+                <SafeAreaView>
+                    {/* <FlatList data={filter.listProducts} /> */}
+                    <Text>sold</Text>
+                </SafeAreaView>
             )}
         </View>
     );

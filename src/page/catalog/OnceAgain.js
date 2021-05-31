@@ -12,7 +12,50 @@ import { InputSearch, loading } from "../../lib/Helpers";
 const OnceAgain = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [tabActive, setTabActive] = useState("send");
-    const [listProducts, setListProducts] = useState([]);
+    const [listProducts, setListProducts] = useState([
+        {
+            "@id": 1,
+            name: "Echarpe rouge",
+            brand: "Hermes",
+            seller: "Eugénie",
+            date: "11.02.2021"
+        },
+        {
+            "@id": 2,
+            name: "Echarpe rouge",
+            brand: "Hermes",
+            seller: "Eugénie",
+            date: "11.02.2021"
+        },
+        {
+            "@id": 3,
+            name: "Echarpe rouge",
+            brand: "Hermes",
+            seller: "Eugénie",
+            date: "11.02.2021"
+        },
+        {
+            "@id": 4,
+            name: "Echarpe rouge",
+            brand: "Hermes",
+            seller: "Eugénie",
+            date: "11.02.2021"
+        },
+        {
+            "@id": 5,
+            name: "Echarpe rouge",
+            brand: "Hermes",
+            seller: "Eugénie",
+            date: "11.02.2021"
+        },
+        {
+            "@id": 6,
+            name: "Echarpe rouge",
+            brand: "Hermes",
+            seller: "Eugénie",
+            date: "11.02.2021"
+        }
+    ]);
     const [listProductsSelected, setListProductsSelected] = useState({
         allInfo: [],
         ids: []
@@ -21,42 +64,42 @@ const OnceAgain = (props) => {
         keyword: "",
         listProducts: [
             {
-                id: 1,
+                "@id": 1,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 2,
+                "@id": 2,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 3,
+                "@id": 3,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 4,
+                "@id": 4,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 5,
+                "@id": 5,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
                 date: "11.02.2021"
             },
             {
-                id: 6,
+                "@id": 6,
                 name: "Echarpe rouge",
                 brand: "Hermes",
                 seller: "Eugénie",
@@ -71,17 +114,9 @@ const OnceAgain = (props) => {
 
     }, [tabActive]);
 
+    // TODO: get list products 
     const getListProducts = (tabActive) => {
         setIsLoading(true);
-        
-    }
-
-    const toggleTab = (type) => {
-        if (type === "send") {
-
-        } else if (type === "sent") {
-
-        }
     }
 
     /**
@@ -90,14 +125,14 @@ const OnceAgain = (props) => {
      * @returns 
      */
     const renderListProductsSend = ({ item }) => (
-        <View key={item.id} style={styles.singleProduct}>
+        <View key={item["@id"]} style={styles.singleProduct}>
             <View>
                 <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.name}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${item.seller} - ${item.date}`}</Text>
             </View>
             <TouchableOpacity onPress={() => handleSelectProduct(item)}>
-                {listProductsSelected.ids.includes(item.id) ? (
+                {listProductsSelected.ids.includes(item["@id"]) ? (
                     <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
                 ) : (
                     <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
@@ -107,7 +142,7 @@ const OnceAgain = (props) => {
     );
 
     const renderListProductsSent = ({item}) => (
-        <View key={item.id}>
+        <View key={item["@id"]}>
 
         </View>
     )
@@ -122,7 +157,7 @@ const OnceAgain = (props) => {
                 ids: []
             });
         } else {
-            const ids = listProducts.send.map(product => product.id);
+            const ids = listProducts.send.map(product => product["@id"]);
             setListProductsSelected({
                 allInfo: listProducts.send,
                 ids
@@ -132,9 +167,9 @@ const OnceAgain = (props) => {
 
     /** Handle select or unselect one product */
     const handleSelectProduct = (item) => {
-        if (listProductsSelected.ids.includes(item.id)) {
-            const listNewProducts = listProductsSelected.allInfo.filter(product => product.id !== item.id);
-            const listNewIds = listProductsSelected.ids.filter(id => id !== item.id);
+        if (listProductsSelected.ids.includes(item["@id"])) {
+            const listNewProducts = listProductsSelected.allInfo.filter(product => product["@id"] !== item["@id"]);
+            const listNewIds = listProductsSelected.ids.filter(id => id !== item["@id"]);
             setListProductsSelected({
                 allInfo: listNewProducts,
                 ids: listNewIds
@@ -142,26 +177,23 @@ const OnceAgain = (props) => {
         } else {
             setListProductsSelected({
                 allInfo: [...listProductsSelected.allInfo, item],
-                ids: [...listProductsSelected.ids, item.id]
+                ids: [...listProductsSelected.ids, item["@id"]]
             });
         }
     }
 
     const filterData = (filter) => {};
 
-    if (isLoading) {
-        return <View style={styles.mainScreen}>{loading()}</View>;
-    }
     return (
         <View style={styles.mainScreen}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
-                    <TouchableOpacity onPress={() => toggleTab("send")} style={{ alignSelf: "center" }}>
+                    <TouchableOpacity onPress={() => setTabActive("send")} style={{ alignSelf: "center" }}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "send" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>À envoyer</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.flex1}>
-                    <TouchableOpacity onPress={() => toggleTab("sent")}>
+                    <TouchableOpacity onPress={() => setTabActive("sent")}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "sent" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>Envoyés</Text>
                     </TouchableOpacity>
                 </View>
@@ -169,7 +201,8 @@ const OnceAgain = (props) => {
 
             <InputSearch placeholder="Chercher une commande, un n° de suivi..." placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
 
-            {tabActive === "send" && (
+            {isLoading && loading()}
+            {!isLoading && tabActive === "send" && (
                 <>
                     <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
                         <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation de l'envoi en cours</Text>
@@ -222,9 +255,10 @@ const OnceAgain = (props) => {
                 </>
             )}
 
-            {tabActive === "sent" && (
+            {!isLoading && tabActive === "sent" && (
                 <SafeAreaView>
-                    <FlatList data={filter.listProducts} />
+                    {/* <FlatList data={filter.listProducts} /> */}
+                    <Text>Sent</Text>
                 </SafeAreaView>
             )}
         </View>
