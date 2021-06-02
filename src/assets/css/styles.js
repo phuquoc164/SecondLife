@@ -63,6 +63,9 @@ export default StyleSheet.create({
     font24: {
         fontSize: 24
     },
+    font28: {
+        fontSize: 28
+    },
     font60: {
         fontSize: 60
     },
@@ -256,5 +259,27 @@ export default StyleSheet.create({
         paddingHorizontal: 20,
         marginHorizontal: 20,
         marginBottom: 15
+    },
+
+    // Add Product
+    addProductInputContainer: {
+        borderColor: "rgba(0, 0, 0, 0.22)",
+        borderWidth: 1,
+        borderRadius: 15,
+        marginHorizontal: 30,
+        padding: 10,
+        marginBottom: 20
+    },
+    addProductLabel: {
+        color: colors.textDarkBlue,
+        fontSize: 20,
+        fontFamily: "SofiaPro-Regular"
+    },
+    addProductInput: {
+        padding: 0,
+        margin: 0,
+        fontFamily: "SofiaPro-Regular",
+        color: colors.textDarkBlue,
+        fontSize: 16
     }
 });
