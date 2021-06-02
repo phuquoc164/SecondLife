@@ -98,14 +98,15 @@ const ActifVouchers = (props) => {
             });
     };
 
-    // TODO: modify the voucherSwiped
     handleMaskAsUsedVoucher = () => {
         const data = { used: true };
+        setModalConfirmation(false);
         FetchService.patch(voucherSwiped["@id"], data, user.token)
             .then((result) => {
-                if (!!result) {
+                console.log(result);
+                if (!!result && result["@id"]) {
                     const newAvailableVouchers = vouchers.available.filter((voucher) => voucher["@id"] !== voucherSwiped["@id"]);
-                    const newUsedVouchers = vouchers.usedOrExpired.push({ ...voucherSwiped, used: true });
+                    const newUsedVouchers = [...vouchers.usedOrExpired, { ...voucherSwiped, used: true }];
                     props.navigation.navigate("Voucher", { screen: "InactifVouchers", params: { available: newAvailableVouchers, usedOrExpired: newUsedVouchers } });
                 }
             })

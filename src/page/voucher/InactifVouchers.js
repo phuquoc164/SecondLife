@@ -100,19 +100,19 @@ const InactifVouchers = (props) => {
             });
     };
 
-    // TODO: modify the voucherSwiped
     const handleReactivateVoucher = () => {
+        setModalConfirmation(false);
         let newDate = new Date();
         newDate.setMonth(newDate.getMonth() + 1);
         const data = { expirationDate: newDate.toISOString().slice(0, 10) };
         console.log(data);
         FetchService.patch(voucherSwiped["@id"], data, user.token)
             .then((result) => {
-                if (!!result) {
+                if (!!result && result["@id"]) {
                     console.log(result);
-                    // const newAvailableVouchers = vouchers.available.push({ ...voucherSwiped, expirationDate});
-                    // const newUsedVouchers = vouchers.usedOrExpired.filter((voucher) => voucher["@id"] !== voucherSwiped["@id"]);
-                    // props.navigation.navigate("Voucher", { screen: "ActifVouchers", params: { available: newAvailableVouchers, usedOrExpired: newUsedVouchers } });
+                    const newAvailableVouchers = [...vouchers.available, { ...voucherSwiped, expirationDate}];
+                    const newUsedVouchers = vouchers.usedOrExpired.filter((voucher) => voucher["@id"] !== voucherSwiped["@id"]);
+                    props.navigation.navigate("Voucher", { screen: "ActifVouchers", params: { available: newAvailableVouchers, usedOrExpired: newUsedVouchers } });
                 }
             })
             .catch((error) => {
