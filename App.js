@@ -30,6 +30,7 @@ import MenuChangeCatalog from "./src/page/catalog/MenuChangeCatalog";
 import OnceAgain from "./src/page/catalog/OnceAgain";
 import Rayon from "./src/page/catalog/Rayon";
 import Donation from "./src/page/catalog/Donation";
+import ResultPage from "./src/page/newProduct/ResultPage";
 
 const RootStack = createStackNavigator();
 const Stack = createStackNavigator();
@@ -170,6 +171,7 @@ const App = () => {
             <Stack.Screen name="ListCustomersAddProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[1], false) }} component={ListCustomers} />
             <Stack.Screen name="CustomerDetailProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[2]) }} component={CustomerDetailProduct} />
             <Stack.Screen name="AddProduct" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[3], false) }} component={AddProduct} />
+            <Stack.Screen name="ResultPage" options={{ header: (screenObject) => headerSL(screenObject, TITLE.products[3], false) }} component={ResultPage} />
         </Stack.Navigator>
     );
 
