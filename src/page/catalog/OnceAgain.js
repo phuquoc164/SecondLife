@@ -151,15 +151,15 @@ const OnceAgain = (props) => {
      * Handle select or unselect all products
      */
     const handleSelectAllProducts = () => {
-        if (listProductsSelected.allInfo.length === listProducts.send.length) {
+        if (listProductsSelected.allInfo.length === listProducts.length) {
             setListProductsSelected({
                 allInfo: [],
                 ids: []
             });
         } else {
-            const ids = listProducts.send.map(product => product["@id"]);
+            const ids = listProducts.map(product => product["@id"]);
             setListProductsSelected({
-                allInfo: listProducts.send,
+                allInfo: listProducts,
                 ids
             });
         }
@@ -242,7 +242,7 @@ const OnceAgain = (props) => {
                     <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
                         <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
                         <TouchableOpacity onPress={handleSelectAllProducts}>
-                            {listProducts.send.length === listProductsSelected.allInfo.length ? (
+                            {listProducts.length === listProductsSelected.allInfo.length ? (
                                 <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
                             ) : (
                                 <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
