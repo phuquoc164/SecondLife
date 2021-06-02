@@ -44,7 +44,7 @@ const Picker = (props) => {
 
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
-        const newOptions = props.items.filter((item) => item.Name.toLowerCase.includes(filterToLower));
+        const newOptions = props.items.filter((item) => item.name.toLowerCase().includes(filterToLower));
         setFilter({
             keyword: filter,
             options: newOptions
