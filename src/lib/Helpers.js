@@ -1,6 +1,6 @@
 /** React*/
 import React from "react";
-import { ActivityIndicator, View, Image, TextInput } from "react-native";
+import { ActivityIndicator, View, Image, Text, TextInput } from "react-native";
 
 /** App */
 import styles from "../assets/css/styles";
