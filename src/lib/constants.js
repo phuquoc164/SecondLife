@@ -20,7 +20,9 @@ export const initialProduct = {
     state: null,
     description: null,
     price: null,
-    seller: null
+    voucherAmount: null,
+    seller: null,
+    reference: null
 }
 
 export const stateDict = {
