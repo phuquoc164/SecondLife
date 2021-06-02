@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 const DOMAIN = "http://api-tsl.thunderstone.tech";
 
 export default class FetchService {
@@ -61,7 +63,6 @@ export default class FetchService {
 
     static post = (endPoint, data, token) => {
         const header = new Headers({
-            Accept: "application/json",
             "content-type": "application/json",
             Authorization: "Bearer " + token
         });
@@ -77,11 +78,7 @@ export default class FetchService {
         return fetch(url, setting)
             .then((res) => {
                 response = res;
-                const contentType = res.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    return res.json();
-                }
-                return res;
+                return res.json();
             })
             .then((body) => {
                 if (response && ((response.status === 200 && !!body) || response.status === 201)) {
@@ -91,9 +88,43 @@ export default class FetchService {
             });
     };
 
+    static postImage = (data, token) => {
+        const header = new Headers({
+            "content-type": "multipart/form-data",
+            Authorization: "Bearer " + token
+        });
+        const formData = new FormData();
+        formData.append("file", {
+            name: data.fileName,
+            type: data.type,
+            uri: Platform.OS === "android" ? data.uri : data.uri.replace("file://", "")
+        });
+        
+        const setting = {
+            method: "POST",
+            headers: header,
+            body: formData,
+            redirect: "follow"
+        };
+
+        const url = DOMAIN + "/images";
+
+        let response;
+        return fetch(url, setting)
+            .then((res) => {
+                response = res;
+                return res.json();
+            })
+            .then((body) => {
+                if (response && response.status === 201) {
+                    return Promise.resolve(body);
+                }
+                return Promise.reject(response.status);
+            });
+    };
+
     static delete = (endPoint, token) => {
         const header = new Headers({
-            Accept: "application/json",
             "content-type": "application/json",
             Authorization: "Bearer " + token
         });
@@ -108,14 +139,10 @@ export default class FetchService {
         return fetch(url, setting)
             .then((res) => {
                 response = res;
-                const contentType = res.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    return res.json();
-                }
-                return res;
+                return res.json();
             })
             .then((body) => {
-                if (response && response.status === 200 && !!body) {
+                if (response && response.status === 204) {
                     return Promise.resolve(body);
                 }
                 return Promise.reject(response.status);
@@ -124,7 +151,6 @@ export default class FetchService {
 
     static patch = (endPoint, data, token) => {
         const header = new Headers({
-            Accept: "application/json",
             "content-type": "application/merge-patch+json",
             Authorization: "Bearer " + token
         });
@@ -141,11 +167,7 @@ export default class FetchService {
         return fetch(url, setting)
             .then((res) => {
                 response = res;
-                const contentType = res.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    return res.json();
-                }
-                return res;
+                return res.json();
             })
             .then((body) => {
                 if (response && response.status === 200 && !!body) {
