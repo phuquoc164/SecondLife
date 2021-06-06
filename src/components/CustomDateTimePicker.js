@@ -14,7 +14,7 @@ const CustomDateTimePicker = (props) => {
 
     return (
         <CustomModal visible={props.visible} containerViewStyle={{ padding: 35, alignItems: "center" }}>
-            <DatePicker locale="fr" date={date} maximumDate={maxDate} mode="date" onDateChange={(date) => setDate(date)} />
+            <DatePicker locale="fr" date={date} format="DD/MM/YYYY" maximumDate={maxDate} mode="date" onDateChange={(date) => setDate(date)} />
 
             <View style={{ marginTop: 20 }}>
                 <TouchableOpacity
