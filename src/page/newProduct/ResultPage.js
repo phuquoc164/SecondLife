@@ -34,7 +34,7 @@ const ResultPage = (props) => {
         if (props.route.params.typeCatalog !== "sell") {
             props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { forceReset: true } });
         } else {
-            product.price = parseInt(product.price); 
+            product.price = parseInt(product.price.replace("€", ""));
             FetchService.post("/products", product, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
@@ -55,7 +55,7 @@ const ResultPage = (props) => {
             console.log()
             props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] });
         } else {
-            product.price = parseInt(product.price); 
+            product.price = parseInt(product.price.replace("€", ""));
             FetchService.post("/products", product, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
@@ -112,7 +112,8 @@ const ResultPage = (props) => {
                                 <Image source={require("../../assets/images/qrcode.png")} style={{ width: 40, height: 40.5 }} />
                             </TouchableOpacity>
                         </View>
-                        {/* Voucher */}
+
+                        {/* Price */}
                         <View style={[styles.addProductInputContainer, { marginBottom: 10 }]}>
                             <Text style={styles.addProductLabel}>Prix de vente boutique</Text>
                             <TextInput
@@ -120,11 +121,23 @@ const ResultPage = (props) => {
                                 placeholder="0,00€"
                                 placeholderTextColor={colors.gray2}
                                 value={`${product.price}`}
+                                onFocus={() => {
+                                    if (product.price) {
+                                        const newValue = product.price.replace("€", "");
+                                        setProduct({ ...product, price: newValue });
+                                    }
+                                }}
+                                onBlur={() => {
+                                    if (product.price) {
+                                        const newValue = (product.price + "€").replace(",", ".");
+                                        setProduct({ ...product, price: newValue });
+                                    }
+                                }}
                                 keyboardType="decimal-pad"
                                 onChangeText={(price) => setProduct({ ...product, price })}
                             />
                             {props.route.params.sellingPrice && (
-                                <Text style={[styles.font14, styles.fontSofiaRegular, { color: colors.gray2 }]}>Montant consseillé: {props.route.params.sellingPrice}€</Text>
+                                <Text style={[styles.font14, styles.fontSofiaRegular, { color: colors.gray2 }]}>Montant conseillé: {props.route.params.sellingPrice}€</Text>
                             )}
                         </View>
                     </>

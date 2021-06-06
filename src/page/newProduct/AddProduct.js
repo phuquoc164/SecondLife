@@ -38,6 +38,7 @@ const AddProduct = (props) => {
     const [btnStatus, setBtnStatus] = useState("");
     const [modal, setModal] = useState("");
     const [argus, setArgus] = useState({
+        fetchArgus: false,
         voucherAmount: null,
         sellingPrice: null,
         buyingPrice: null
@@ -51,6 +52,7 @@ const AddProduct = (props) => {
 
     const resetArgus = () => {
         setArgus({
+            FetchService: false,
             voucherAmount: null,
             sellingPrice: null,
             buyingPrice: null
@@ -88,7 +90,7 @@ const AddProduct = (props) => {
             const listStates = stateApi["hydra:member"].map((state) => ({ id: state["@id"], name: stateDict[state["state"]], value: state["state"] }));
             const listSellers = sellerApi["hydra:member"].map((seller) => ({ id: seller["@id"], name: seller.name }));
             setListOptions({
-                brands: listBrands,
+                brands: listBrands.sort((a, b) => (a.name > b.name ? 1 : -1)),
                 sizes: listSizes,
                 states: listStates,
                 sellers: listSellers,
@@ -225,7 +227,7 @@ const AddProduct = (props) => {
         setModal("");
         if (!product.brand || product.brand.id !== brand.id) {
             // reset argus
-            if (argus.voucherAmount) {
+            if (argus.fetchArgus) {
                 resetArgus();
             }
 
@@ -283,10 +285,13 @@ const AddProduct = (props) => {
                 if (!!result && result["hydra:member"].length > 0) {
                     const argus = result["hydra:member"][0];
                     setArgus({
+                        fetchArgus: true,
                         voucherAmount: argus.voucherAmount,
                         sellingPrice: argus.sellingPrice,
                         buyingPrice: argus.buyingPrice
                     });
+                } else {
+                    setArgus({ ...argus, fetchArgus: true });
                 }
                 setIsLoadingScreen(false);
             })
@@ -303,7 +308,7 @@ const AddProduct = (props) => {
             images: product.images.map((image) => image.id),
             vouchers: [
                 {
-                    voucherAmount: parseInt(product.voucherAmount),
+                    voucherAmount: parseInt(product.voucherAmount.replace("€", "")),
                     used: false
                 }
             ],
@@ -338,9 +343,9 @@ const AddProduct = (props) => {
                                 if (shipment && shipment["@id"]) {
                                     let description = "";
                                     if (shipment.closed) {
-                                        description = "Vous avez ajouté 15 produits, rendez-vous sur votre back-office pour télécharger votre étiquette d'envoi !"
+                                        description = "Vous avez ajouté 15 produits, rendez-vous sur votre back-office pour télécharger votre étiquette d'envoi !";
                                     } else {
-                                        description = "Il vous reste " + shipment.leftProducts + " produits à ajouter avant de pouvoir les envoyer à Once Again."
+                                        description = "Il vous reste " + shipment.leftProducts + " produits à ajouter avant de pouvoir les envoyer à notre partenaire.";
                                     }
                                     props.navigation.navigate("NewProduct", {
                                         screen: "ResultPage",
@@ -502,28 +507,42 @@ const AddProduct = (props) => {
                         placeholder="0,00€"
                         placeholderTextColor={colors.gray2}
                         value={product.voucherAmount}
+                        onFocus={() => {
+                            if (product.voucherAmount) {
+                                const newValue = product.voucherAmount.replace("€", "");
+                                setProduct({ ...product, voucherAmount: newValue });
+                            }
+                        }}
+                        onBlur={() => {
+                            if (product.voucherAmount) {
+                                const newValue = (product.voucherAmount + "€").replace(",", ".");
+                                setProduct({ ...product, voucherAmount: newValue });
+                            }
+                        }}
                         keyboardType="decimal-pad"
                         onChangeText={(voucherAmount) => setProduct({ ...product, voucherAmount })}
                     />
-                    {argus.voucherAmount && <Text style={[styles.font14, styles.fontSofiaRegular, { color: colors.gray2 }]}>Montant consseillé: {argus.voucherAmount}€</Text>}
+                    {argus.voucherAmount && <Text style={[styles.font14, styles.fontSofiaRegular, { color: colors.gray2 }]}>Montant conseillé: {argus.voucherAmount}€</Text>}
                 </View>
 
-                <View style={[styles.addProductInputContainer, { backgroundColor: "rgba(216, 255, 0, 0.22)", flexDirection: "row", alignItems: "center", padding: 15 }]}>
-                    <Text style={[styles.font24, styles.fontSofiaRegular]}>💡</Text>
-                    <Text style={{ marginLeft: 15, fontSize: 16, lineHeight: 22, width: "87%", color: "#707070", fontFamily: "SofiaPro-Regular" }}>
-                        Si l’article n’est pas vendu, notre partenaire Once Again s’engage à le racheter au prix de {argus.buyingPrice ? argus.buyingPrice : "0,00"}€
-                    </Text>
-                </View>
+                {argus.fetchArgus && (
+                    <View style={[styles.addProductInputContainer, { backgroundColor: "rgba(216, 255, 0, 0.22)", flexDirection: "row", alignItems: "center", padding: 15 }]}>
+                        <Text style={[styles.font24, styles.fontSofiaRegular]}>💡</Text>
+                        <Text style={{ marginLeft: 15, fontSize: 16, lineHeight: 22, width: "87%", color: "#707070", fontFamily: "SofiaPro-Regular" }}>
+                            {argus.buyingPrice
+                                ? `Si l’article n’est pas vendu, notre partenaire s’engage à le racheter au prix de ${argus.buyingPrice}€`
+                                : "Notre partenaire ne reprend malheureusement pas cet article."}
+                        </Text>
+                    </View>
+                )}
 
                 <TouchableOpacity
                     onPress={() => setBtnStatus("partner")}
                     style={[styles.addProductInputContainer, btnStatus === "partner" && componentStyle.btnActive, { padding: 20 }]}>
-                    <Text style={[styles.addProductLabel, styles.textCenter]}>Envoi à Once Again</Text>
+                    <Text style={[styles.addProductLabel, styles.textCenter]}>Envoi partenaire</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress={() => setBtnStatus("sell")}
-                    style={[styles.addProductInputContainer, btnStatus === "sell" && componentStyle.btnActive, { padding: 20 }]}>
+                <TouchableOpacity onPress={() => setBtnStatus("sell")} style={[styles.addProductInputContainer, btnStatus === "sell" && componentStyle.btnActive, { padding: 20 }]}>
                     <Text style={[styles.addProductLabel, styles.textCenter]}>Mise en rayon</Text>
                 </TouchableOpacity>
 
