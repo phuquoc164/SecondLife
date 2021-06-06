@@ -10,7 +10,7 @@ import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
-import { convertDateToString, InputSearch } from "../../lib/Helpers";
+import { convertDateToDisplay, InputSearch } from "../../lib/Helpers";
 import { loading } from "../../lib/Helpers";
 
 let voucherSwiped = null;
@@ -133,7 +133,7 @@ const InactifVouchers = (props) => {
                     <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${item.customer.firstname} ${item.customer.lastname}`}</Text>
                     <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.customer.email}</Text>
                     <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item["@id"]}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaSemiBold, styles.textMediumGray]}>{convertDateToString(item.expirationDate, true)}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaSemiBold, styles.textMediumGray]}>{convertDateToDisplay(item.expirationDate, true)}</Text>
                 </View>
                 <View>
                     <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, styles.textRight]}>{item.voucherAmount}€</Text>
@@ -171,7 +171,7 @@ const InactifVouchers = (props) => {
         const filterToLower = filter.toLowerCase();
         const newFilteredVouchers = vouchers.usedOrExpired.filter((voucher) => {
             const { voucherAmount, expirationDate, customer } = voucher;
-            const expirationDateFormatted = convertDateToString(expirationDate);
+            const expirationDateFormatted = convertDateToDisplay(expirationDate);
 
             return (
                 customer.firstname.toLowerCase().includes(filterToLower) ||
