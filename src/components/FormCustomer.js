@@ -6,7 +6,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 /** App */
 import styles from "../assets/css/styles";
 import { colors } from "../lib/colors";
-import { convertDateToApi, convertDateToString } from "../lib/Helpers";
+import { convertDateToApi, convertDateToDisplay } from "../lib/Helpers";
 import CustomDateTimePicker from "./CustomDateTimePicker";
 
 let initialDate = new Date();
@@ -24,6 +24,7 @@ const FormCustomer = (props) => {
     return (
         <SafeAreaView>
             <KeyboardAwareScrollView>
+                {/* Prénom */}
                 <View style={componentStyle.inputContainer}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/name.png")} style={{ width: 20, height: 30.8 }} />
@@ -38,6 +39,8 @@ const FormCustomer = (props) => {
                         onChangeText={(firstname) => setCustomer({ ...customer, firstname })}
                     />
                 </View>
+
+                {/* Nom */}
                 <View style={componentStyle.inputContainer}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/name.png")} style={{ width: 25, height: 30.8 }} />
@@ -52,6 +55,8 @@ const FormCustomer = (props) => {
                         onChangeText={(lastname) => setCustomer({ ...customer, lastname })}
                     />
                 </View>
+
+                {/* Birthday */}
                 <View style={componentStyle.inputContainer}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/birthday.png")} style={{ width: 25, height: 29.3 }} />
@@ -59,15 +64,17 @@ const FormCustomer = (props) => {
                     {props.editable ? (
                         <TouchableOpacity onPress={() => setShowCalendar(true)}>
                             <Text style={[birthdayRef.current.color, styles.font20, componentStyle.input, { paddingVertical: 7 }]}>
-                                {convertDateToString(birthdayRef.current.value)}
+                                {convertDateToDisplay(birthdayRef.current.value)}
                             </Text>
                         </TouchableOpacity>
                     ) : (
                         <Text style={[birthdayRef.current.color, styles.font20, componentStyle.input, { paddingVertical: 7 }]}>
-                            {convertDateToString(birthdayRef.current.value)}
+                            {convertDateToDisplay(birthdayRef.current.value)}
                         </Text>
                     )}
                 </View>
+
+                {/* Phone */}
                 <View style={componentStyle.inputContainer}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/phone.png")} style={{ width: 30, height: 26.1 }} />
@@ -83,6 +90,8 @@ const FormCustomer = (props) => {
                         onChangeText={(phone) => setCustomer({ ...customer, phone })}
                     />
                 </View>
+
+                {/* Email */}
                 <View style={componentStyle.inputContainer}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/email.png")} style={{ width: 30, height: 28.3 }} />
@@ -99,6 +108,8 @@ const FormCustomer = (props) => {
                         onChangeText={(email) => setCustomer({ ...customer, email })}
                     />
                 </View>
+
+                {/* Address */}
                 <View style={componentStyle.inputContainer}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/home.png")} style={{ width: 30, height: 30.9 }} />
@@ -113,12 +124,15 @@ const FormCustomer = (props) => {
                         onChangeText={(address) => setCustomer({ ...customer, address })}
                     />
                 </View>
+
+                {/* Code postal */}
                 <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginHorizontal: 20 }}>
                     <View style={componentStyle.smallContainer}>
                         <TextInput
                             editable={props.editable}
                             style={[styles.textDarkBlue, styles.font20, componentStyle.input]}
-                            placeholder="Postal Code"
+                            placeholder="Code Postal"
+                            keyboardType="decimal-pad"
                             placeholderTextColor={colors.mediumGray}
                             autoCompleteType="postal-code"
                             value={customer.zipCode}
