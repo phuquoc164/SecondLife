@@ -1,5 +1,7 @@
 export const STORAGE_USER = "storage_user";
 
+export const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juiilet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
 export const initialCustomer = { 
     firstname: null, 
     lastname: null, 
