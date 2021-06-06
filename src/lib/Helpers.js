@@ -6,6 +6,7 @@ import { ActivityIndicator, View, Image, Text, TextInput } from "react-native";
 import styles from "../assets/css/styles";
 import CustomModal from "../components/CustomModal";
 import { colors } from "./colors";
+import { monthNames } from "./constants";
 
 /**
  * Verify if the champ have form of email
@@ -69,17 +70,22 @@ export const InputSearch = (props) => (
  * @param date
  * @param withOptions
  */
-export const convertDateToString = (date, withOptions = false) => {
-    const options = withOptions ? { year: "numeric", month: "long", day: "numeric" } : {};
-    return new Date(date).toLocaleDateString("fr-Fr", options);
+export const convertDateToDisplay = (date, isMonthText = false) => {
+    const dateObject = new Date(date);
+    const dd = String(dateObject.getDate()).padStart(2, "0");
+    const monthInNumber = dateObject.getMonth();
+    const mm = String(monthInNumber + 1).padStart(2, "0");
+    const yyyy = dateObject.getFullYear();
+
+    return isMonthText ? dd + " " + monthNames[monthInNumber] + " " + yyyy : dd + "/" + mm + "/" + yyyy;
 };
 
 /**
  * format date to send api
- * @param {*} date 
- * @returns 
+ * @param {*} date
+ * @returns
  */
-export const convertDateToApi = (date) => new Date(date).toISOString().slice(0,10); 
+export const convertDateToApi = (date) => new Date(date).toISOString().slice(0, 10);
 
 export const getSimpleDiff = (oldObject, newObject) => {
     const diffs = {};
