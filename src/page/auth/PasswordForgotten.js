@@ -21,7 +21,7 @@ const PasswordForgotten = (props) => {
                 <Image source={require("../../assets/images/arrow-down.png")} style={{ width: 30, height: 49 }} />
                 <TouchableOpacity onPress={() => Linking.openURL("https://thesecondelife.com")}>
                     <LinearGradient style={stylesComponent.button} colors={["#0EE38A", "#A3F8FF"]} useAngle={true} angle={170}>
-                        <Text style={[styles.fontSofiaMedium, stylesComponent.buttonText]}>Thesecondelife.com</Text>
+                        <Text style={[styles.fontSofiaMedium, stylesComponent.buttonText]}>thesecondelife.io</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>

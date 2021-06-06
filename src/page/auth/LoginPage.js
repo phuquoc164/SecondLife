@@ -89,9 +89,9 @@ const LoginPage = (props) => {
                 throw Error("Erreur de serveur");
             }
         } catch (error) {
-            console.error(error);
-            if (error === "401" || error === "404") {
-                Alert.alert("Votre email ou votre mot de passe n'est pas correct, veuillez re-essayer!");
+            console.error(typeof error);
+            if (error === 401 || error === 404) {
+                Alert.alert("Erreur", "Votre email ou votre mot de passe n'est pas correct, veuillez re-essayer!");
             } else {
                 Alert.alert("Erreur de serveur", "Veuillez-vous réessayer!");
             }
@@ -191,7 +191,7 @@ const LoginPage = (props) => {
                     </TouchableOpacity>
                     <Text style={[styles.fontSofiaRegular, styles.font14, styles.textCenter]}>Vous n'avez pas encore de compte ?</Text>
                     <TouchableOpacity onPress={() => props.navigation.navigate("PasswordForgotten", { title: "Pour vous inscrire, rendez-vous sur" })}>
-                        <Text style={[styles.fontSofiaMedium, styles.font14, styles.textCenter]}>Inscrivez-vous</Text>
+                        <Text style={[styles.fontSofiaMedium, stylesLogin.passwordForgotten, styles.font14, styles.textCenter]}>Inscrivez-vous</Text>
                     </TouchableOpacity>
                 </View>
             </Animated.View>
