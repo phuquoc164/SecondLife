@@ -8,7 +8,7 @@ import { colors } from "../lib/colors";
 const listItems = ["Customer", "Scanner", "Home", "Catalog", "Voucher"];
 const listItemsData = {
     Customer: {
-        title: "Client",
+        title: "Clients",
         image: require(`../assets/images/client-item.png`),
         imageStyle: { width: 26.3, height: 26 },
         screen: "ListCustomers"
@@ -26,7 +26,7 @@ const listItemsData = {
         screen: "Catalog"
     },
     Voucher: {
-        title: "Bon d'achat",
+        title: "Bons d'achat",
         image: require(`../assets/images/voucher-item.png`),
         imageStyle: { width: 26, height: 26 },
         screen: "ActifVouchers"
