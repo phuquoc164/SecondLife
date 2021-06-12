@@ -11,7 +11,7 @@ const PickerCategories = (props) => {
     const { visible, title, items, categoryIds, prefix, selected, onSelected, handleClose } = props;
 
     const getSelectedPicker = (index) => {
-        if (selected) {
+        if (selected && typeof selected === "string") {
             const selectedDatas = selected.split("/");
             const prefixIndex = prefix[selectedDatas[0]];
             const name = selectedDatas[index];

@@ -13,6 +13,13 @@ const Picker = (props) => {
         options: props.items
     });
 
+    React.useEffect(() => {
+        setFilter({
+            keyword: "",
+            options: props.items
+        });
+    }, [props.items]);
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
             onPress={() => {
