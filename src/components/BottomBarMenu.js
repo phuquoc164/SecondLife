@@ -23,7 +23,7 @@ const listItemsData = {
         title: "Catalogue",
         image: require(`../assets/images/catalog-item.png`),
         imageStyle: { width: 28.5, height: 26 },
-        screen: "Catalog"
+        screen: "OnceAgain"
     },
     Voucher: {
         title: "Bons d'achat",
@@ -51,17 +51,15 @@ const BottomBarMenu = ({ state, navigation }) => {
                         target: key
                     });
 
-                    if (!isFocused && !event.defaultPrevented) {
+                    if (!event.defaultPrevented) {
                         if (name === "Home") {
                             navigation.navigate("Home", { params: { animation: false } });
                         } else {
-                            navigation.navigate(name, { screen: listItemsData[name].screen });
+                            navigation.navigate(name, {
+                                screen: listItemsData[name].screen,
+                                params: { fromBottomMenu: true }
+                            });
                         }
-                    } else if (isFocused && !event.defaultPrevented && name === "Voucher") {
-                        navigation.navigate(name, {
-                            screen: listItemsData[name].screen,
-                            params: { fromBottomMenu: true }
-                        });
                     }
                 };
 
