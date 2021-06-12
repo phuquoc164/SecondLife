@@ -2,15 +2,15 @@ export const STORAGE_USER = "storage_user";
 
 export const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juiilet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 
-export const initialCustomer = { 
-    firstname: null, 
-    lastname: null, 
-    birthday: null, 
-    phone: null, 
-    email: null, 
-    address: null, 
-    zipCode: null, 
-    city: null 
+export const initialCustomer = {
+    firstname: null,
+    lastname: null,
+    birthday: null,
+    phone: null,
+    email: null,
+    address: null,
+    zipCode: null,
+    city: null
 };
 
 export const initialProduct = {
@@ -25,7 +25,7 @@ export const initialProduct = {
     voucherAmount: null,
     seller: null,
     reference: null
-}
+};
 
 export const stateDict = {
     GOOD: "Bon état",
@@ -40,6 +40,12 @@ export const TITLE = {
     voucher: ["Bon d'achat", "Historique"],
     profil: ["Compte"],
     products: ["Nouveau Lifer", "Trouver un client", "Informations client", "Ajouter un produit"]
+};
+
+export const SHIPMENT_STATUS = {
+    inProgress: "En courrs d'envoi",
+    shipped: "Expédié",
+    done: "Reçu"
 };
 
 // ==============================
