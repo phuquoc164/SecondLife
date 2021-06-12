@@ -31,32 +31,42 @@ const OnceAgain = (props) => {
     const { user } = React.useContext(AuthContext);
 
     React.useEffect(() => {
+        !isLoading && setIsLoading(true);
+        setDataDetail(null);
         getData();
     }, [tabActive]);
 
+    // Delete produit from product detail
     React.useEffect(() => {
         if (props.route.params.deleteProduct && dataDetailed) {
+            setIsLoadingScreen(true);
             //TODO: erreeur unexpected end of json input
-            FetchService.delete(dataDetailed["@id"], user.token).then((result) => {
-                console.log(result);
-                if (result) {
-                    const newData = data.filter((product) => product["@id"] !== dataDetailed["@id"]);
-                    setData(newData);
-                    setFilter({
-                        keyword: "",
-                        listOptions: newData
-                    });
-                    if (listProductsSelected.ids.includes(dataDetailed["@id"])) {
-                        const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== dataDetailed["@id"]);
-                        const newIds = listProductsSelected.ids.filter((id) => id !== dataDetailed["@id"]);
-                        setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
+            FetchService.delete(dataDetailed["@id"], user.token)
+                .then((result) => {
+                    if (result) {
+                        const newData = data.filter((product) => product["@id"] !== dataDetailed["@id"]);
+                        setData(newData);
+                        setFilter({
+                            keyword: "",
+                            listOptions: newData
+                        });
+                        if (listProductsSelected.ids.includes(dataDetailed["@id"])) {
+                            const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== dataDetailed["@id"]);
+                            const newIds = listProductsSelected.ids.filter((id) => id !== dataDetailed["@id"]);
+                            setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
+                        }
+                        setDataDetail(null);
+                        setIsLoadingScreen(false);
                     }
-                    setDataDetail(null);
-                }
-            });
+                })
+                .catch((error) => {
+                    console.error(error);
+                    Alert.alert("Erreur", "Delete product fail");
+                });
         }
     }, [props.route.params]);
 
+    // get product or get shipments
     const getData = () => {
         const endpoint = tabActive === "products" ? "/products?isSentToPartner=0" : "/shipments";
         FetchService.get(endpoint, user.token)
@@ -84,7 +94,7 @@ const OnceAgain = (props) => {
      */
     const renderListProducts = ({ item }) => (
         <View key={item["@id"]} style={styles.singleProduct}>
-            <TouchableOpacity onPress={() => handleDisplayDataDetail(item)}>
+            <TouchableOpacity onPress={() => handleDisplayProductDetail(item)}>
                 <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.title}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand.name}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${item.seller.name} - ${convertDateToDisplay(item.createAt)}`}</Text>
@@ -107,7 +117,13 @@ const OnceAgain = (props) => {
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Statut: {SHIPMENT_STATUS[item.status]}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Nombre d'articles: {item.totalProducts}</Text>
             </View>
-            <TouchableOpacity onPress={() => setDataDetail(item)}>
+            <TouchableOpacity
+                onPress={() => {
+                    props.navigation.setOptions({
+                        handleGoBack: () => setDataDetail(null)
+                    });
+                    setDataDetail(item);
+                }}>
                 <Text style={[styles.font14, styles.fontSofiaRegular, styles.textMediumGray]}>Voir le détail</Text>
             </TouchableOpacity>
         </View>
@@ -127,8 +143,8 @@ const OnceAgain = (props) => {
                     {dataDetailed.products.map((productShipment, index) => {
                         const { product } = productShipment;
                         return (
-                            <View key={product["@id"]} style={{flexDirection: "row"}}>
-                                <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, {marginRight: 10}]}>{index + 1}.</Text>
+                            <View key={product["@id"]} style={{ flexDirection: "row" }}>
+                                <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, { marginRight: 10 }]}>{index + 1}.</Text>
                                 <View>
                                     <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{product.title}</Text>
                                     <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{product.reference}</Text>
@@ -242,7 +258,7 @@ const OnceAgain = (props) => {
             });
     };
 
-    const handleDisplayDataDetail = (item) => {
+    const handleDisplayProductDetail = (item) => {
         setDataDetail(item);
         props.navigation.navigate("Catalog", {
             screen: "ProductDetail",
@@ -258,26 +274,15 @@ const OnceAgain = (props) => {
     const placeHolderFilter = tabActive === "products" ? "Chercher une commande..." : "Chercher un n° de suivi...";
 
     return (
-        <View style={styles.mainScreen}>
+        <View style={[styles.mainScreen, { paddingBottom: 150 }]}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            setIsLoading(true);
-                            setDataDetail(null);
-                            setTabActive("products");
-                        }}
-                        style={{ alignSelf: "center" }}>
+                    <TouchableOpacity onPress={() => setTabActive("products")} style={{ alignSelf: "center" }}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "products" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>À envoyer</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.flex1}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            setIsLoading(true);
-                            setDataDetail(null);
-                            setTabActive("shipments");
-                        }}>
+                    <TouchableOpacity onPress={() => setTabActive("shipments")}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "shipments" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>Envoyés</Text>
                     </TouchableOpacity>
                 </View>
@@ -285,6 +290,7 @@ const OnceAgain = (props) => {
             {!dataDetailed && <InputSearch placeholder={placeHolderFilter} placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />}
 
             {isLoading && loading()}
+            {/* TODO: find the way for scroll view  */}
             {!isLoading && tabActive === "products" && (
                 <>
                     <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
@@ -334,7 +340,7 @@ const OnceAgain = (props) => {
                             )}
                         </TouchableOpacity>
                     </View>
-                    <SafeAreaView style={{ marginBottom: 490 }}>
+                    <SafeAreaView style={{ marginBottom: 450 }}>
                         <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
                     </SafeAreaView>
                 </>

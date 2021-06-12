@@ -1,16 +1,17 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList } from "react-native";
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, ScrollView } from "react-native";
 
 /** App */
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
-import { convertDateToDisplay, InputSearch, loading } from "../../lib/Helpers";
+import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../../lib/Helpers";
 
 const Rayon = (props) => {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingScreen, setIsLoadingScreen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [tabActive, setTabActive] = useState("sell");
     const [listProducts, setListProducts] = useState([]);
     const [listProductsSelected, setListProductsSelected] = useState({
@@ -21,15 +22,49 @@ const Rayon = (props) => {
         keyword: "",
         listProducts: []
     });
-
+    const [productDetail, setProductdetail] = useState(null);
     const { user } = React.useContext(AuthContext);
 
     React.useEffect(() => {
+        !isLoading && setIsLoading(true);
+        setProductdetail(null);
         getListProducts();
     }, [tabActive]);
 
+    React.useEffect(() => {
+        if (dataDetailed) {
+            setIsLoadingScreen(true);
+            const { deleteProduct, sellProduct } = props.route.params;
+            if (deleteProduct) {
+                //TODO: erreeur unexpected end of json input
+                FetchService.delete(productDetail["@id"], user.token).then((result) => {
+                    if (result) {
+                        const newData = data.filter((product) => product["@id"] !== productDetail["@id"]);
+                        setData(newData);
+                        setFilter({
+                            keyword: "",
+                            listOptions: newData
+                        });
+                        if (listProductsSelected.ids.includes(productDetail["@id"])) {
+                            const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== productDetail["@id"]);
+                            const newIds = listProductsSelected.ids.filter((id) => id !== productDetail["@id"]);
+                            setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
+                        }
+                        setProductdetail(null);
+                        setIsLoadingScreen(false);
+                    }
+                }).catch(error => {
+                    console.error(error);
+                    Alert.alert("Erreur", "Delete product fail");
+                });
+            } else if (sellProduct) {
+                // TODO: handle sell Product
+            }
+        }
+        
+    }, [props.route.params]);
+
     const getListProducts = () => {
-        setIsLoading(true);
         const endpoint = tabActive === "sell" ? "/products?isSell=0" : "/products?isSell=1";
         FetchService.get(endpoint, user.token)
             .then((result) => {
@@ -58,11 +93,21 @@ const Rayon = (props) => {
 
         return (
             <View key={item["@id"]} style={styles.singleProduct}>
-                <View>
+                <TouchableOpacity
+                    onPress={() => {
+                        if (tabActive === "sell") {
+                            handleDisplayProductDetail(item);
+                        } else {
+                            props.navigation.setOptions({
+                                handleGoBack: () => setDataDetail(null)
+                            });
+                            setProductdetail(item);
+                        }
+                    }}>
                     <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.title}</Text>
                     <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand.name}</Text>
                     <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${sellBy}${item.seller.name} - ${convertDateToDisplay(item.createAt)}`}</Text>
-                </View>
+                </TouchableOpacity>
                 {tabActive === "sell" && (
                     <TouchableOpacity onPress={() => handleSelectProduct(item)}>
                         {listProductsSelected.ids.includes(item["@id"]) ? (
@@ -73,6 +118,77 @@ const Rayon = (props) => {
                     </TouchableOpacity>
                 )}
             </View>
+        );
+    };
+
+    const renderSoldProductDetail = () => {
+        const voucher = productDetail.vouchers[0];
+        let statusVoucher = "";
+        if (voucher) {
+            statusVoucher = voucher.used ? "Utilisé" : voucher.expired ? "Expiré" : "Valide";
+        }
+        return (
+            <ScrollView>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Nom</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.title}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Marque</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.brand.name}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Catégorie</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.category.name}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Taille</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.size.size}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Etat</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.state.state}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Description</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.description}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Seller</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.seller.name}</Text>
+                </View>
+                <View style={{ marginHorizontal: 20 }}>
+                    <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de dépôt: {convertDateToDisplay(productDetail.createAt)}</Text>
+                    {voucher && (
+                        <View>
+                            <Text style={[styles.font20, styles.textDarkBlue, styles.fontSofiaSemiBold, { marginVertical: 20 }]}>Valeur de bon d'achat</Text>
+                            <View
+                                style={{
+                                    borderColor: "rgba(0, 0, 0, 0.22)",
+                                    borderWidth: 1,
+                                    borderRadius: 30,
+                                    backgroundColor: colors.white,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 20,
+                                    width: 140,
+                                    alignSelf: "center",
+                                    marginBottom: 20
+                                }}>
+                                <Text style={[styles.font24, styles.textDarkBlue, styles.fontSofiaSemiBold, styles.textCenter]}>{voucher.voucherAmount}€</Text>
+                            </View>
+                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Statut: {statusVoucher}</Text>
+                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de validité: {convertDateToDisplay(voucher.expirationDate)}</Text>
+                        </View>
+                    )}
+                    <View>
+                        <Text style={[styles.font20, styles.textDarkBlue, styles.fontSofiaSemiBold, { marginVertical: 20 }]}>Informations déposant</Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Prénom: {productDetail.customer.firstname}</Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Nom: {productDetail.customer.lastname}</Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Email: {productDetail.customer.email}</Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Tel: </Text>
+                    </View>
+                </View>
+            </ScrollView>
         );
     };
 
@@ -130,9 +246,23 @@ const Rayon = (props) => {
         });
     };
 
-    const handleSellProduct = () => {
-        console.log("do something");
-    }
+    const handleDisplayProductDetail = (item) => {
+        setProductdetail(item);
+        props.navigation.navigate("Catalog", {
+            screen: "ProductDetail",
+            params: {
+                productId: item["@id"],
+                screen: "Rayon",
+                btnText: "Marqué comme\nenvoyé"
+            }
+        });
+    };
+
+    // TODO: handle mettre comme envoyé
+    const handleSellProducts = () => {
+        setIsLoadingScreen(true);
+        // const
+    };
 
     const nbProductsSelected = listProductsSelected.ids.length;
 
@@ -152,6 +282,8 @@ const Rayon = (props) => {
             </View>
             <InputSearch placeholder="Chercher une commande..." placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             {isLoading && loading()}
+
+            {/* TODO: find the way to display well the list of produits */}
             {!isLoading && tabActive === "sell" && (
                 <>
                     <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
@@ -159,7 +291,10 @@ const Rayon = (props) => {
                         <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>{nbProductsSelected} produits sélectionnés</Text>
                         <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>{nbProductsSelected}</Text>
                         <View style={{ alignSelf: "center", marginBottom: 10 }}>
-                            <TouchableOpacity onPress={handleSellProduct} style={styles.btnSend}>
+                            <TouchableOpacity
+                                disabled={nbProductsSelected === 0}
+                                onPress={handleSellProducts}
+                                style={[styles.btnSend, nbProductsSelected === 0 && { opacity: 0.5 }]}>
                                 <Image source={require("../../assets/images/rayon.png")} style={styles.imageBtnSend} />
                                 <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { top: -0.5, paddingRight: 10, paddingLeft: 5 }]}>
                                     Marquer comme vendu
@@ -186,9 +321,10 @@ const Rayon = (props) => {
 
             {!isLoading && tabActive === "sold" && (
                 <SafeAreaView>
-                    <FlatList data={filter.listProducts} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
+                    {productDetail ? renderSoldProductDetail() : <FlatList data={filter.listProducts} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />}
                 </SafeAreaView>
             )}
+            {loadingScreen(isLoadingScreen)}
         </View>
     );
 };

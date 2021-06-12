@@ -8,103 +8,18 @@ import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 import { InputSearch, loading } from "../../lib/Helpers";
 
+// tab
 const Donation = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [tabActive, setTabActive] = useState("give");
-    const [listProducts, setListProducts] = useState([
-        {
-            "@id": 1,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            "@id": 2,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            "@id": 3,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            "@id": 4,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            "@id": 5,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            "@id": 6,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        }
-    ]);
+    const [listProducts, setListProducts] = useState([]);
     const [listProductsSelected, setListProductsSelected] = useState({
         allInfo: [],
         ids: []
     });
     const [filter, setFilter] = useState({
         keyword: "",
-        listProducts: [
-            {
-                "@id": 1,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                "@id": 2,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                "@id": 3,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                "@id": 4,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                "@id": 5,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                "@id": 6,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            }
-        ]
+        listProducts: []
     });
 
     const { user } = React.useContext(AuthContext);
@@ -112,7 +27,7 @@ const Donation = (props) => {
     React.useEffect(() => {}, [tabActive]);
 
     // TODO: get list products
-    const getListProducts = (tabActive) => {
+    const getData = (tabActive) => {
         setIsLoading(true);
     };
 
