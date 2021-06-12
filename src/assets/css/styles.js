@@ -165,6 +165,18 @@ export default StyleSheet.create({
         width: 220,
         height: 113
     },
+    buttonWithBorderGreen: { 
+        borderRadius: 10,
+        borderColor: colors.green,
+        borderWidth: 3,
+        marginHorizontal: 30,
+        marginBottom: 10,
+        paddingVertical: 15,
+        backgroundColor: colors.darkBlue 
+    },
+
+
+
     //input search
     inputContainer: {
         borderRadius: 5,
@@ -281,5 +293,12 @@ export default StyleSheet.create({
         fontFamily: "SofiaPro-Regular",
         color: colors.textDarkBlue,
         fontSize: 16
+    },
+    chevronDown: {
+        position: "absolute",
+        width: 40,
+        height: 33.2,
+        top: 22.5,
+        right: 20
     }
 });
