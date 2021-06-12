@@ -169,7 +169,7 @@ export default StyleSheet.create({
         borderRadius: 10,
         borderColor: colors.green,
         borderWidth: 3,
-        marginHorizontal: 30,
+        marginHorizontal: 20,
         marginBottom: 10,
         paddingVertical: 15,
         backgroundColor: colors.darkBlue 
@@ -278,7 +278,7 @@ export default StyleSheet.create({
         borderColor: "rgba(0, 0, 0, 0.22)",
         borderWidth: 1,
         borderRadius: 15,
-        marginHorizontal: 30,
+        marginHorizontal: 20,
         padding: 10,
         marginBottom: 20
     },

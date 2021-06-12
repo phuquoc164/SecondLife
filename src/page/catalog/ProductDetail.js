@@ -149,7 +149,7 @@ const ProductDetail = (props) => {
     const handleDeleteProduct = () => {
         props.navigation.navigate("Catalog", {
             screen: props.route.params.screen,
-            params: { deleteProduct: true, sendProduct: false }
+            params: { deleteProduct: true, sellProduct: false }
         });
     }
 
@@ -370,7 +370,7 @@ const ProductDetail = (props) => {
                         />
                     </>
                 )}
-                <View style={{ marginHorizontal: 30 }}>
+                <View style={{ marginHorizontal: 20 }}>
                     <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de dépôt: {convertDateToDisplay(productRef.current.createAt)}</Text>
                     {voucher && (
                         <View>
@@ -405,7 +405,7 @@ const ProductDetail = (props) => {
                     <View style={{ marginVertical: 20 }}>
                         <TouchableOpacity
                             onPress={handleSaveModification}
-                            style={[styles.greenScreen, { marginHorizontal: 30, paddingVertical: 10, borderRadius: 10, marginVertical: 10 }]}>
+                            style={[styles.greenScreen, { marginHorizontal: 20, paddingVertical: 10, borderRadius: 10, marginVertical: 10 }]}>
                             <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Sauvegarder</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={handleResetModification} style={styles.buttonWithBorderGreen}>
@@ -417,11 +417,12 @@ const ProductDetail = (props) => {
                         {props.route.params.btnText && (
                             <TouchableOpacity
                                 onPress={() => {
-                                    props.navigation.push({
-
+                                    props.navigation.navigate("Catalog", {
+                                        screen: props.route.params.screen,
+                                        params: { deleteProduct: false, sellProduct: true }
                                     });
                                 }}
-                                style={[styles.greenScreen, { marginHorizontal: 30, paddingVertical: 10, borderRadius: 10, marginVertical: 10 }]}>
+                                style={[styles.greenScreen, { marginHorizontal: 20, paddingVertical: 10, borderRadius: 10, marginVertical: 10 }]}>
                                 <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>{props.route.params.btnText}</Text>
                             </TouchableOpacity>
                         )}
