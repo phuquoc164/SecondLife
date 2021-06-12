@@ -136,6 +136,7 @@ const LoginPage = (props) => {
                         autoCorrect={false}
                         autoCompleteType="email"
                         autoCapitalize="none"
+                        keyboardType="email-address"
                         value={email.value}
                         placeholder="exemple@gmail.com"
                         placeholderTextColor="#6A6A6A"
