@@ -21,7 +21,7 @@ const CustomerDetailProduct = (props) => {
         if (props.route.params.customerId) {
             getCustomer(props.route.params.customerId);
         }
-    }, [props.route.params.customerId]);
+    }, [props.route.params]);
 
     const getCustomer = (customerId) => {
         FetchService.get(customerId, token)
@@ -32,6 +32,7 @@ const CustomerDetailProduct = (props) => {
             })
             .catch((error) => {
                 console.error(error);
+                // TODO: change text
                 Alert.alert("Error");
             });
     };
@@ -41,7 +42,10 @@ const CustomerDetailProduct = (props) => {
         props.navigation.setOptions({ title: "Modifier les informations" });
     };
 
-    const handleModifyCustomer = (newCustomer) => {};
+    // TODO: modify customer
+    const handleModifyCustomer = (newCustomer) => {
+
+    };
 
     if (!customer) {
         return loading();

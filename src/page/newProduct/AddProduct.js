@@ -1,6 +1,6 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Image, TextInput, Linking, Platform, Alert } from "react-native";
+import { SafeAreaView, Text, View, TouchableOpacity, Image, TextInput, Linking, Platform, Alert, ActivityIndicator } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
@@ -16,11 +16,11 @@ import Picker from "../../components/Picker";
 import ModalPhoto from "../../components/ModalPhoto";
 import PickerCategories from "../../components/PickerCategories";
 
-let scrollRef = null;
 const AddProduct = (props) => {
     const { user } = React.useContext(AuthContext);
-
+    const firstView = React.createRef();
     const [isLoadingScreen, setIsLoadingScreen] = useState(false);
+    const [isLoadingBtnSubmit, setIsLoadingBtnsubmit] = useState(false);
     const [product, setProduct] = useState(initialProduct);
     const [listOptions, setListOptions] = useState({
         brands: [],
@@ -49,6 +49,7 @@ const AddProduct = (props) => {
         categoriesRef.current = categories;
         _setCategories(categories);
     };
+    const scrollRef = React.useRef(null);
 
     const resetArgus = () => {
         setArgus({
@@ -71,7 +72,7 @@ const AddProduct = (props) => {
             });
             resetArgus();
             if (scrollRef) {
-                scrollRef.prrops.scrollToPosition(0, 0);
+                scrollRef.current.scrollTo(0, 0);
             }
         } else {
             getListOptions();
@@ -278,7 +279,6 @@ const AddProduct = (props) => {
             endPoint += "&category=" + categoriesData[categoriesData.length - 1] + "&state=" + data.value.value;
         }
         setIsLoadingScreen(true);
-        console.log(endPoint);
         FetchService.get(endPoint, user.token)
             .then((result) => {
                 console.log(result);
@@ -303,7 +303,7 @@ const AddProduct = (props) => {
     };
 
     const handlSubmitForm = () => {
-        console.log(product);
+        setIsLoadingBtnsubmit(true);
         const data = {
             images: product.images.map((image) => image.id),
             vouchers: [
@@ -360,6 +360,7 @@ const AddProduct = (props) => {
                             });
                         }
                     }
+                    setIsLoadingBtnsubmit(false);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -376,8 +377,10 @@ const AddProduct = (props) => {
         <SafeAreaView style={styles.mainScreen}>
             <KeyboardAwareScrollView
                 innerRef={(ref) => {
-                    scrollRef = ref;
+                    console.log("rref", ref);
+                    scrollRef.current = ref;
                 }}>
+                <View ref={firstView} />
                 <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }]}>
                     <Text style={[styles.textCenter, styles.addProductLabel]}>Ajoute jusqu'à 5 photos</Text>
                     {product.images.length === 0 && (
@@ -451,7 +454,7 @@ const AddProduct = (props) => {
                     <Text style={[styles.addProductInput, { color: product.brand ? colors.darkBlue : colors.gray2 }]}>
                         {product.brand ? product.brand.name : "Sélectionnez une marque"}
                     </Text>
-                    <Image source={require("../../assets/images/chevron-down.png")} style={componentStyle.chevronDown} />
+                    <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                 </TouchableOpacity>
 
                 {/* Category */}
@@ -460,28 +463,28 @@ const AddProduct = (props) => {
                     onPress={() => setModal("category")}
                     style={[styles.addProductInputContainer, styles.positionRelative, !product.brand && { opacity: 0.4 }]}>
                     <Text style={styles.addProductLabel}>Catégorie</Text>
-                    <Text style={[styles.addProductInput, { color: product.brand ? colors.darkBlue : colors.gray2 }]}>
+                    <Text style={[styles.addProductInput, { color: product.category ? colors.darkBlue : colors.gray2 }]}>
                         {product.category ? product.category : "Sélectionnez une catégorie"}
                     </Text>
-                    <Image source={require("../../assets/images/chevron-down.png")} style={componentStyle.chevronDown} />
+                    <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                 </TouchableOpacity>
 
                 {/* Size */}
                 <TouchableOpacity onPress={() => setModal("size")} style={[styles.addProductInputContainer, styles.positionRelative]}>
                     <Text style={styles.addProductLabel}>Taille</Text>
-                    <Text style={[styles.addProductInput, { color: product.brand ? colors.darkBlue : colors.gray2 }]}>
+                    <Text style={[styles.addProductInput, { color: product.size ? colors.darkBlue : colors.gray2 }]}>
                         {product.size ? product.size.name : "Renseignez la taille de l'article"}
                     </Text>
-                    <Image source={require("../../assets/images/chevron-down.png")} style={componentStyle.chevronDown} />
+                    <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                 </TouchableOpacity>
 
                 {/* State */}
                 <TouchableOpacity onPress={() => setModal("state")} style={[styles.addProductInputContainer, styles.positionRelative]}>
                     <Text style={styles.addProductLabel}>Etat</Text>
-                    <Text style={[styles.addProductInput, { color: product.brand ? colors.darkBlue : colors.gray2 }]}>
+                    <Text style={[styles.addProductInput, { color: product.state ? colors.darkBlue : colors.gray2 }]}>
                         {product.state ? product.state.name : "Indiquez l'état de l'article"}
                     </Text>
-                    <Image source={require("../../assets/images/chevron-down.png")} style={componentStyle.chevronDown} />
+                    <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                 </TouchableOpacity>
 
                 {/* Description */}
@@ -538,17 +541,17 @@ const AddProduct = (props) => {
 
                 <TouchableOpacity
                     onPress={() => setBtnStatus("partner")}
-                    style={[styles.addProductInputContainer, btnStatus === "partner" && componentStyle.btnActive, { padding: 20 }]}>
+                    style={[styles.addProductInputContainer, btnStatus === "partner" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : {padding: 20}]}>
                     <Text style={[styles.addProductLabel, styles.textCenter]}>Envoi partenaire</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setBtnStatus("sell")} style={[styles.addProductInputContainer, btnStatus === "sell" && componentStyle.btnActive, { padding: 20 }]}>
+                <TouchableOpacity onPress={() => setBtnStatus("sell")} style={[styles.addProductInputContainer, btnStatus === "sell" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : {padding: 20}]}>
                     <Text style={[styles.addProductLabel, styles.textCenter]}>Mise en rayon</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => setBtnStatus("donation")}
-                    style={[styles.addProductInputContainer, btnStatus === "donation" && componentStyle.btnActive, { padding: 20 }]}>
+                    style={[styles.addProductInputContainer, btnStatus === "donation" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : {padding: 20}]}>
                     <Text style={[styles.addProductLabel, styles.textCenter]}>Je donne à une association</Text>
                 </TouchableOpacity>
 
@@ -557,12 +560,18 @@ const AddProduct = (props) => {
                     <Text style={[styles.addProductInput, { color: product.seller ? colors.darkBlue : colors.gray2 }]}>
                         {product.seller ? product.seller.name : "Sélectionnez un vendeur"}
                     </Text>
-                    <Image source={require("../../assets/images/chevron-down.png")} style={componentStyle.chevronDown} />
+                    <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={handlSubmitForm} style={[styles.addProductInputContainer, styles.greenScreen, { paddingVertical: 20, marginBottom: 50 }]}>
-                    <Text style={[styles.addProductLabel, styles.textCenter, styles.textWhite]}>Continuer</Text>
-                </TouchableOpacity>
+                {isLoadingBtnSubmit ? (
+                    <View style={[styles.addProductInputContainer, styles.greenScreen, { paddingVertical: 20, marginBottom: 50 }]}>
+                        <ActivityIndicator color={colors.white} />
+                    </View>
+                ) : (
+                    <TouchableOpacity onPress={handlSubmitForm} style={[styles.addProductInputContainer, styles.greenScreen, { paddingVertical: 20, marginBottom: 50 }]}>
+                        <Text style={[styles.addProductLabel, styles.textCenter, styles.textWhite]}>Continuer</Text>
+                    </TouchableOpacity>
+                )}
 
                 {/* ========================================== */}
                 {/* Modal Brand */}
@@ -639,16 +648,4 @@ const AddProduct = (props) => {
     );
 };
 
-const componentStyle = StyleSheet.create({
-    chevronDown: {
-        position: "absolute",
-        width: 40,
-        height: 33.2,
-        top: 22.5,
-        right: 20
-    },
-    btnActive: {
-        backgroundColor: "rgba(14, 227, 138, 0.22)"
-    }
-});
 export default AddProduct;

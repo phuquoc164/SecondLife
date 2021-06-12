@@ -21,7 +21,7 @@ const ListCustomers = (props) => {
 
     React.useEffect(() => {
         getListCustomers();
-    }, []);
+    }, [props.route.params]);
 
     const getListCustomers = () => {
         FetchService.get("/customers", token)
