@@ -71,13 +71,16 @@ export const InputSearch = (props) => (
  * @param withOptions
  */
 export const convertDateToDisplay = (date, isMonthText = false) => {
-    const dateObject = new Date(date);
-    const dd = String(dateObject.getDate()).padStart(2, "0");
-    const monthInNumber = dateObject.getMonth();
-    const mm = String(monthInNumber + 1).padStart(2, "0");
-    const yyyy = dateObject.getFullYear();
-
-    return isMonthText ? dd + " " + monthNames[monthInNumber] + " " + yyyy : dd + "/" + mm + "/" + yyyy;
+    if (date) {
+        const dateObject = new Date(date);
+        const dd = String(dateObject.getDate()).padStart(2, "0");
+        const monthInNumber = dateObject.getMonth();
+        const mm = String(monthInNumber + 1).padStart(2, "0");
+        const yyyy = dateObject.getFullYear();
+    
+        return isMonthText ? dd + " " + monthNames[monthInNumber] + " " + yyyy : dd + "/" + mm + "/" + yyyy;
+    }
+    return '';
 };
 
 /**
