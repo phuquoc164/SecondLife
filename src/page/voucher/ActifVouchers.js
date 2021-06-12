@@ -28,8 +28,8 @@ const ActifVouchers = (props) => {
     const { user } = React.useContext(AuthContext);
 
     React.useEffect(() => {
-        setIsLoading(true);
         if (props.route.params) {
+            setIsLoading(true);
             if (props.route.params.available && props.route.params.usedOrExpired) {
                 const { available, usedOrExpired } = props.route.params;
                 setVouchers({ available, usedOrExpired });
@@ -65,9 +65,9 @@ const ActifVouchers = (props) => {
                     vouchers: available
                 });
                 setIsLoading(false);
+            } else {
+                getListVouchers();
             }
-        } else {
-            getListVouchers();
         }
     }, [props.route.params]);
 
@@ -98,16 +98,21 @@ const ActifVouchers = (props) => {
             });
     };
 
-    handleMaskAsUsedVoucher = () => {
+    const handleMaskAsUsedVoucher = () => {
         const data = { used: true };
         setModalConfirmation(false);
         FetchService.patch(voucherSwiped["@id"], data, user.token)
             .then((result) => {
-                console.log(result);
                 if (!!result && result["@id"]) {
                     const newAvailableVouchers = vouchers.available.filter((voucher) => voucher["@id"] !== voucherSwiped["@id"]);
                     const newUsedVouchers = [...vouchers.usedOrExpired, { ...voucherSwiped, used: true }];
-                    props.navigation.navigate("Voucher", { screen: "InactifVouchers", params: { available: newAvailableVouchers, usedOrExpired: newUsedVouchers } });
+                    const newVouchers = { available: newAvailableVouchers, usedOrExpired: newUsedVouchers };
+                    setVouchers(newVouchers);
+                    setFilter({
+                        keyword: "",
+                        vouchers: newVouchers.available
+                    });
+                    props.navigation.navigate("Voucher", { screen: "InactifVouchers", params: newVouchers });
                 }
             })
             .catch((error) => {
@@ -168,10 +173,10 @@ const ActifVouchers = (props) => {
 
     return (
         <SafeAreaView style={styles.mainScreen}>
-            {(props.route.params && props.route.params.fromBottomMenu) ? (
+            {props.route.params && props.route.params.fromBottomMenu ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
-                <View style={{ paddingVertical: 5 }}></View>
+                <View style={{ paddingVertical: 10 }}></View>
             )}
 
             {filter.vouchers.length > 0 ? (

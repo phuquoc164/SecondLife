@@ -29,8 +29,8 @@ const InactifVouchers = (props) => {
     const { user } = React.useContext(AuthContext);
 
     React.useEffect(() => {
-        setIsLoading(true);
         if (props.route.params) {
+            setIsLoading(true);
             if (props.route.params.available && props.route.params.usedOrExpired) {
                 const { available, usedOrExpired } = props.route.params;
                 setVouchers({ available, usedOrExpired });
@@ -67,9 +67,9 @@ const InactifVouchers = (props) => {
                     vouchers: usedOrExpired
                 });
                 setIsLoading(false);
+            } else {
+                getListVouchers();
             }
-        } else {
-            getListVouchers();
         }
     }, [props.route.params]);
 
@@ -105,14 +105,18 @@ const InactifVouchers = (props) => {
         let newDate = new Date();
         newDate.setMonth(newDate.getMonth() + 1);
         const data = { expirationDate: newDate.toISOString().slice(0, 10) };
-        console.log(data);
         FetchService.patch(voucherSwiped["@id"], data, user.token)
             .then((result) => {
                 if (!!result && result["@id"]) {
-                    console.log(result);
                     const newAvailableVouchers = [...vouchers.available, { ...voucherSwiped, expirationDate}];
                     const newUsedVouchers = vouchers.usedOrExpired.filter((voucher) => voucher["@id"] !== voucherSwiped["@id"]);
-                    props.navigation.navigate("Voucher", { screen: "ActifVouchers", params: { available: newAvailableVouchers, usedOrExpired: newUsedVouchers } });
+                    const newVouchers = { available: newAvailableVouchers, usedOrExpired: newUsedVouchers };
+                    setVouchers(newVouchers);
+                    setFilter({
+                        keyword: "",
+                        vouchers: newVouchers.usedOrExpired
+                    });
+                    props.navigation.navigate("Voucher", { screen: "ActifVouchers", params: newVouchers });
                 }
             })
             .catch((error) => {
