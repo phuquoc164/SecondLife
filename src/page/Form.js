@@ -24,7 +24,7 @@ const zIndexEmail = Platform.OS === "ios" ? { zIndex: 8 } : {};
 
 const Form = props => {
 	const [loading, setLoading] = useState(false);
-	const [loadingScreen, setLoadingScreen] = useState(false);
+	const [isLoadingScreen, setIsLoadingScreen] = useState(false);
 	const [hideSize, setHideSize] = useState(false);
 	const [categories, _setCategories] = useState({
 		options: [],
@@ -68,7 +68,6 @@ const Form = props => {
 	const listLastNamesFiltered = useRef(filterArray(listLastNames, information.lastName));
 	const listFirstNamesFiltered = useRef(filterArray(listFirstNames, information.firstName));
 	const listEmailsFiltered = useRef(filterArray(listEmails, information.email));
-	console.log(categoriesRef.current.options);
 
 	const setCategories = (categories) => {
 		categoriesRef.current = categories;
@@ -338,7 +337,7 @@ const Form = props => {
 	};
 
 	const handleSelectBrand = (selected) => {
-		setLoadingScreen(true);
+		setIsLoadingScreen(true);
 		FetchService.get("categories?brand=" + selected.Id, props.token).then(result => {
 			if (result.data.length > 0) {
 				const listCategories = [];
@@ -374,11 +373,11 @@ const Form = props => {
 					selected: null
 				});
 				setArticle({ ...article, category: null, brand: selected });
-				setLoadingScreen(false);
+				setIsLoadingScreen(false);
 			}
 		}).catch(error => {
 			console.error(error);
-			setLoadingScreen(false);
+			setIsLoadingScreen(false);
 			Alert.alert("Erreur système", "On ne peut pas récupérer la liste des catégories. Veuillez-vous réessayer!");
 		})
 	}
@@ -422,7 +421,7 @@ const Form = props => {
 
 		if (title === "Veuillez sélectionner ") {
 			endPoint = endPoint.slice(0, -1);
-			setLoadingScreen(true);
+			setIsLoadingScreen(true);
 			FetchService.get(endPoint, props.token)
 				.then(result => {
 					if (result.data.price && result.data.voucher && result.data.price !== 0 && result.data.voucher !== 0) {
@@ -459,7 +458,7 @@ const Form = props => {
 							}
 						});
 					}
-					setLoadingScreen(false);
+					setIsLoadingScreen(false);
 				})
 				.catch(error => {
 					console.error(error);
@@ -1002,23 +1001,7 @@ const Form = props => {
 				handleSelectPhoto={handleSelectPhoto}
 			/>
 			<ModalScanner visible={showScanner} onCancel={() => setShowScanner(false)} handleScanSuccess={handleScanSuccess} />
-			<CustomModal
-				visible={loadingScreen}
-				rootViewStyle={{ backgroundColor: "rgba(0,0,0,0.4)" }}
-				containerViewStyle={{
-					alignItems: "center",
-					position: "relative",
-					backgroundColor: "transparent",
-					borderRadius: 0,
-					shadowOpacity: 0,
-					shadowRadius: 0,
-					elevation: 0
-				}}>
-				<View style={{ justifyContent: "center" }}>
-					<ActivityIndicator color={colors.white} size="large" />
-					<Text style={{ color: colors.white, marginVertical: 10, fontSize: 18 }}>Chargement...</Text>
-				</View>
-			</CustomModal>
+			{loadingScreen(isLoadingScreen)}
 		</SafeAreaView>
 	);
 
