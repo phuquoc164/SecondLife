@@ -117,6 +117,19 @@ const App = () => {
                     </TouchableOpacity>
                 )}
                 {hasBackBtn && (!scene.descriptor.options.title || scene.descriptor.options.title === "Informations produit") && backButton()}
+
+                {/* Back button special for catalog page */}
+                {scene.descriptor.options.handleGoBack && (
+                    <TouchableOpacity
+                        onPress={() => {
+                            navigation.setOptions({handleGoBack: null});
+                            scene.descriptor.options.handleGoBack();
+                        }}
+                        style={styles.backImageBtn}>
+                        <Image source={require("./src/assets/images/back_btn.png")} style={styles.backImage} />
+                    </TouchableOpacity>
+                )}
+
                 {TITLE.catalog.includes(title) ? (
                     <TouchableOpacity onPress={() => navigation.navigate("MenuChangeCatalog", { title })}>
                         <Text style={styles.headerTitle}>{title}</Text>
