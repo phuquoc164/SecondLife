@@ -31,6 +31,7 @@ import OnceAgain from "./src/page/catalog/OnceAgain";
 import Rayon from "./src/page/catalog/Rayon";
 import Donation from "./src/page/catalog/Donation";
 import ResultPage from "./src/page/newProduct/ResultPage";
+import ProductDetail from "./src/page/catalog/ProductDetail";
 
 const RootStack = createStackNavigator();
 const Stack = createStackNavigator();
@@ -115,7 +116,7 @@ const App = () => {
                         <Image source={require("./src/assets/images/history.png")} style={styles.historyImage} />
                     </TouchableOpacity>
                 )}
-                {hasBackBtn && !scene.descriptor.options.title && backButton()}
+                {hasBackBtn && (!scene.descriptor.options.title || scene.descriptor.options.title === "Informations produit") && backButton()}
                 {TITLE.catalog.includes(title) ? (
                     <TouchableOpacity onPress={() => navigation.navigate("MenuChangeCatalog", { title })}>
                         <Text style={styles.headerTitle}>{title}</Text>
@@ -149,6 +150,7 @@ const App = () => {
             <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.catalog[0], false) }} name="OnceAgain" component={OnceAgain} />
             <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.catalog[1], false) }} name="Rayon" component={Rayon} />
             <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.catalog[2], false) }} name="Donation" component={Donation} />
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, "Informations produit") }} name="ProductDetail" component={ProductDetail} />
         </Stack.Navigator>
     );
 
