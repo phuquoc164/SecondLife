@@ -4,141 +4,77 @@ import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList
 
 /** App */
 import styles from "../../assets/css/styles";
+import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
-import { InputSearch, loading } from "../../lib/Helpers";
+import { convertDateToDisplay, InputSearch, loading } from "../../lib/Helpers";
 
 const Rayon = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [tabActive, setTabActive] = useState("sell");
-    const [listProducts, setListProducts] = useState([
-        {
-            '@id': 1,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            '@id': 2,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            '@id': 3,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            '@id': 4,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            '@id': 5,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        },
-        {
-            '@id': 6,
-            name: "Echarpe rouge",
-            brand: "Hermes",
-            seller: "Eugénie",
-            date: "11.02.2021"
-        }
-    ]);
+    const [listProducts, setListProducts] = useState([]);
     const [listProductsSelected, setListProductsSelected] = useState({
         allInfo: [],
         ids: []
     });
     const [filter, setFilter] = useState({
         keyword: "",
-        listProducts: [
-            {
-                '@id': 1,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                '@id': 2,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                '@id': 3,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                '@id': 4,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                '@id': 5,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            },
-            {
-                '@id': 6,
-                name: "Echarpe rouge",
-                brand: "Hermes",
-                seller: "Eugénie",
-                date: "11.02.2021"
-            }
-        ]
+        listProducts: []
     });
 
     const { user } = React.useContext(AuthContext);
 
     React.useEffect(() => {
-
+        getListProducts();
     }, [tabActive]);
 
-    // TODO: get listProducts
-    const getListProducts = (tabActive) => {
+    const getListProducts = () => {
         setIsLoading(true);
-    }
+        const endpoint = tabActive === "sell" ? "/products?isSell=0" : "/products?isSell=1";
+        FetchService.get(endpoint, user.token)
+            .then((result) => {
+                if (!!result && result["@id"] === "/products") {
+                    setListProducts(result["hydra:member"]);
+                    setFilter({
+                        keyword: "",
+                        listProducts: result["hydra:member"]
+                    });
+                    setIsLoading(false);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                Alert.alert("Error", "Can't get list products");
+            });
+    };
 
     /**
      * Render List products
      * @param {*} param0
      * @returns
      */
-    const renderListProducts = ({ item }) => (
-        <View key={item["@id"]} style={styles.singleProduct}>
-            <View>
-                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.name}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${item.seller} - ${item.date}`}</Text>
-            </View>
-            <TouchableOpacity onPress={() => handleSelectProduct(item)}>
-                {listProductsSelected.ids.includes(item["@id"]) ? (
-                    <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
-                ) : (
-                    <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
+    const renderListProducts = ({ item }) => {
+        const sellBy = tabActive === "sell" ? "" : "Vendu par ";
+
+        return (
+            <View key={item["@id"]} style={styles.singleProduct}>
+                <View>
+                    <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.title}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand.name}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${sellBy}${item.seller.name} - ${convertDateToDisplay(item.createAt)}`}</Text>
+                </View>
+                {tabActive === "sell" && (
+                    <TouchableOpacity onPress={() => handleSelectProduct(item)}>
+                        {listProductsSelected.ids.includes(item["@id"]) ? (
+                            <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
+                        ) : (
+                            <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
+                        )}
+                    </TouchableOpacity>
                 )}
-            </TouchableOpacity>
-        </View>
-    );
+            </View>
+        );
+    };
 
     /**
      * Handle select or unselect all products
@@ -175,7 +111,30 @@ const Rayon = (props) => {
         }
     };
 
-    const filterData = (filter) => {};
+    const filterData = (filter) => {
+        const filterToLower = filter.toLowerCase();
+        const newFilterProducts = listProducts.filter((product) => {
+            const { title, brand, seller, createAt } = product;
+            const date = convertDateToDisplay(createAt);
+            return (
+                title.toLowerCase().includes(filterToLower) ||
+                brand.name.toLowerCase().includes(filterToLower) ||
+                seller.name.toLowerCase().includes(filterToLower) ||
+                date.includes(filterToLower)
+            );
+        });
+
+        setFilter({
+            keyword: filter,
+            listOptions: newFilterProducts
+        });
+    };
+
+    const handleSellProduct = () => {
+        console.log("do something");
+    }
+
+    const nbProductsSelected = listProductsSelected.ids.length;
 
     return (
         <View style={styles.mainScreen}>
@@ -191,18 +150,16 @@ const Rayon = (props) => {
                     </TouchableOpacity>
                 </View>
             </View>
-
+            <InputSearch placeholder="Chercher une commande..." placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             {isLoading && loading()}
             {!isLoading && tabActive === "sell" && (
                 <>
-                    <InputSearch placeholder="Chercher une commande, un n° de suivi..." placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
-
                     <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
                         <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Produits en vente</Text>
-                        <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>7 produits sélectionnés</Text>
-                        <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>7</Text>
+                        <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>{nbProductsSelected} produits sélectionnés</Text>
+                        <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>{nbProductsSelected}</Text>
                         <View style={{ alignSelf: "center", marginBottom: 10 }}>
-                            <TouchableOpacity style={styles.btnSend}>
+                            <TouchableOpacity onPress={handleSellProduct} style={styles.btnSend}>
                                 <Image source={require("../../assets/images/rayon.png")} style={styles.imageBtnSend} />
                                 <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { top: -0.5, paddingRight: 10, paddingLeft: 5 }]}>
                                     Marquer comme vendu
@@ -229,8 +186,7 @@ const Rayon = (props) => {
 
             {!isLoading && tabActive === "sold" && (
                 <SafeAreaView>
-                    {/* <FlatList data={filter.listProducts} /> */}
-                    <Text>sold</Text>
+                    <FlatList data={filter.listProducts} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
                 </SafeAreaView>
             )}
         </View>

@@ -24,7 +24,7 @@ const HEADER_CATALOG = [
 ];
 const MenuChangeCatalog = (props) => {
     const listPages = HEADER_CATALOG.filter(header => header.title !== props.route.params.title);
-    console.log(listPages);
+    
     return (
         <View style={{ flex: 1, alignItems: "center", marginTop: 75 }}>
             <View style={{ width: "85%" }}>
