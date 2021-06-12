@@ -38,7 +38,6 @@ const ResultPage = (props) => {
             FetchService.post("/products", product, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
-                        console.log(result);
                         props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { forceReset: true } });
                     }
                 })
@@ -52,14 +51,12 @@ const ResultPage = (props) => {
     const handleFinish = () => {
         const { typeCatalog } = props.route.params;
         if (typeCatalog !== "sell") {
-            console.log()
             props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] });
         } else {
             product.price = parseInt(product.price.replace("€", ""));
             FetchService.post("/products", product, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
-                        console.log(result);
                         props.navigation.navigate("Catalog", { screen: "Rayon" });
                     }
                 })
