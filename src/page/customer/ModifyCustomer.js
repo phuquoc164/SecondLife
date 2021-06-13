@@ -19,12 +19,11 @@ const ModifyCustomer = (props) => {
         newCustomer.birthday = convertDateToApi(newCustomer.birthday);
         const diffs = getSimpleDiff(customer, newCustomer);
         const data = { store, ...diffs };
-
         if (Object.keys(diffs).length > 0) {
             FetchService.patch(customer["@id"], data, token)
                 .then((result) => {
                     if (!!result) {
-                        props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customer: result } });
+                        props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customer: result, customerId: null } });
                     }
                 })
                 .catch((error) => {
@@ -32,6 +31,8 @@ const ModifyCustomer = (props) => {
                     // TODO: change text
                     Alert.alert("Modify Customer Error");
                 });
+        } else {
+            props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customer, customerId: null } });
         }
     };
 

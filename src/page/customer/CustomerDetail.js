@@ -17,8 +17,8 @@ const CustomerDetail = (props) => {
     React.useEffect(() => {
         if (props.route.params.customerId) {
             getCustomer(props.route.params.customerId);
-        } else if (props.route.params.cutomer) {
-            setCustomer({ ...props.route.params.cutomer, "@id": customer["@id"] });
+        } else if (props.route.params.customer) {
+            setCustomer({ ...props.route.params.customer, "@id": customer["@id"] });
         }
     }, [props.route.params]);
 
@@ -37,11 +37,11 @@ const CustomerDetail = (props) => {
     };
 
     if (!customer) return loading();
-
     return (
         <ScrollView style={styles.mainScreen}>
             <View style={componentStyle.informationContainer}>
                 <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${customer.firstname} ${customer.lastname}`}</Text>
+                {/* Data Customer */}
                 <View style={componentStyle.subInformationContainer}>
                     <View style={componentStyle.singleInformation}>
                         <Image source={require("../../assets/images/email.png")} style={{ width: 25, height: 23.6 }} />
@@ -63,6 +63,7 @@ const CustomerDetail = (props) => {
                         <Text style={componentStyle.text}>{`${customer.address}, ${customer.zipCode} ${customer.city}`}</Text>
                     </View>
                 </View>
+                {/* Button Modifier */}
                 <TouchableOpacity style={componentStyle.btnModif} onPress={() => props.navigation.navigate("Customer", { screen: "ModifyCustomer", params: { customer } })}>
                     <Text style={[styles.font24, styles.fontSofiaRegular, styles.textWhite, styles.textCenter]}>Modifier</Text>
                 </TouchableOpacity>
