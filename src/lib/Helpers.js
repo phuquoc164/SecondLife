@@ -101,6 +101,24 @@ export const getSimpleDiff = (oldObject, newObject) => {
     return diffs;
 };
 
+export const verifyProduct = (product) => {
+    const listErreur = [];
+    Object.keys(product).forEach(key => {
+        if (key === "price" || key === "reference") continue;
+        if (key === "images" && (!product.images || product.image.length ===0)) {
+            listErreur.push("image");
+        } else if (key === "name" && key==="description" && (!product[key] || product[key] === "")) {
+            listErreur.push(key);
+        } else if (key === "voucher" && (!product.voucherAmount || product.voucherAmount === "0" || product.voucherAmount === "")) {
+            listErreur.push("voucher");
+        } else if (!product[key]) {
+            listErreur.push(key);
+        }
+    });
+    return listErreurs;
+}
+
+// ============================================
 export const verifyData = (object) => {
     let isError = false;
     Object.keys(object).forEach((property) => {
