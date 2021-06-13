@@ -32,6 +32,7 @@ import Rayon from "./src/page/catalog/Rayon";
 import Donation from "./src/page/catalog/Donation";
 import ResultPage from "./src/page/newProduct/ResultPage";
 import ProductDetail from "./src/page/catalog/ProductDetail";
+import ScannerScreen from './src/page/ScannerScreen';
 
 const RootStack = createStackNavigator();
 const Stack = createStackNavigator();
@@ -154,9 +155,11 @@ const App = () => {
         </Stack.Navigator>
     );
 
-    const scannerScreen = () => {
-        return <Text>Scanner</Text>;
-    };
+    const scannerScreen = () => (
+        <Stack.Navigator>
+            <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, "Scanner le code QR", false, false) }} name="ScannerScreen" component={ScannerScreen} />
+        </Stack.Navigator>
+    );
 
     const catalogScreen = () => (
         <Stack.Navigator>

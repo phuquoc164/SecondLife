@@ -26,20 +26,21 @@ const ActifVouchers = (props) => {
     const [modalConfirmation, setModalConfirmation] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const { user } = React.useContext(AuthContext);
+    const paramsNavigation = props.route.params;
 
     React.useEffect(() => {
-        if (props.route.params) {
+        if (paramsNavigation) {
             setIsLoading(true);
-            if (props.route.params.available && props.route.params.usedOrExpired) {
-                const { available, usedOrExpired } = props.route.params;
+            if (paramsNavigation.available && paramsNavigation.usedOrExpired) {
+                const { available, usedOrExpired } = paramsNavigation;
                 setVouchers({ available, usedOrExpired });
                 setFilter({
                     keyword: "",
                     vouchers: available
                 });
                 setIsLoading(false);
-            } else if (props.route.params.customer && !props.route.params.fromBottomMenu) {
-                const { customer } = props.route.params;
+            } else if (paramsNavigation.customer && !paramsNavigation.fromBottomMenu) {
+                const { customer } = paramsNavigation;
                 const available = [];
                 const usedOrExpired = [];
                 customer.vouchers.forEach((voucher) => {
@@ -85,10 +86,18 @@ const ActifVouchers = (props) => {
                         }
                     });
                     setVouchers({ available, usedOrExpired });
-                    setFilter({
-                        keyword: "",
-                        vouchers: available
-                    });
+                    if (paramsNavigation.reference && !paramsNavigation.fromBottomMenu) {
+                        const voucherFiltered = available.filter((voucher) => voucher["@id"] === paramsNavigation.reference);
+                        setFilter({
+                            keyword: paramsNavigation.reference,
+                            vouchers: voucherFiltered
+                        });
+                    } else {
+                        setFilter({
+                            keyword: "",
+                            vouchers: available
+                        });
+                    }
                     setIsLoading(false);
                 }
             })
@@ -173,7 +182,7 @@ const ActifVouchers = (props) => {
 
     return (
         <SafeAreaView style={styles.mainScreen}>
-            {props.route.params && props.route.params.fromBottomMenu ? (
+            {paramsNavigation && paramsNavigation.fromBottomMenu ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
                 <View style={{ paddingVertical: 10 }}></View>

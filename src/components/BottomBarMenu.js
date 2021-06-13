@@ -17,7 +17,7 @@ const listItemsData = {
         title: "Scanner",
         image: require(`../assets/images/scanner-item.png`),
         imageStyle: { width: 26, height: 26 },
-        screen: "Scanner"
+        screen: "ScannerScreen"
     },
     Catalog: {
         title: "Catalogue",
