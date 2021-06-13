@@ -4,6 +4,7 @@ import { SafeAreaView, Text, View, TouchableOpacity, Image, TextInput, Linking, 
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
+import { useScrollToTop } from "@react-navigation/native";
 
 /** App */
 import styles from "../../assets/css/styles";
@@ -11,11 +12,13 @@ import FetchService from "../../lib/FetchService";
 import { colors } from "../../lib/colors";
 import { initialProduct, stateDict } from "../../lib/constants";
 import { AuthContext } from "../../lib/AuthContext";
-import { loading, loadingScreen } from "../../lib/Helpers";
+import { loading, loadingScreen, verifyProduct } from "../../lib/Helpers";
 import Picker from "../../components/Picker";
 import ModalPhoto from "../../components/ModalPhoto";
 import PickerCategories from "../../components/PickerCategories";
 
+// TODO: verify the data before sending request
+// if erreur -> display border red
 const AddProduct = (props) => {
     const { user } = React.useContext(AuthContext);
     const firstView = React.createRef();
@@ -43,6 +46,7 @@ const AddProduct = (props) => {
         sellingPrice: null,
         buyingPrice: null
     });
+    const [listErreurs, setListErreurs] = useState([]);
 
     const categoriesRef = React.useRef(categories);
     const setCategories = (categories) => {
@@ -71,9 +75,7 @@ const AddProduct = (props) => {
                 prefix: {}
             });
             resetArgus();
-            if (scrollRef) {
-                scrollRef.current.scrollTo(0, 0);
-            }
+            useScrollToTop(scrollRef);
         } else {
             getListOptions();
         }
@@ -126,6 +128,7 @@ const AddProduct = (props) => {
                     } else if (response.customButton) {
                         console.debug("User tapped custom button: ", response.customButton);
                     } else {
+                        setIsLoadingScreen(true);
                         FetchService.postImage(response, user.token)
                             .then((result) => {
                                 if (!!result) {
@@ -133,10 +136,12 @@ const AddProduct = (props) => {
                                         ...product,
                                         images: [...product.images, { base64: response.base64, id: result["@id"] }]
                                     });
+                                    setIsLoadingScreen(false);
                                 }
                             })
                             .catch((error) => {
                                 console.error(error);
+                                setIsLoadingScreen(false);
                                 // TODO: change text
                                 Alert.alert("Take image error");
                             });
@@ -178,6 +183,7 @@ const AddProduct = (props) => {
                     } else if (response.customButton) {
                         console.debug("User tapped custom button: ", response.customButton);
                     } else {
+                        setIsLoadingScreen(true);
                         FetchService.postImage(response, user.token)
                             .then((result) => {
                                 if (!!result) {
@@ -185,10 +191,12 @@ const AddProduct = (props) => {
                                         ...product,
                                         images: [...product.images, { base64: response.base64, id: result["@id"] }]
                                     });
+                                    setIsLoadingScreen(false);
                                 }
                             })
                             .catch((error) => {
                                 console.error(error);
+                                setIsLoadingScreen(false);
                                 // TODO: change text
                                 Alert.alert("Select image error");
                             });
@@ -304,7 +312,16 @@ const AddProduct = (props) => {
 
     const handlSubmitForm = () => {
         setIsLoadingBtnsubmit(true);
+        // TODO: verify product before create data
+        const listErreurs = verifyProduct(product);
+        if (listErreurs.length > 0) {
+            Alert.alert("Erreur", "Veuillez vérifier les données à champ rouge");
+            setListErreurs(listErreurs);
+            return;
+        }
+        setListErreurs([]);
         const data = {
+            name: product.name,
             images: product.images.map((image) => image.id),
             vouchers: [
                 {
@@ -325,11 +342,10 @@ const AddProduct = (props) => {
             size: product.size.id,
             state: product.state.id,
             description: product.description,
-            price: 0,
+            price: null,
             reference: ""
         };
 
-        console.log(data);
         if (btnStatus === "sell") {
             props.navigation.navigate("NewProduct", { screen: "ResultPage", params: { data, typeCatalog: "sell", sellingPrice: argus.sellingPrice } });
         } else {
@@ -373,15 +389,12 @@ const AddProduct = (props) => {
     if (listOptions.isLoading) {
         return <View style={styles.mainScreen}>{loading()}</View>;
     }
+    const inputContainer = (listErreurs.includes())
     return (
         <SafeAreaView style={styles.mainScreen}>
-            <KeyboardAwareScrollView
-                innerRef={(ref) => {
-                    console.log("rref", ref);
-                    scrollRef.current = ref;
-                }}>
+            <KeyboardAwareScrollView ref={scrollRef}>
                 <View ref={firstView} />
-                <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }]}>
+                <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }, listErreurs.includes("images") && { borderColor: colors.red }]}>
                     <Text style={[styles.textCenter, styles.addProductLabel]}>Ajoute jusqu'à 5 photos</Text>
                     {product.images.length === 0 && (
                         <TouchableOpacity onPress={() => setModal("photo")} style={{ display: "flex", alignItems: "center", marginVertical: 20 }}>
@@ -437,7 +450,7 @@ const AddProduct = (props) => {
                 </View>
 
                 {/* Nom */}
-                <View style={styles.addProductInputContainer}>
+                <View style={[styles.addProductInputContainer, listErreurs.includes("name") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Nom</Text>
                     <TextInput
                         style={[styles.addProductInput]}
@@ -449,7 +462,9 @@ const AddProduct = (props) => {
                 </View>
 
                 {/* Brand */}
-                <TouchableOpacity onPress={() => setModal("brand")} style={[styles.addProductInputContainer, styles.positionRelative]}>
+                <TouchableOpacity
+                    onPress={() => setModal("brand")}
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("brand") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Marque</Text>
                     <Text style={[styles.addProductInput, { color: product.brand ? colors.darkBlue : colors.gray2 }]}>
                         {product.brand ? product.brand.name : "Sélectionnez une marque"}
@@ -461,7 +476,12 @@ const AddProduct = (props) => {
                 <TouchableOpacity
                     disabled={!product.brand}
                     onPress={() => setModal("category")}
-                    style={[styles.addProductInputContainer, styles.positionRelative, !product.brand && { opacity: 0.4 }]}>
+                    style={[
+                        styles.addProductInputContainer,
+                        styles.positionRelative,
+                        !product.brand && { opacity: 0.4 },
+                        listErreurs.includes("category") && { borderColor: colors.red }
+                    ]}>
                     <Text style={styles.addProductLabel}>Catégorie</Text>
                     <Text style={[styles.addProductInput, { color: product.category ? colors.darkBlue : colors.gray2 }]}>
                         {product.category ? product.category : "Sélectionnez une catégorie"}
@@ -470,7 +490,9 @@ const AddProduct = (props) => {
                 </TouchableOpacity>
 
                 {/* Size */}
-                <TouchableOpacity onPress={() => setModal("size")} style={[styles.addProductInputContainer, styles.positionRelative]}>
+                <TouchableOpacity
+                    onPress={() => setModal("size")}
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("size") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Taille</Text>
                     <Text style={[styles.addProductInput, { color: product.size ? colors.darkBlue : colors.gray2 }]}>
                         {product.size ? product.size.name : "Renseignez la taille de l'article"}
@@ -479,7 +501,9 @@ const AddProduct = (props) => {
                 </TouchableOpacity>
 
                 {/* State */}
-                <TouchableOpacity onPress={() => setModal("state")} style={[styles.addProductInputContainer, styles.positionRelative]}>
+                <TouchableOpacity
+                    onPress={() => setModal("state")}
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("state") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Etat</Text>
                     <Text style={[styles.addProductInput, { color: product.state ? colors.darkBlue : colors.gray2 }]}>
                         {product.state ? product.state.name : "Indiquez l'état de l'article"}
@@ -488,7 +512,7 @@ const AddProduct = (props) => {
                 </TouchableOpacity>
 
                 {/* Description */}
-                <View style={styles.addProductInputContainer}>
+                <View style={[styles.addProductInputContainer, listErreurs.includes("description") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Description</Text>
                     <TextInput
                         style={[styles.addProductInput]}
@@ -503,7 +527,7 @@ const AddProduct = (props) => {
                 </View>
 
                 {/* Voucher */}
-                <View style={styles.addProductInputContainer}>
+                <View style={[styles.addProductInputContainer, listErreurs.includes("voucher") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Bon d'achat</Text>
                     <TextInput
                         style={[styles.addProductInput]}
@@ -541,21 +565,25 @@ const AddProduct = (props) => {
 
                 <TouchableOpacity
                     onPress={() => setBtnStatus("partner")}
-                    style={[styles.addProductInputContainer, btnStatus === "partner" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : {padding: 20}]}>
+                    style={[styles.addProductInputContainer, btnStatus === "partner" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : { padding: 20 }]}>
                     <Text style={[styles.addProductLabel, styles.textCenter]}>Envoi partenaire</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setBtnStatus("sell")} style={[styles.addProductInputContainer, btnStatus === "sell" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : {padding: 20}]}>
+                <TouchableOpacity
+                    onPress={() => setBtnStatus("sell")}
+                    style={[styles.addProductInputContainer, btnStatus === "sell" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : { padding: 20 }]}>
                     <Text style={[styles.addProductLabel, styles.textCenter]}>Mise en rayon</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={() => setBtnStatus("donation")}
-                    style={[styles.addProductInputContainer, btnStatus === "donation" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : {padding: 20}]}>
+                    style={[styles.addProductInputContainer, btnStatus === "donation" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : { padding: 20 }]}>
                     <Text style={[styles.addProductLabel, styles.textCenter]}>Je donne à une association</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setModal("seller")} style={[styles.addProductInputContainer, styles.positionRelative]}>
+                <TouchableOpacity
+                    onPress={() => setModal("seller")}
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("seller") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Nom du vendeur</Text>
                     <Text style={[styles.addProductInput, { color: product.seller ? colors.darkBlue : colors.gray2 }]}>
                         {product.seller ? product.seller.name : "Sélectionnez un vendeur"}
@@ -568,7 +596,10 @@ const AddProduct = (props) => {
                         <ActivityIndicator color={colors.white} />
                     </View>
                 ) : (
-                    <TouchableOpacity onPress={handlSubmitForm} style={[styles.addProductInputContainer, styles.greenScreen, { paddingVertical: 20, marginBottom: 50 }]}>
+                    <TouchableOpacity
+                        disabled={btnStatus === ""}
+                        onPress={handlSubmitForm}
+                        style={[styles.addProductInputContainer, styles.greenScreen, { paddingVertical: 20, marginBottom: 50 }]}>
                         <Text style={[styles.addProductLabel, styles.textCenter, styles.textWhite]}>Continuer</Text>
                     </TouchableOpacity>
                 )}
