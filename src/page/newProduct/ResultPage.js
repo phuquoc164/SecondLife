@@ -5,6 +5,7 @@ import { SafeAreaView, ScrollView, View, TouchableOpacity, Text, Image, TextInpu
 /** App */
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
+import ModalScanner from '../../components/ModalScanner';
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 
@@ -17,9 +18,9 @@ const screenPageCatalog = {
 const ResultPage = (props) => {
     const [product, setProduct] = React.useState({});
     const [showPageResult, setShowPageResult] = React.useState(props.route.params.typeCatalog !== "sell");
+    const [isModalScanner, setIsModalScanner] = React.useState(false);
 
     const { user } = React.useContext(AuthContext);
-
 
     React.useEffect(() => {
         if (props.route.params.typeCatalog === "sell") {
@@ -30,6 +31,17 @@ const ResultPage = (props) => {
         }
     }, [props.route.params]);
 
+    const handleScanSuccess = (event) => {
+        const data = JSON.parse(event.data);
+        if (data && data.type === "product") {
+            setProduct({ ...product, reference: data.reference});
+        }
+        setIsModalScanner(false);
+    }
+
+    /**
+     * Handle Add other product
+     */
     const handleAddOtherProduct = () => {
         if (props.route.params.typeCatalog !== "sell") {
             props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { forceReset: true } });
@@ -48,6 +60,9 @@ const ResultPage = (props) => {
         }
     };
 
+    /**
+     * handle finish adding product and go to the page catalog
+     */
     const handleFinish = () => {
         const { typeCatalog } = props.route.params;
         if (typeCatalog !== "sell") {
@@ -105,7 +120,7 @@ const ResultPage = (props) => {
                                 value={product.reference}
                                 onChangeText={(reference) => setProduct({ ...product, reference })}
                             />
-                            <TouchableOpacity style={{ position: "absolute", top: "50%", right: 10, marginTop: -10 }}>
+                            <TouchableOpacity onPress={() => setIsModalScanner(true)} style={{ position: "absolute", top: "50%", right: 10, marginTop: -10 }}>
                                 <Image source={require("../../assets/images/qrcode.png")} style={{ width: 40, height: 40.5 }} />
                             </TouchableOpacity>
                         </View>
@@ -152,6 +167,7 @@ const ResultPage = (props) => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+            <ModalScanner visible={isModalScanner} handleScanSuccess={handleScanSuccess} />
         </SafeAreaView>
     );
 };
