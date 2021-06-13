@@ -55,7 +55,7 @@ const ListCustomers = (props) => {
         <TouchableOpacity key={item["@id"]} onPress={() => handlePressItem(item)}>
             <View style={componentStyle.singleCustomer}>
                 <View style={styles.flex3}>
-                    <Text style={[styles.font18, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${item.lastname} ${item.firstname}`}</Text>
+                    <Text style={[styles.font18, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${item.firstname} ${item.lastname}`}</Text>
                     <Text style={[styles.font12, styles.fontSofiaRegular, styles.textMediumGray]}>Email: {item.email}</Text>
                     <Text style={[styles.font12, styles.fontSofiaRegular, styles.textMediumGray]}>N° tel: {item.phone}</Text>
                 </View>
