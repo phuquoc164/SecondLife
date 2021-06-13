@@ -1,21 +1,26 @@
 /** React */
 import React, { useState } from "react";
-import { Alert, SafeAreaView, Text, TextInput, TouchableOpacity, View, Image } from "react-native";
+import { Alert, SafeAreaView, Text, TextInput, TouchableOpacity, View, Image, Platform } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 
 /** App */
+import Picker from "../../components/Picker";
+import PickerCategories from "../../components/PickerCategories";
+import ModalConfirmation from "../../components/ModalConfirmation";
+import ModalPhoto from '../../components/ModalPhoto';
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
 import { convertDateToDisplay, loading, loadingScreen } from "../../lib/Helpers";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { colors } from "../../lib/colors";
 import { stateDict } from "../../lib/constants";
-import Picker from "../../components/Picker";
-import PickerCategories from "../../components/PickerCategories";
 
 const ProductDetail = (props) => {
     const [editable, setEditable] = useState(false);
     const [isLoadingScreenVisible, setIsLoadingScreenVisible] = useState(false);
+    const [modalConfirmation, setModalConfirmation] = useState(false);
     const [product, setProduct] = useState(null);
     const [modal, setModal] = useState("");
     const [listOptions, setListOptions] = useState({
@@ -73,8 +78,144 @@ const ProductDetail = (props) => {
             seller: { id: seller["@id"], name: seller.name }
         };
         setProduct(product);
-    }
+    };
 
+    /**
+     * handle when user takes photo
+     */
+    const handleTakePhoto = async () => {
+        setModal("");
+        const options = {
+            mediaType: "photo",
+            maxWidth: 1000,
+            maxHeight: 1000,
+            includeBase64: true,
+            quality: 0.9
+        };
+        const permissionCamera = Platform.OS === "ios" ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA;
+        try {
+            const granted = await request(permissionCamera);
+            if (granted === RESULTS.GRANTED) {
+                launchCamera(options, (response) => {
+                    if (response.didCancel) {
+                        console.debug("User cancelled image picker");
+                    } else if (response.error || response.errorCode) {
+                        console.debug("ImagePicker Error: ", response.error ? response.error : response.errorCode);
+                    } else if (response.customButton) {
+                        console.debug("User tapped custom button: ", response.customButton);
+                    } else {
+                        setIsLoadingScreen(true);
+                        FetchService.postImage(response, user.token)
+                            .then((result) => {
+                                if (!!result) {
+                                    setProduct({
+                                        ...product,
+                                        images: [...product.images, { base64: response.base64, id: result["@id"] }]
+                                    });
+                                    setIsLoadingScreen(false);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                                setIsLoadingScreen(false);
+                                // TODO: change text
+                                Alert.alert("Take image error");
+                            });
+                    }
+                });
+            } else {
+                console.debug("Camera permission denied");
+                Alert.alert("Demande de permission", "Nous avons besoin de la permission d'accéder à votre caméra.", [
+                    { text: "Annuler", style: "cancel" },
+                    { text: "Paramètres", onPress: () => Linking.openSettings() }
+                ]);
+            }
+        } catch (err) {
+            console.warn(err);
+        }
+    };
+
+    /**
+     * handle when user selects photo from library
+     */
+    const handleSelectPhoto = async () => {
+        setModal("");
+        const options = {
+            mediaType: "photo",
+            maxWidth: 1000,
+            maxHeight: 1000,
+            includeBase64: true
+        };
+        let permissionPhoto = Platform.OS === "ios" ? PERMISSIONS.IOS.PHOTO_LIBRARY : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+
+        try {
+            const granted = await request(permissionPhoto);
+            if (granted === RESULTS.GRANTED) {
+                launchImageLibrary(options, (response) => {
+                    if (response.didCancel) {
+                        console.debug("User cancelled image picker");
+                    } else if (response.error) {
+                        console.debug("ImagePicker Error: ", response.error);
+                    } else if (response.customButton) {
+                        console.debug("User tapped custom button: ", response.customButton);
+                    } else {
+                        setIsLoadingScreen(true);
+                        FetchService.postImage(response, user.token)
+                            .then((result) => {
+                                if (!!result) {
+                                    setProduct({
+                                        ...product,
+                                        images: [...product.images, { base64: response.base64, id: result["@id"] }]
+                                    });
+                                    setIsLoadingScreen(false);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                                setIsLoadingScreen(false);
+                                // TODO: change text
+                                Alert.alert("Select image error");
+                            });
+                    }
+                });
+            } else {
+                console.debug("Photo permission denied");
+                Alert.alert("Demande de permission", "Nous avons besoin de la permission d'accéder à votre bibliothèque média.", [
+                    { text: "Annuler", style: "cancel" },
+                    { text: "Paramètres", onPress: () => Linking.openSettings() }
+                ]);
+            }
+        } catch (error) {
+            console.warn(err);
+        }
+    };
+
+    /**
+     * Send request to delete image on server and update images
+     * @param {*} imageId
+     */
+    const handleDeletePhoto = (imageId) => {
+        FetchService.delete(imageId, user.token)
+            .then((result) => {
+                if (!!result) {
+                    const newImages = product.images.filter((image) => image.id !== imageId);
+                    setProduct({
+                        ...product,
+                        images: newImages
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                // TODO: change text
+                Alert.alert("Delete image error");
+            });
+    };
+
+    /**
+     * get list options which include brand, size, state and seller
+     * list category depends on brand
+     */
     const getListOptions = async () => {
         try {
             const brandApi = await FetchService.get("/brands", user.token);
@@ -86,7 +227,7 @@ const ProductDetail = (props) => {
             const listSizes = sizeApi["hydra:member"].map((size) => ({ id: size["@id"], name: size["size"] }));
             const listStates = stateApi["hydra:member"].map((state) => ({ id: state["@id"], name: stateDict[state["state"]], value: state["state"] }));
             const listSellers = sellerApi["hydra:member"].map((seller) => ({ id: seller["@id"], name: seller.name }));
-            setProduct({...product, brand: null});
+            setProduct({ ...product, brand: null });
             setListOptions({
                 brands: listBrands.sort((a, b) => (a.name > b.name ? 1 : -1)),
                 sizes: listSizes,
@@ -98,10 +239,16 @@ const ProductDetail = (props) => {
         }
     };
 
+    /**
+     * Selete brand and initialize list category
+     * @param {*} brand
+     */
     const handleSelectBrand = (brand) => {
         setModal("");
         if (!product.brand || product.brand.id !== brand.id) {
             setProduct({ ...product, brand, category: null });
+            // listSelectedCategoryIds helps finding the id of selected category
+            // listCategoryIds is the list of all category
             const listCategories = [];
             const listSelectedCategoryIds = {};
             const listCategoryIds = {};
@@ -136,6 +283,9 @@ const ProductDetail = (props) => {
         }
     };
 
+    /**
+     * handleModifyProduct
+     */
     const handleModifyProduct = async () => {
         setEditable(true);
         if (listOptions.brands.length === 0) {
@@ -144,18 +294,24 @@ const ProductDetail = (props) => {
             setIsLoadingScreenVisible(false);
         }
         props.navigation.setOptions({ title: "Modifier les informations" });
-    }
+    };
 
+    /**
+     * Navigation to dedicated page catalog 
+     */
     const handleDeleteProduct = () => {
         props.navigation.navigate("Catalog", {
             screen: props.route.params.screen,
             params: { deleteProduct: true, sellProduct: false }
         });
-    }
+    };
 
+    /**
+     * Send request to save the modification of product
+     */
     const handleSaveModification = () => {
         let data = {};
-        Object.keys(product).forEach(key => {
+        Object.keys(product).forEach((key) => {
             if (["brand", "size", "seller", "state"].includes(key)) {
                 if (productRef.current[key]["@id"] !== product[key].id) {
                     data[key] = product[key].id;
@@ -169,16 +325,17 @@ const ProductDetail = (props) => {
                 data[key] = product[key];
             }
         });
-        console.log(productRef.current["@id"], data);
 
         // TODO: erreur 500 mais après ça, les donnés a changé
-        FetchService.patch(productRef.current["@id"], data, user.token).then(result => {
-            console.log(result);
-        }).catch(error => {
-            console.error(error);
-            Alert.Alert("Erreur", "Modify product error");
-        })
-    }
+        FetchService.patch(productRef.current["@id"], data, user.token)
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => {
+                console.error(error);
+                Alert.Alert("Erreur", "Modify product error");
+            });
+    };
 
     const handleResetModification = () => {
         formatProduct(productRef.current);
@@ -199,6 +356,63 @@ const ProductDetail = (props) => {
     return (
         <SafeAreaView style={styles.mainScreen}>
             <KeyboardAwareScrollView>
+                {/* Images */}
+                <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }]}>
+                    {product.images.length === 0 && (
+                        <TouchableOpacity onPress={() => setModal("photo")} style={{ display: "flex", alignItems: "center", marginVertical: 20 }}>
+                            <Image source={require("../../assets/images/image_upload.png")} style={{ width: 220, height: 209.1 }} />
+                        </TouchableOpacity>
+                    )}
+
+                    {product.images.length > 0 && (
+                        <View style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: 15 }}>
+                            {product.images.map((image) => (
+                                <View key={image.id} style={{ width: "33.3%", aspectRatio: 1, padding: 5, position: "relative" }}>
+                                    {editable && (
+                                        <TouchableOpacity
+                                            onPress={() => handleDeletePhoto(image.id)}
+                                            style={{
+                                                position: "absolute",
+                                                top: -2,
+                                                right: -2,
+                                                zIndex: 2,
+                                                backgroundColor: colors.white,
+                                                borderRadius: 50,
+                                                padding: 4
+                                            }}>
+                                            <Image source={require("../../assets/images/cross-black.png")} style={{ width: 10.5, height: 10 }} />
+                                        </TouchableOpacity>
+                                    )}
+                                    <Image
+                                        source={{
+                                            uri: "https://pixabay.com/photos/tree-sunset-clouds-sky-silhouette-736885/"
+                                        }}
+                                        style={{
+                                            width: "100%",
+                                            height: "100%",
+                                            resizeMode: "cover"
+                                        }}
+                                    />
+                                </View>
+                            ))}
+                            {product.images.length < 5 && editable && (
+                                <View
+                                    style={{
+                                        width: "33.3%",
+                                        aspectRatio: 1,
+                                        padding: 20,
+                                        justifyContent: "center",
+                                        alignItems: "center"
+                                    }}>
+                                    <TouchableOpacity onPress={() => setModal("photo")}>
+                                        <Image source={require("../../assets/images/plus.png")} style={{ width: 57, height: 57 }} />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
+                    )}
+                </View>
+
                 {/* Nom */}
                 <View style={styles.addProductInputContainer}>
                     <Text style={styles.addProductLabel}>Nom</Text>
@@ -430,13 +644,20 @@ const ProductDetail = (props) => {
                         <TouchableOpacity onPress={handleModifyProduct} style={styles.buttonWithBorderGreen}>
                             <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Modifier</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleDeleteProduct} style={[styles.buttonWithBorderGreen, { backgroundColor: colors.red }]}>
+                        <TouchableOpacity onPress={() => setModalConfirmation(true)} style={[styles.buttonWithBorderGreen, { backgroundColor: colors.red }]}>
                             <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Supprimer</Text>
                         </TouchableOpacity>
                     </View>
                 )}
 
                 {loadingScreen(isLoadingScreenVisible)}
+                <ModalPhoto visible={modal === "photo"} onCancel={() => setModal("")} handleTakePhoto={handleTakePhoto} handleSelectPhoto={handleSelectPhoto} />
+                <ModalConfirmation
+                    visible={modalConfirmation}
+                    description={"Êtes-vous sûr de vouloir\nsupprimer ce produit ?"}
+                    handleSubmit={handleDeleteProduct}
+                    handleCancel={() => setModalConfirmation(false)}
+                />
             </KeyboardAwareScrollView>
         </SafeAreaView>
     );
