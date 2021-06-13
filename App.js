@@ -33,6 +33,7 @@ import Donation from "./src/page/catalog/Donation";
 import ResultPage from "./src/page/newProduct/ResultPage";
 import ProductDetail from "./src/page/catalog/ProductDetail";
 import ScannerScreen from './src/page/ScannerScreen';
+import NeedHelp from './src/page/profil/NeedHelp';
 
 const RootStack = createStackNavigator();
 const Stack = createStackNavigator();
@@ -180,6 +181,7 @@ const App = () => {
     const profilScreen = () => (
         <Stack.Navigator initialRouteName="MyAccount">
             <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.profil[0], false, false) }} name="MyAccount" component={MyAccount} />
+            <Stack.Screen options={{ headerShown: false }} name="NeedHelp" component={NeedHelp} />
         </Stack.Navigator>
     );
 
