@@ -200,13 +200,14 @@ const OnceAgain = (props) => {
         const filterToLower = filter.toLowerCase();
         if (tabActive === "products") {
             const newFilterProducts = data.filter((product) => {
-                const { title, brand, seller, createAt } = product;
+                const { title, brand, seller, createAt, reference } = product;
                 const date = convertDateToDisplay(createAt);
                 return (
                     title.toLowerCase().includes(filterToLower) ||
                     brand.name.toLowerCase().includes(filterToLower) ||
                     seller.name.toLowerCase().includes(filterToLower) ||
-                    date.includes(filterToLower)
+                    date.includes(filterToLower) ||
+                    reference.toLowerCase().includes(filterToLower)
                 );
             });
 
