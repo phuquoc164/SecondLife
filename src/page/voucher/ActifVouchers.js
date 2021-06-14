@@ -106,7 +106,6 @@ const ActifVouchers = (props) => {
                         });
                     }
                     setIsLoading(false);
-                    props.route.params?.fromBottomMenu && props.navigation.setParams({ fromBottomMenu: null });
                 }
             })
             .catch((error) => {
@@ -196,7 +195,7 @@ const ActifVouchers = (props) => {
 
     return (
         <SafeAreaView style={styles.mainScreen}>
-            {!props.route.params?.customer || props.route.params?.fromBottomMenu ? (
+            {!props.route.params?.customer ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
                 <View style={{ paddingVertical: 10 }}></View>
