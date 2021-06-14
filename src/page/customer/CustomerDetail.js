@@ -7,7 +7,7 @@ import styles from "../../assets/css/styles";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 import FetchService from "../../lib/FetchService";
-import { loading } from "../../lib/Helpers";
+import { convertDateToDisplay, loading } from "../../lib/Helpers";
 
 const CustomerDetail = (props) => {
     const [customer, setCustomer] = React.useState(null);
@@ -30,9 +30,9 @@ const CustomerDetail = (props) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 // TODO: change text
-                Alert.alert("Error");
+                console.error(error);
+                Alert.alert("Customer", "Get customer error");
             });
     };
 
@@ -55,7 +55,7 @@ const CustomerDetail = (props) => {
 
                     <View style={componentStyle.singleInformation}>
                         <Image source={require("../../assets/images/birthday.png")} style={{ width: 25, height: 29.3 }} />
-                        <Text style={componentStyle.text}>{customer.birthdayDateFormatted}</Text>
+                        <Text style={componentStyle.text}>{convertDateToDisplay(customer.birthday)}</Text>
                     </View>
 
                     <View style={componentStyle.singleInformation}>
@@ -76,7 +76,7 @@ const CustomerDetail = (props) => {
                         onPress={() =>
                             props.navigation.navigate("Voucher", {
                                 screen: "ActifVouchers",
-                                params: { customer, fromBottomMenu: false }
+                                params: { customer, fromBottomMenu: false, reference: null, available: null, usedOrExpired: null }
                             })
                         }
                         style={[componentStyle.singleProduct, { borderColor: colors.green }]}>
@@ -88,7 +88,7 @@ const CustomerDetail = (props) => {
                         onPress={() =>
                             props.navigation.navigate("Voucher", {
                                 screen: "InactifVouchers",
-                                params: { customer, fromBottomMenu: false }
+                                params: { customer, fromBottomMenu: false, reference: null, available: null, usedOrExpired: null }
                             })
                         }
                         style={[componentStyle.singleProduct, { borderColor: colors.darkBlue }]}>

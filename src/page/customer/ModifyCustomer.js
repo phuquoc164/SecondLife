@@ -27,9 +27,9 @@ const ModifyCustomer = (props) => {
                     }
                 })
                 .catch((error) => {
-                    console.error("Modify Customer Error", error);
                     // TODO: change text
-                    Alert.alert("Modify Customer Error");
+                    console.error(error);
+                    Alert.alert("Customer error", "Modify customer error");
                 });
         } else {
             props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customer, customerId: null } });
