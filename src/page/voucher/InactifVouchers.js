@@ -95,8 +95,9 @@ const InactifVouchers = (props) => {
                 }
             })
             .catch((error) => {
+                // TODO: change text
                 console.error(error);
-                Alert.alert("Actif vouchers Error");
+                Alert.alert("Voucher error", "Get voucher error");
             });
     };
 
@@ -108,7 +109,7 @@ const InactifVouchers = (props) => {
         FetchService.patch(voucherSwiped["@id"], data, user.token)
             .then((result) => {
                 if (!!result && result["@id"]) {
-                    const newAvailableVouchers = [...vouchers.available, { ...voucherSwiped, expirationDate}];
+                    const newAvailableVouchers = [...vouchers.available, { ...voucherSwiped, expirationDate }];
                     const newUsedVouchers = vouchers.usedOrExpired.filter((voucher) => voucher["@id"] !== voucherSwiped["@id"]);
                     const newVouchers = { available: newAvailableVouchers, usedOrExpired: newUsedVouchers };
                     setVouchers(newVouchers);
@@ -120,9 +121,9 @@ const InactifVouchers = (props) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 // TODO: Change text
-                Alert.alert("reactiver voucher error");
+                console.error(error);
+                Alert.alert("Voucher error", "reactiver voucher error");
             });
     };
 
@@ -136,7 +137,7 @@ const InactifVouchers = (props) => {
                 <View>
                     <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${item.customer.firstname} ${item.customer.lastname}`}</Text>
                     <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.customer.email}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item["@id"]}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.reference ? item.reference.substring(0, 10) : item["@id"]}</Text>
                     <Text style={[styles.font16, styles.fontSofiaSemiBold, styles.textMediumGray]}>{convertDateToDisplay(item.expirationDate, true)}</Text>
                 </View>
                 <View>
@@ -198,12 +199,16 @@ const InactifVouchers = (props) => {
 
     return (
         <SafeAreaView style={styles.mainScreen}>
-            {props.route.params && props.route.params.fromBottomMenu ? (
+            {!props.route.params?.customer || props.route.params?.fromBottomMenu ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
                 <View style={{ paddingVertical: 5 }}></View>
             )}
-            <FlatList data={filter.vouchers} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
+            {filter.vouchers.length > 0 ? (
+                <FlatList data={filter.vouchers} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
+            ) : (
+                <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucune vouchers</Text>
+            )}
             <ModalConfirmation
                 visible={modalConfirmation}
                 description={"Êtes-vous sûr de vouloir\nréactiver ce bon\nd’achat ?"}

@@ -25,13 +25,13 @@ const ActifVouchers = (props) => {
     });
     const [modalConfirmation, setModalConfirmation] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const { user } = React.useContext(AuthContext);
-    const paramsNavigation = props.route.params;
+    const { user, signOut } = React.useContext(AuthContext);
 
     React.useEffect(() => {
-        if (paramsNavigation) {
-            setIsLoading(true);
+        if (props.route.params) {
+            const paramsNavigation = props.route.params;
             if (paramsNavigation.available && paramsNavigation.usedOrExpired) {
+                setIsLoading(true);
                 const { available, usedOrExpired } = paramsNavigation;
                 setVouchers({ available, usedOrExpired });
                 setFilter({
@@ -40,6 +40,7 @@ const ActifVouchers = (props) => {
                 });
                 setIsLoading(false);
             } else if (paramsNavigation.customer && !paramsNavigation.fromBottomMenu) {
+                setIsLoading(true);
                 const { customer } = paramsNavigation;
                 const available = [];
                 const usedOrExpired = [];
@@ -66,18 +67,24 @@ const ActifVouchers = (props) => {
                     vouchers: available
                 });
                 setIsLoading(false);
-            } else {
+            } else if (paramsNavigation.reference) {
+                getListVouchers(paramsNavigation.reference);
+                props.navigation.setParams({ reference: null });
+            } else if (paramsNavigation.fromBottomMenu) {
                 getListVouchers();
             }
         }
     }, [props.route.params]);
 
-    const getListVouchers = () => {
+    const getListVouchers = (reference = null) => {
+        setIsLoading(true);
         FetchService.get("/vouchers", user.token)
             .then((result) => {
+                console.log(result);
                 if (result && result["hydra:member"] && result["hydra:member"].length > 0) {
                     const available = [];
                     const usedOrExpired = [];
+                    console.log("go here ne");
                     result["hydra:member"].forEach((voucher) => {
                         if (voucher.used || voucher.expired) {
                             usedOrExpired.push(voucher);
@@ -86,10 +93,10 @@ const ActifVouchers = (props) => {
                         }
                     });
                     setVouchers({ available, usedOrExpired });
-                    if (paramsNavigation.reference && !paramsNavigation.fromBottomMenu) {
-                        const voucherFiltered = available.filter((voucher) => voucher["@id"] === paramsNavigation.reference);
+                    if (reference) {
+                        const voucherFiltered = available.filter((voucher) => voucher.reference === props.route.params.reference);
                         setFilter({
-                            keyword: paramsNavigation.reference,
+                            keyword: props.route.params.reference,
                             vouchers: voucherFiltered
                         });
                     } else {
@@ -99,11 +106,17 @@ const ActifVouchers = (props) => {
                         });
                     }
                     setIsLoading(false);
+                    props.route.params?.fromBottomMenu && props.navigation.setParams({ fromBottomMenu: null });
                 }
             })
             .catch((error) => {
-                console.error(error);
-                Alert.alert("Actif vouchers Error");
+                // TODO: change texte
+                if (error === 401) {
+                    Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
+                } else {
+                    console.error(error);
+                    Alert.alert("Voucher error", "Get voucher error");
+                }
             });
     };
 
@@ -125,9 +138,9 @@ const ActifVouchers = (props) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 // TODO: Change text
-                Alert.alert("déactiveer voucher error");
+                console.error(error);
+                Alert.alert("Voucher error", "Déactiver voucher error");
             });
     };
 
@@ -145,7 +158,7 @@ const ActifVouchers = (props) => {
                 <View>
                     <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${item.customer.firstname} ${item.customer.lastname}`}</Text>
                     <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.customer.email}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item["@id"]}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.reference ? item.reference.substring(0, 10) : item["@id"]}</Text>
                     <Text style={[styles.font16, styles.fontSofiaSemiBold, styles.textMediumGray]}>{convertDateToDisplay(item.expirationDate, true)}</Text>
                 </View>
                 <View>
@@ -158,7 +171,7 @@ const ActifVouchers = (props) => {
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
         const newFilteredVouchers = vouchers.available.filter((voucher) => {
-            const { voucherAmount, expirationDate, customer } = voucher;
+            const { voucherAmount, expirationDate, customer, reference } = voucher;
             const expirationDateFormatted = convertDateToDisplay(expirationDate);
 
             return (
@@ -167,7 +180,8 @@ const ActifVouchers = (props) => {
                 customer.email.includes(filterToLower) ||
                 voucher["@id"].includes(filterToLower) ||
                 voucherAmount.toString().includes(filterToLower) ||
-                expirationDateFormatted.toLowerCase().includes(filterToLower)
+                expirationDateFormatted.toLowerCase().includes(filterToLower) ||
+                (reference && reference.toLowerCase().includes(filterToLower))
             );
         });
         setFilter({
@@ -182,7 +196,7 @@ const ActifVouchers = (props) => {
 
     return (
         <SafeAreaView style={styles.mainScreen}>
-            {paramsNavigation && paramsNavigation.fromBottomMenu ? (
+            {!props.route.params?.customer || props.route.params?.fromBottomMenu ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
                 <View style={{ paddingVertical: 10 }}></View>
