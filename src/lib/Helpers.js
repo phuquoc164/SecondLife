@@ -77,10 +77,10 @@ export const convertDateToDisplay = (date, isMonthText = false) => {
         const monthInNumber = dateObject.getMonth();
         const mm = String(monthInNumber + 1).padStart(2, "0");
         const yyyy = dateObject.getFullYear();
-    
+
         return isMonthText ? dd + " " + monthNames[monthInNumber] + " " + yyyy : dd + "/" + mm + "/" + yyyy;
     }
-    return '';
+    return "";
 };
 
 /**
@@ -102,124 +102,31 @@ export const getSimpleDiff = (oldObject, newObject) => {
 };
 
 export const verifyProduct = (product) => {
-    const listErreur = [];
-    Object.keys(product).forEach(key => {
-        if (key === "price" || key === "reference") continue;
-        if (key === "images" && (!product.images || product.image.length ===0)) {
-            listErreur.push("image");
-        } else if (key === "name" && key==="description" && (!product[key] || product[key] === "")) {
-            listErreur.push(key);
-        } else if (key === "voucher" && (!product.voucherAmount || product.voucherAmount === "0" || product.voucherAmount === "")) {
-            listErreur.push("voucher");
+    const listErreurs = [];
+    Object.keys(product).forEach((key) => {
+        if (key === "price" || key === "reference") return;
+        if (key === "images" && (!product.images || product.images.length === 0)) {
+            listErreurs.push("images");
+        } else if (key === "name" && key === "description" && (!product[key] || product[key] === "")) {
+            listErreurs.push(key);
+        } else if (key === "voucherAmount" && (!product.voucherAmount || product.voucherAmount === "0" || product.voucherAmount === "")) {
+            listErreurs.push("voucherAmount");
         } else if (!product[key]) {
-            listErreur.push(key);
+            listErreurs.push(key);
         }
     });
     return listErreurs;
+};
+
+export const getKeyByValue = (object, value) => {
+  return Object.keys(object).find(key => object[key] === value);
 }
 
-// ============================================
-export const verifyData = (object) => {
-    let isError = false;
-    Object.keys(object).forEach((property) => {
-        if (property !== "sold" && property !== "description") {
-            if (!!object[property]) {
-                switch (typeof object[property]) {
-                    case "string": {
-                        if ((property === "email" && !validateEmail(object[property])) || (property !== "email" && object[property] === "")) {
-                            isError = true;
-                        }
-                        break;
-                    }
-                    case "object": {
-                        if (
-                            (Array.isArray(object[property]) && object[property].length === 0) ||
-                            (!Array.isArray(object[property]) && Object.keys(object[property]).length === 0)
-                        ) {
-                            isError = true;
-                        }
-                        break;
-                    }
-                    default: {
-                        isError = true;
-                        break;
-                    }
-                }
-            } else {
-                isError = true;
-            }
-        }
-    });
-
-    return isError;
-};
-const uppercaseFirstLetter = (string) => {
-    const uppercaseFirstLetter = string.charAt(0).toUpperCase();
-    const stringWithoutFirstLetter = string.slice(1);
-    return uppercaseFirstLetter + stringWithoutFirstLetter;
-};
-
-export const toUppercaseKeys = (object) => {
-    const newObject = {};
-    Object.keys(object).forEach((key) => {
-        newObject[uppercaseFirstLetter(key)] = object[key];
-    });
-    return newObject;
-};
-
-export const formatListProducts = (listProducts) => {
-    const listProductsSold = [];
-    const listProductsHaventSold = [];
-
-    listProducts.forEach((singleProduct) => {
-        const { product, customer, uri } = singleProduct;
-        const data = {
-            customer,
-            product,
-            uri: uri.sold,
-            sku: product.sku
-        };
-        if (product.sold) {
-            listProductsSold.push(data);
-        } else {
-            listProductsHaventSold.push(data);
-        }
-    });
-
-    return { listProductsSold, listProductsHaventSold };
-};
-
+/**
+ * @deprecated
+ */
 export const filterArray = (array, filtered, limit = 5) => {
     if (!filtered || filtered === "") return array.slice(0, limit);
     const newArray = array.filter((singleData) => singleData.toLowerCase().includes(filtered.toLowerCase()));
     return newArray.slice(0, limit);
 };
-
-export const convertFormDatatoRequestData = (information, article) => ({
-    firstName: information.firstName,
-    lastName: information.lastName,
-    birthdayDate: information.birthdayDate,
-    address: information.address,
-    zipCode: information.zipCode,
-    city: information.city,
-    phone: information.phone,
-    email: information.email,
-    products: [
-        {
-            name: article.name,
-            sku: article.reference,
-            description: article.description ? article.description : "",
-            voucherAmount: parseFloat(article.voucherAmount.replace(" €", "")),
-            price: parseFloat(article.price.replace(" €", "")),
-            category: article.category,
-            brand: article.brand.Name,
-            reference: article.reference,
-            pictures: article.pictures.map((photo, index) => ({
-                name: `image${index + 1}`,
-                content: photo
-            })),
-            size: article.size,
-            state: article.state.Name
-        }
-    ]
-});
