@@ -57,7 +57,7 @@ const BottomBarMenu = ({ state, navigation }) => {
                         } else {
                             navigation.navigate(name, {
                                 screen: listItemsData[name].screen,
-                                params: { fromBottomMenu: true }
+                                params: { forceUpdate: true }
                             });
                         }
                     }

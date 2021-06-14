@@ -39,7 +39,7 @@ const ActifVouchers = (props) => {
                     vouchers: available
                 });
                 setIsLoading(false);
-            } else if (paramsNavigation.customer && !paramsNavigation.fromBottomMenu) {
+            } else if (paramsNavigation.customer && !paramsNavigation.forceUpdate) {
                 setIsLoading(true);
                 const { customer } = paramsNavigation;
                 const available = [];
@@ -70,7 +70,7 @@ const ActifVouchers = (props) => {
             } else if (paramsNavigation.reference) {
                 getListVouchers(paramsNavigation.reference);
                 props.navigation.setParams({ reference: null });
-            } else if (paramsNavigation.fromBottomMenu) {
+            } else if (paramsNavigation.forceUpdate) {
                 getListVouchers();
             }
         }

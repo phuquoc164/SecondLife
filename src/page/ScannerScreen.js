@@ -56,7 +56,7 @@ const ScannerScreen = (props) => {
         } else if (data.type && data.type === "voucher") {
             props.navigation.navigate("Voucher", {
                 screen: "ActifVouchers",
-                params: { reference: data.reference, customer: null, available: null, usedOrExpired: null, fromBottomMenu: null }
+                params: { reference: data.reference, customer: null, available: null, usedOrExpired: null, forceUpdate: null }
             });
         } else {
             Alert.alert("Erreur", "Qrcode invalide");

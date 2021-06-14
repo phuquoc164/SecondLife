@@ -55,7 +55,7 @@ const ResultPage = (props) => {
                 })
                 .catch((error) => {
                     console.error(error);
-                    Alert.aler("Add Product sell error");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         }
     };
@@ -77,7 +77,7 @@ const ResultPage = (props) => {
                 })
                 .catch((error) => {
                     console.error(error);
-                    Alert.aler("Add Product sell error");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         }
     }

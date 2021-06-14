@@ -37,7 +37,7 @@ const OnceAgain = (props) => {
 
     React.useEffect(() => {
         if (props.route.params) {
-            const { deleteProduct, reference, fromBottomMenu } = props.route.params;
+            const { deleteProduct, reference, forceUpdate } = props.route.params;
             if (deleteProduct && dataDetailed) {
                 const newData = data.filter((product) => product["@id"] !== dataDetailed["@id"]);
                 setData(newData);
@@ -62,7 +62,7 @@ const OnceAgain = (props) => {
                 } else if (tabActive === "shipment") {
                     setTabActive("products");
                 }
-            } else if (fromBottomMenu) {
+            } else if (forceUpdate) {
                 setIsLoading(true);
                 setDataDetail(null);
                 getData();

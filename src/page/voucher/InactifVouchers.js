@@ -39,7 +39,7 @@ const InactifVouchers = (props) => {
                     vouchers: usedOrExpired
                 });
                 setIsLoading(false);
-            } else if (props.route.params.customer && !props.route.params.fromBottomMenu) {
+            } else if (props.route.params.customer && !props.route.params.forceUpdate) {
                 const { customer } = props.route.params;
                 const available = [];
                 const usedOrExpired = [];
@@ -197,7 +197,7 @@ const InactifVouchers = (props) => {
 
     return (
         <SafeAreaView style={styles.mainScreen}>
-            {!props.route.params?.customer || props.route.params?.fromBottomMenu ? (
+            {!props.route.params?.customer || props.route.params?.forceUpdate ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
                 <View style={{ paddingVertical: 5 }}></View>

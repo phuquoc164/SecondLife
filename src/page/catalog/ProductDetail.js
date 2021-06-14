@@ -326,7 +326,7 @@ const ProductDetail = (props) => {
                 setIsLoadingScreenVisible(false);
                 props.navigation.navigate("Catalog", {
                     screen: props.route.params.screen,
-                    params: { deleteProduct: true, sellProduct: null, reference: null, fromBottomMenu: null }
+                    params: { deleteProduct: true, sellProduct: null, reference: null, forceUpdate: null }
                 });
             }
         }).catch(error => {

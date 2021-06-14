@@ -32,7 +32,7 @@ const Rayon = (props) => {
     }, [tabActive]);
 
     React.useEffect(() => {
-        const { deleteProduct, sellProduct, reference, fromBottomMenu } = props.route.params;
+        const { deleteProduct, sellProduct, reference, forceUpdate } = props.route.params;
         if (deleteProduct && productDetail) {
             const newListProducts = listProducts.filter((product) => product["@id"] !== productDetail["@id"]);
             setListProducts(newListProducts);
@@ -74,7 +74,7 @@ const Rayon = (props) => {
             } else if (tabActive === "sold") {
                 setTabActive("sell");
             }
-        } else if (fromBottomMenu) {
+        } else if (forceUpdate) {
             setIsLoading(true);
             setProductdetail(null);
             getListProducts();

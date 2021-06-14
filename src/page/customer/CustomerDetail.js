@@ -75,7 +75,7 @@ const CustomerDetail = (props) => {
                         onPress={() =>
                             props.navigation.navigate("Voucher", {
                                 screen: "ActifVouchers",
-                                params: { customer, fromBottomMenu: false, reference: null, available: null, usedOrExpired: null }
+                                params: { customer, forceUpdate: false, reference: null, available: null, usedOrExpired: null }
                             })
                         }
                         style={[componentStyle.singleProduct, { borderColor: colors.green }]}>
@@ -87,7 +87,7 @@ const CustomerDetail = (props) => {
                         onPress={() =>
                             props.navigation.navigate("Voucher", {
                                 screen: "InactifVouchers",
-                                params: { customer, fromBottomMenu: false, reference: null, available: null, usedOrExpired: null }
+                                params: { customer, forceUpdate: false, reference: null, available: null, usedOrExpired: null }
                             })
                         }
                         style={[componentStyle.singleProduct, { borderColor: colors.darkBlue }]}>

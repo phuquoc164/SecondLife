@@ -38,7 +38,7 @@ const MenuChangeCatalog = (props) => {
                         onPress={() =>
                             props.navigation.navigate("Catalog", {
                                 screen: page.screenName,
-                                params: { fromBottomMenu: true, reference: null, deleteProduct: null, sellProduct: null }
+                                params: { forceUpdate: true, reference: null, deleteProduct: null, sellProduct: null }
                             })
                         }
                     />
