@@ -1,34 +1,104 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList } from "react-native";
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert } from "react-native";
 
+/** App */
 /** App */
 import styles from "../../assets/css/styles";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
-import { InputSearch, loading } from "../../lib/Helpers";
+import { SHIPMENT_STATUS } from "../../lib/constants";
+import FetchService from "../../lib/FetchService";
+import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../../lib/Helpers";
 
-// tab
+// tab give => list Products
+// tab gave => list shipments
 const Donation = (props) => {
+    const [isLoadingScreen, setIsLoadingScreen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [tabActive, setTabActive] = useState("give");
-    const [listProducts, setListProducts] = useState([]);
+    const [data, setData] = useState([]);
     const [listProductsSelected, setListProductsSelected] = useState({
         allInfo: [],
         ids: []
     });
     const [filter, setFilter] = useState({
         keyword: "",
-        listProducts: []
+        listOptions: []
     });
+    const [dataDetailed, setDataDetail] = useState(null);
 
     const { user } = React.useContext(AuthContext);
 
-    React.useEffect(() => {}, [tabActive]);
+    React.useEffect(() => {
+        setDataDetail(null);
+        getData();
+    }, [tabActive]);
 
-    // TODO: get list products
-    const getData = (tabActive) => {
-        setIsLoading(true);
+    React.useEffect(() => {
+        if (props.route.params) {
+            const { deleteProduct, reference, fromBottomMenu } = props.route.params;
+            if (deleteProduct && dataDetailed) {
+                const newData = data.filter((product) => product["@id"] !== dataDetailed["@id"]);
+                setData(newData);
+                setFilter({
+                    keyword: "",
+                    listOptions: newData
+                });
+                if (listProductsSelected.ids.includes(dataDetailed["@id"])) {
+                    const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== dataDetailed["@id"]);
+                    const newIds = listProductsSelected.ids.filter((id) => id !== dataDetailed["@id"]);
+                    setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
+                }
+                setDataDetail(null);
+            } else if (reference) {
+                if (data.length > 0 && tabActive === "give") {
+                    const newData = data.filter((product) => product.reference === reference);
+                    setFilter({
+                        keyword: reference,
+                        listOptions: newData
+                    });
+                    props.navigation.setParams({ reference: null });
+                } else if (tabActive === "gave") {
+                    setTabActive("give");
+                }
+            } else if (fromBottomMenu) {
+                setIsLoading(true);
+                setDataDetail(null);
+                getData();
+            }
+        }
+    }, [props.route.params]);
+
+    // get product or get shipments
+    const getData = (reference) => {
+        const endpoint = tabActive === "give" ? "/products?isSentToDonation=0" : "/shipments?type=donation";
+        FetchService.get(endpoint, user.token)
+            .then((result) => {
+                if (!!result) {
+                    setData(result["hydra:member"]);
+                    if (props.route.params?.reference) {
+                        const newData = result["hydra:member"].filter((product) => product.reference === reference);
+                        setFilter({
+                            keyword: reference,
+                            listOptions: newData
+                        });
+                        props.navigation.setParams({ reference: null });
+                    } else {
+                        setFilter({
+                            keyword: "",
+                            listOptions: result["hydra:member"]
+                        });
+                    }
+                    setIsLoading(false);
+                    isLoadingScreen && setIsLoadingScreen(false);
+                }
+            })
+            .catch((error) => {
+                // TODO: change text
+                console.error(error);
+                Alert.alert("Donation", "Get data error");
+            });
     };
 
     /**
@@ -38,11 +108,11 @@ const Donation = (props) => {
      */
     const renderListProducts = ({ item }) => (
         <View key={item["@id"]} style={styles.singleProduct}>
-            <View>
-                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.name}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${item.seller} - ${item.date}`}</Text>
-            </View>
+            <TouchableOpacity onPress={() => handleDisplayProductDetail(item)}>
+                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.title}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand.name}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${item.seller.name} - ${convertDateToDisplay(item.createAt)}`}</Text>
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => handleSelectProduct(item)}>
                 {listProductsSelected.ids.includes(item["@id"]) ? (
                     <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
@@ -52,6 +122,57 @@ const Donation = (props) => {
             </TouchableOpacity>
         </View>
     );
+
+    const renderShipments = ({ item }) => (
+        <View key={item["@id"]} style={[styles.singleProduct, { alignItems: "flex-start" }]}>
+            <View>
+                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{item.poolNumber}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(item.sentAt)}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Statut: {SHIPMENT_STATUS[item.status]}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Nombre d'articles: {item.totalProducts}</Text>
+            </View>
+            <TouchableOpacity
+                onPress={() => {
+                    props.navigation.setOptions({
+                        handleGoBack: () => setDataDetail(null)
+                    });
+                    setDataDetail(item);
+                }}>
+                <Text style={[styles.font14, styles.fontSofiaRegular, styles.textMediumGray]}>Voir le détail</Text>
+            </TouchableOpacity>
+        </View>
+    );
+
+    const renderShipmentsDetailed = () => {
+        return (
+            <ScrollView key={dataDetailed["@id"]}>
+                <View style={[styles.singleProduct, { flexDirection: "column", alignItems: "flex-start" }]}>
+                    <View>
+                        <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{dataDetailed.poolNumber}</Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(dataDetailed.sentAt)}</Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Statut: {SHIPMENT_STATUS[dataDetailed.status]}</Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Nombre d'articles: {dataDetailed.totalProducts}</Text>
+                    </View>
+                    <View style={[styles.divisionHorizontal, { backgroundColor: colors.gray, marginVertical: 10 }]} />
+                    {dataDetailed.products.map((productShipment, index) => {
+                        const { product } = productShipment;
+                        return (
+                            <View key={product["@id"]} style={{ flexDirection: "row" }}>
+                                <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, { marginRight: 10 }]}>{index + 1}.</Text>
+                                <View>
+                                    <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{product.title}</Text>
+                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{product.reference}</Text>
+                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>
+                                        Customer: {product.customer.firstname} {product.customer.lastname}
+                                    </Text>
+                                </View>
+                            </View>
+                        );
+                    })}
+                </View>
+            </ScrollView>
+        );
+    };
 
     /**
      * Handle select or unselect all products
@@ -88,34 +209,127 @@ const Donation = (props) => {
         }
     };
 
-    const filterData = (filter) => {};
+    /**
+     * handle filter list data by the input filter
+     * @param {*} filter
+     */
+    const filterData = (filter) => {
+        const filterToLower = filter.toLowerCase();
+        if (tabActive === "give") {
+            const newFilterProducts = data.filter((product) => {
+                const { title, brand, seller, createAt, reference } = product;
+                const date = convertDateToDisplay(createAt);
+                return (
+                    title.toLowerCase().includes(filterToLower) ||
+                    brand.name.toLowerCase().includes(filterToLower) ||
+                    seller.name.toLowerCase().includes(filterToLower) ||
+                    date.includes(filterToLower) ||
+                    reference.toLowerCase().includes(filterToLower)
+                );
+            });
+
+            setFilter({
+                keyword: filter,
+                listOptions: newFilterProducts
+            });
+        } else {
+            const newFilterShipments = data.filter((shipment) => {
+                const { totalProducts, poolNumber } = shipment;
+
+                return totalProducts.toString().includes(filterToLower) || poolNumber.toString().includes(filterToLower);
+            });
+
+            setFilter({
+                keyword: filter,
+                listOptions: newFilterShipments
+            });
+        }
+    };
+
+    /**
+     * handle send request to send products to donation
+     */
+    const handleSendProducts = () => {
+        setIsLoadingScreen(true);
+        const productsShipment = listProductsSelected.ids.map((id) => {
+            return { product: id };
+        });
+
+        const dataApi = { products: [...productsShipment], type: "donation" };
+        FetchService.post("/shipments", dataApi, user.token)
+            .then((result) => {
+                if (result && result["@id"]) {
+                    const newData = data.filter((product) => !listProductsSelected.ids.includes(product["@id"]));
+                    setData(newData);
+                    setFilter({
+                        keyword: "",
+                        listOptions: newData
+                    });
+                    setListProductsSelected({ allInfo: [], ids: [] });
+                    setIsLoadingScreen(false);
+                }
+            })
+            .catch((error) => {
+                // TODO: change text
+                console.error(error);
+                Alert.alert("Donation", "Send shipment error");
+            });
+    };
+
+    /**
+     * handle display product detail
+     * @param {*} item
+     */
+    const handleDisplayProductDetail = (item) => {
+        setDataDetail(item);
+        props.navigation.navigate("Catalog", {
+            screen: "ProductDetail",
+            params: {
+                productId: item["@id"],
+                screen: "Donation"
+            }
+        });
+    };
+    const nbProductsSelected = listProductsSelected.ids.length;
+    const placeHolderFilter = tabActive === "give" ? "Chercher une commande..." : "Chercher un n° de suivi...";
 
     return (
         <View style={styles.mainScreen}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
-                    <TouchableOpacity onPress={() => setTabActive("give")} style={{ alignSelf: "center" }}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            setIsLoading(true);
+                            setTabActive("give");
+                        }}
+                        style={{ alignSelf: "center" }}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "give" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>À donner</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.flex1}>
-                    <TouchableOpacity onPress={() => setTabActive("gave")}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            setIsLoading(true);
+                            setTabActive("gave");
+                        }}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "gave" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>Donnés</Text>
                     </TouchableOpacity>
                 </View>
             </View>
+            {!dataDetailed && <InputSearch placeholder={placeHolderFilter} placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />}
 
             {isLoading && loading()}
             {!isLoading && tabActive === "give" && (
                 <>
-                    <InputSearch placeholder="Chercher une commande, un n° de suivi..." placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
-
                     <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
                         <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation des dons en cours</Text>
-                        <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>7 produits sélectionnés</Text>
-                        <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>7</Text>
+                        <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>{nbProductsSelected} produits sélectionnés</Text>
+                        <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>{nbProductsSelected}</Text>
                         <View style={{ alignSelf: "center", marginBottom: 10 }}>
-                            <TouchableOpacity style={styles.btnSend}>
+                            <TouchableOpacity
+                                disabled={nbProductsSelected === 0}
+                                onPress={handleSendProducts}
+                                style={[styles.btnSend, nbProductsSelected === 0 && { opacity: 0.5 }]}>
                                 <Image source={require("../../assets/images/don.png")} style={styles.imageBtnSend} />
                                 <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { top: -0.5, paddingRight: 10, paddingLeft: 5 }]}>
                                     Marquer comme donné
@@ -124,28 +338,30 @@ const Donation = (props) => {
                         </View>
                     </View>
 
-                    <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
-                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
-                        <TouchableOpacity onPress={handleSelectAllProducts}>
-                            {listProducts.length === listProductsSelected.allInfo.length ? (
-                                <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
-                            ) : (
-                                <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
-                            )}
-                        </TouchableOpacity>
-                    </View>
+                    {data.length !== 0 && (
+                        <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
+                            <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
+                            <TouchableOpacity onPress={handleSelectAllProducts}>
+                                {data.length === listProductsSelected.allInfo.length ? (
+                                    <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
+                                ) : (
+                                    <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
                     <SafeAreaView style={{ marginBottom: 440 }}>
-                        <FlatList data={filter.listProducts} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
+                        <FlatList data={filter.data} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
                     </SafeAreaView>
                 </>
             )}
 
             {!isLoading && tabActive === "gave" && (
                 <SafeAreaView>
-                    {/* <FlatList data={filter.listProducts} /> */}
-                    <Text>Gave</Text>
+                    {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
                 </SafeAreaView>
             )}
+            {loadingScreen(isLoadingScreen)}
         </View>
     );
 };
