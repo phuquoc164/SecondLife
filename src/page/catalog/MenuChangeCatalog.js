@@ -23,8 +23,8 @@ const HEADER_CATALOG = [
     }
 ];
 const MenuChangeCatalog = (props) => {
-    const listPages = HEADER_CATALOG.filter(header => header.title !== props.route.params.title);
-    
+    const listPages = HEADER_CATALOG.filter((header) => header.title !== props.route.params.title);
+
     return (
         <View style={{ flex: 1, alignItems: "center", marginTop: 75 }}>
             <View style={{ width: "85%" }}>
@@ -35,12 +35,17 @@ const MenuChangeCatalog = (props) => {
                         title={page.title}
                         isLinear={false}
                         titleStyle={[styles.font24, styles.textWhite]}
-                        onPress={() => props.navigation.navigate("Catalog", { screen: page.screenName})}
+                        onPress={() =>
+                            props.navigation.navigate("Catalog", {
+                                screen: page.screenName,
+                                params: { fromBottomMenu: true, reference: null, deleteProduct: null, sellProduct: null }
+                            })
+                        }
                     />
                 ))}
             </View>
         </View>
     );
-}
+};
 
 export default MenuChangeCatalog;
