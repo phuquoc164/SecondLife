@@ -7,21 +7,18 @@ import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import { useScrollToTop } from "@react-navigation/native";
 
 /** App */
+import Picker from "../../components/Picker";
+import ModalPhoto from "../../components/ModalPhoto";
+import PickerCategories from "../../components/PickerCategories";
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { colors } from "../../lib/colors";
 import { initialProduct, stateDict } from "../../lib/constants";
 import { AuthContext } from "../../lib/AuthContext";
 import { loading, loadingScreen, verifyProduct } from "../../lib/Helpers";
-import Picker from "../../components/Picker";
-import ModalPhoto from "../../components/ModalPhoto";
-import PickerCategories from "../../components/PickerCategories";
 
-// TODO: verify the data before sending request
-// if erreur -> display border red
 const AddProduct = (props) => {
     const { user } = React.useContext(AuthContext);
-    const firstView = React.createRef();
     const [isLoadingScreen, setIsLoadingScreen] = useState(false);
     const [isLoadingBtnSubmit, setIsLoadingBtnsubmit] = useState(false);
     const [product, setProduct] = useState(initialProduct);
@@ -55,6 +52,9 @@ const AddProduct = (props) => {
     };
     const scrollRef = React.useRef(null);
 
+    /**
+     * reset argus
+     */
     const resetArgus = () => {
         setArgus({
             FetchService: false,
@@ -81,6 +81,10 @@ const AddProduct = (props) => {
         }
     }, [props.route.params]);
 
+    /**
+     * get list brand, size, state and seller
+     * list categories depends on list brand
+     */
     const getListOptions = async () => {
         try {
             const brandApi = await FetchService.get("/brands", user.token);
@@ -128,23 +132,7 @@ const AddProduct = (props) => {
                     } else if (response.customButton) {
                         console.debug("User tapped custom button: ", response.customButton);
                     } else {
-                        setIsLoadingScreen(true);
-                        FetchService.postImage(response, user.token)
-                            .then((result) => {
-                                if (!!result) {
-                                    setProduct({
-                                        ...product,
-                                        images: [...product.images, { base64: response.base64, id: result["@id"] }]
-                                    });
-                                    setIsLoadingScreen(false);
-                                }
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                                setIsLoadingScreen(false);
-                                // TODO: change text
-                                Alert.alert("Take image error");
-                            });
+                        sendRequestToAddImage(response, "Take image error");
                     }
                 });
             } else {
@@ -183,23 +171,7 @@ const AddProduct = (props) => {
                     } else if (response.customButton) {
                         console.debug("User tapped custom button: ", response.customButton);
                     } else {
-                        setIsLoadingScreen(true);
-                        FetchService.postImage(response, user.token)
-                            .then((result) => {
-                                if (!!result) {
-                                    setProduct({
-                                        ...product,
-                                        images: [...product.images, { base64: response.base64, id: result["@id"] }]
-                                    });
-                                    setIsLoadingScreen(false);
-                                }
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                                setIsLoadingScreen(false);
-                                // TODO: change text
-                                Alert.alert("Select image error");
-                            });
+                        sendRequestToAddImage(response, "Select image error");
                     }
                 });
             } else {
@@ -214,9 +186,43 @@ const AddProduct = (props) => {
         }
     };
 
+    /**
+     * send request to add image to server
+     * @param {*} response
+     * @param {*} errorMessage
+     */
+    const sendRequestToAddImage = (response, errorMessage) => {
+        setIsLoadingScreen(true);
+        FetchService.postImage(response, user.token)
+            .then((result) => {
+                if (!!result) {
+                    setProduct({
+                        ...product,
+                        images: [...product.images, { base64: response.base64, id: result["@id"] }]
+                    });
+                    if (listErreurs.includes("images")) {
+                        const newListErreurs = [...listErreurs];
+                        newListErreurs.shift();
+                        setListErreurs(newListErreurs);
+                    }
+                    setIsLoadingScreen(false);
+                }
+            })
+            .catch((error) => {
+                setIsLoadingScreen(false);
+                console.error(error);
+                Alert.alert("Image Error", "Add image to server error");
+            });
+    };
+
+    /**
+     * send request to delete the image
+     * @param {*} imageId
+     */
     const handleDeletePhoto = (imageId) => {
         FetchService.delete(imageId, user.token)
             .then((result) => {
+                console.log(result);
                 if (!!result) {
                     const newImages = product.images.filter((image) => image.id !== imageId);
                     setProduct({
@@ -226,12 +232,16 @@ const AddProduct = (props) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 // TODO: change text
-                Alert.alert("Delete image error");
+                console.error(error);
+                Alert.alert("Image Error", "Delete image error");
             });
     };
 
+    /**
+     * handle select brand and initialize list categories
+     * @param {*} brand
+     */
     const handleSelectBrand = (brand) => {
         setModal("");
         if (!product.brand || product.brand.id !== brand.id) {
@@ -275,6 +285,11 @@ const AddProduct = (props) => {
         }
     };
 
+    /**
+     * send requeste to get the data of argus
+     * @param {*} data
+     * @returns
+     */
     const handleArgus = (data) => {
         let endPoint = "/arguses?brand=" + product.brand.name;
         if (data.type === "category") {
@@ -304,24 +319,30 @@ const AddProduct = (props) => {
                 setIsLoadingScreen(false);
             })
             .catch((error) => {
-                console.error(error);
                 // TODO: chang text
-                Alert.alert("Argus Erreur");
+                console.error(error);
+                Alert.alert("Error", "Get argus information error");
             });
     };
 
+    /**
+     * handle send request to add product
+     * @returns
+     */
     const handlSubmitForm = () => {
-        setIsLoadingBtnsubmit(true);
         // TODO: verify product before create data
         const listErreurs = verifyProduct(product);
+        console.log(listErreurs);
         if (listErreurs.length > 0) {
+            // TODO: change text
             Alert.alert("Erreur", "Veuillez vérifier les données à champ rouge");
             setListErreurs(listErreurs);
             return;
         }
+        setIsLoadingBtnsubmit(true);
         setListErreurs([]);
         const data = {
-            name: product.name,
+            title: product.title,
             images: product.images.map((image) => image.id),
             vouchers: [
                 {
@@ -342,32 +363,40 @@ const AddProduct = (props) => {
             size: product.size.id,
             state: product.state.id,
             description: product.description,
-            price: null,
-            reference: ""
+            price: 0
         };
 
         if (btnStatus === "sell") {
-            props.navigation.navigate("NewProduct", { screen: "ResultPage", params: { data, typeCatalog: "sell", sellingPrice: argus.sellingPrice } });
+            props.navigation.navigate("NewProduct", {
+                screen: "ResultPage",
+                params: { data: { ...data, price: null, reference: null }, typeCatalog: "sell", sellingPrice: argus.sellingPrice }
+            });
         } else {
             FetchService.post("/products", data, user.token)
                 .then((result) => {
-                    console.log("products", result);
+                    console.log("fetch product", result, btnStatus);
                     if (result && result["@id"]) {
                         if (btnStatus === "partner") {
-                            const data = { products: [{ product: result["@id"] }] };
-                            FetchService.post("/shipments", data, user.token).then((shipment) => {
-                                if (shipment && shipment["@id"]) {
+                            const data = { products: [{ product: result["@id"] }], type: "partner" };
+                            FetchService.get("/products?isSentToPartner=0", user.token).then((listProductsPartner) => {
+                                console.log(listProductsPartner);
+                                if (listProductsPartner) {
+                                    const nbProducts = listProductsPartner["hydra:totalItems"];
                                     let description = "";
-                                    if (shipment.closed) {
+                                    if (nbProducts >=15) {
                                         description = "Vous avez ajouté 15 produits, rendez-vous sur votre back-office pour télécharger votre étiquette d'envoi !";
                                     } else {
-                                        description = "Il vous reste " + shipment.leftProducts + " produits à ajouter avant de pouvoir les envoyer à notre partenaire.";
+                                        description = "Il vous reste " + (15 - nbProducts) + " produits à ajouter avant de pouvoir les envoyer à notre partenaire.";
                                     }
                                     props.navigation.navigate("NewProduct", {
                                         screen: "ResultPage",
                                         params: { typeCatalog: "partner", description }
                                     });
                                 }
+                                setIsLoadingBtnsubmit(false);
+                            }).catch(error => {
+                                console.error(error);
+                                Alert.alert("Error", "get product onceagain error");
                             });
                         } else {
                             props.navigation.navigate("NewProduct", {
@@ -376,12 +405,12 @@ const AddProduct = (props) => {
                             });
                         }
                     }
-                    setIsLoadingBtnsubmit(false);
                 })
                 .catch((error) => {
+                    // TODO: change text
+                    setIsLoadingBtnsubmit(false);
                     console.error(error);
-                    // TODO: set text
-                    Alert.alert("Add product error");
+                    Alert.alert("Error", "Add product error");
                 });
         }
     };
@@ -389,11 +418,9 @@ const AddProduct = (props) => {
     if (listOptions.isLoading) {
         return <View style={styles.mainScreen}>{loading()}</View>;
     }
-    const inputContainer = (listErreurs.includes())
     return (
         <SafeAreaView style={styles.mainScreen}>
             <KeyboardAwareScrollView ref={scrollRef}>
-                <View ref={firstView} />
                 <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }, listErreurs.includes("images") && { borderColor: colors.red }]}>
                     <Text style={[styles.textCenter, styles.addProductLabel]}>Ajoute jusqu'à 5 photos</Text>
                     {product.images.length === 0 && (
@@ -456,8 +483,8 @@ const AddProduct = (props) => {
                         style={[styles.addProductInput]}
                         placeholder="Choisissez le nom du produit"
                         placeholderTextColor={colors.gray2}
-                        value={product.name}
-                        onChangeText={(name) => setProduct({ ...product, name })}
+                        value={product.title}
+                        onChangeText={(title) => setProduct({ ...product, title })}
                     />
                 </View>
 
@@ -527,7 +554,7 @@ const AddProduct = (props) => {
                 </View>
 
                 {/* Voucher */}
-                <View style={[styles.addProductInputContainer, listErreurs.includes("voucher") && { borderColor: colors.red }]}>
+                <View style={[styles.addProductInputContainer, listErreurs.includes("voucherAmount") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Bon d'achat</Text>
                     <TextInput
                         style={[styles.addProductInput]}
@@ -599,7 +626,7 @@ const AddProduct = (props) => {
                     <TouchableOpacity
                         disabled={btnStatus === ""}
                         onPress={handlSubmitForm}
-                        style={[styles.addProductInputContainer, styles.greenScreen, { paddingVertical: 20, marginBottom: 50 }]}>
+                        style={[styles.addProductInputContainer, styles.greenScreen, { paddingVertical: 20, marginBottom: 50 }, btnStatus === "" && { opacity: 0.5 }]}>
                         <Text style={[styles.addProductLabel, styles.textCenter, styles.textWhite]}>Continuer</Text>
                     </TouchableOpacity>
                 )}

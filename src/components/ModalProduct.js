@@ -58,7 +58,7 @@ const ModalProduct = props => {
 						<Text style={{ fontSize: 15, color: "#AAAAAA", fontWeight: "bold" }}>
 							{product.customer.firstName} {product.customer.lastName}
 						</Text>
-						<Text style={{ fontSize: 20, marginBottom: 15, fontWeight: "bold" }}>{product.product.name}</Text>
+						<Text style={{ fontSize: 20, marginBottom: 15, fontWeight: "bold" }}>{product.product.title}</Text>
 						<Text style={{ fontWeight: "bold" }}>Information Générale</Text>
 						<View style={{ marginBottom: 25 }}>
 							<Text>{`Prénom: ${product.customer.firstName}`}</Text>
@@ -69,7 +69,7 @@ const ModalProduct = props => {
 						<Text style={{ fontWeight: "bold" }}>Article</Text>
 						<View>
 							<Text>{`Réf: ${product.sku}`}</Text>
-							<Text>{`Nom: ${product.product.name}`}</Text>
+							<Text>{`Nom: ${product.product.title}`}</Text>
 							<Text>{`Marque: ${product.product.brand}`}</Text>
 							<Text>{`Prix: ${product.product.price} €`}</Text>
 							<Text>{`Créé: ${product.product.createdDate.split(" ")[0]}`}</Text>

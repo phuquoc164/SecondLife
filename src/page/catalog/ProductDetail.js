@@ -9,11 +9,11 @@ import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import Picker from "../../components/Picker";
 import PickerCategories from "../../components/PickerCategories";
 import ModalConfirmation from "../../components/ModalConfirmation";
-import ModalPhoto from '../../components/ModalPhoto';
+import ModalPhoto from "../../components/ModalPhoto";
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
-import { convertDateToDisplay, loading, loadingScreen } from "../../lib/Helpers";
+import { convertDateToDisplay, getKeyByValue, loading, loadingScreen } from "../../lib/Helpers";
 import { colors } from "../../lib/colors";
 import { stateDict } from "../../lib/constants";
 
@@ -44,6 +44,7 @@ const ProductDetail = (props) => {
     };
 
     const { user } = React.useContext(AuthContext);
+
     React.useEffect(() => {
         if (props.route.params && props.route.params.productId) {
             getProduct(props.route.params.productId);
@@ -59,15 +60,16 @@ const ProductDetail = (props) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 // TODO: change text
-                Alert.alert("error");
+                console.error(error);
+                Alert.alert("Product Detail", "Get Product error");
             });
     };
 
     const formatProduct = (allInfoProduct) => {
         const { title, brand, category, description, images, size, state, seller } = allInfoProduct;
         const product = {
+            id: allInfoProduct["@id"],
             title,
             brand: { id: brand["@id"], name: brand.name },
             category: category.name,
@@ -104,23 +106,7 @@ const ProductDetail = (props) => {
                     } else if (response.customButton) {
                         console.debug("User tapped custom button: ", response.customButton);
                     } else {
-                        setIsLoadingScreen(true);
-                        FetchService.postImage(response, user.token)
-                            .then((result) => {
-                                if (!!result) {
-                                    setProduct({
-                                        ...product,
-                                        images: [...product.images, { base64: response.base64, id: result["@id"] }]
-                                    });
-                                    setIsLoadingScreen(false);
-                                }
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                                setIsLoadingScreen(false);
-                                // TODO: change text
-                                Alert.alert("Take image error");
-                            });
+                        sendRequestToAddImage(response, "select image error");
                     }
                 });
             } else {
@@ -159,23 +145,7 @@ const ProductDetail = (props) => {
                     } else if (response.customButton) {
                         console.debug("User tapped custom button: ", response.customButton);
                     } else {
-                        setIsLoadingScreen(true);
-                        FetchService.postImage(response, user.token)
-                            .then((result) => {
-                                if (!!result) {
-                                    setProduct({
-                                        ...product,
-                                        images: [...product.images, { base64: response.base64, id: result["@id"] }]
-                                    });
-                                    setIsLoadingScreen(false);
-                                }
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                                setIsLoadingScreen(false);
-                                // TODO: change text
-                                Alert.alert("Select image error");
-                            });
+                        sendRequestToAddImage(response, "Take image error");
                     }
                 });
             } else {
@@ -188,6 +158,31 @@ const ProductDetail = (props) => {
         } catch (error) {
             console.warn(err);
         }
+    };
+
+    /**
+     * send request to add image to server
+     * @param {*} response
+     * @param {*} errorMessage
+     */
+    const sendRequestToAddImage = (response, errorMessage) => {
+        setIsLoadingScreen(true);
+        FetchService.postImage(response, user.token)
+            .then((result) => {
+                if (!!result) {
+                    setProduct({
+                        ...product,
+                        images: [...product.images, { base64: response.base64, id: result["@id"] }]
+                    });
+                    setIsLoadingScreen(false);
+                }
+            })
+            .catch((error) => {
+                setIsLoadingScreen(false);
+                // TODO: change text
+                console.error(error);
+                Alert.alert("Product Detail", errorMessage);
+            });
     };
 
     /**
@@ -206,9 +201,9 @@ const ProductDetail = (props) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 // TODO: change text
-                Alert.alert("Delete image error");
+                console.error(error);
+                Alert.alert("Product Detail", "Delete image error");
             });
     };
 
@@ -227,7 +222,16 @@ const ProductDetail = (props) => {
             const listSizes = sizeApi["hydra:member"].map((size) => ({ id: size["@id"], name: size["size"] }));
             const listStates = stateApi["hydra:member"].map((state) => ({ id: state["@id"], name: stateDict[state["state"]], value: state["state"] }));
             const listSellers = sellerApi["hydra:member"].map((seller) => ({ id: seller["@id"], name: seller.name }));
-            setProduct({ ...product, brand: null });
+
+            const brandSelected = listBrands.find((brand) => brand.id === product.brand.id);
+            if (brandSelected) {
+                const listOptionCategories = initListOptionCategories(brandSelected);
+                const categoryName = getKeyByValue(listOptionCategories.selectedIds, productRef.current.category["@id"]);
+                setProduct({ ...product, category: categoryName });
+                setCategories(listOptionCategories);
+            } else {
+                setProduct({ ...product, brand: null });
+            }
             setListOptions({
                 brands: listBrands.sort((a, b) => (a.name > b.name ? 1 : -1)),
                 sizes: listSizes,
@@ -247,40 +251,43 @@ const ProductDetail = (props) => {
         setModal("");
         if (!product.brand || product.brand.id !== brand.id) {
             setProduct({ ...product, brand, category: null });
-            // listSelectedCategoryIds helps finding the id of selected category
-            // listCategoryIds is the list of all category
-            const listCategories = [];
-            const listSelectedCategoryIds = {};
-            const listCategoryIds = {};
-            const listPrefix = {};
-
-            brand.categories.forEach((category, index) => {
-                listPrefix[category.name] = index;
-                listCategoryIds[index + category.name] = category["@id"];
-                listCategories.push(category);
-                let categoryName = category.name;
-                category.children.forEach((child) => {
-                    categoryName += "/" + child.name;
-                    listCategoryIds[index + child.name] = child["@id"];
-                    if (child.children.length > 0) {
-                        child.children.forEach((c) => {
-                            listCategoryIds[index + c.name] = c["@id"];
-                            listSelectedCategoryIds[categoryName + "/" + c.name] = c["@id"];
-                        });
-                    } else {
-                        listSelectedCategoryIds[categoryName] = child["@id"];
-                    }
-                    categoryName = category.name;
-                });
-            });
-
-            setCategories({
-                options: listCategories,
-                selectedIds: listSelectedCategoryIds,
-                ids: listCategoryIds,
-                prefix: listPrefix
-            });
+            setCategories(initListOptionCategories(brand));
         }
+    };
+
+    const initListOptionCategories = (brand) => {
+        // listSelectedCategoryIds helps finding the id of selected category
+        // listCategoryIds is the list of all category
+        const listCategories = [];
+        const listSelectedCategoryIds = {};
+        const listCategoryIds = {};
+        const listPrefix = {};
+        brand.categories && brand.categories.forEach((category, index) => {
+            listPrefix[category.name] = index;
+            listCategoryIds[index + category.name] = category["@id"];
+            listCategories.push(category);
+            let categoryName = category.name;
+            category.children.forEach((child) => {
+                categoryName += "/" + child.name;
+                listCategoryIds[index + child.name] = child["@id"];
+                if (child.children.length > 0) {
+                    child.children.forEach((c) => {
+                        listCategoryIds[index + c.name] = c["@id"];
+                        listSelectedCategoryIds[categoryName + "/" + c.name] = c["@id"];
+                    });
+                } else {
+                    listSelectedCategoryIds[categoryName] = child["@id"];
+                }
+                categoryName = category.name;
+            });
+        });
+
+        return {
+            options: listCategories,
+            selectedIds: listSelectedCategoryIds,
+            ids: listCategoryIds,
+            prefix: listPrefix
+        };
     };
 
     /**
@@ -292,18 +299,42 @@ const ProductDetail = (props) => {
             setIsLoadingScreenVisible(true);
             await getListOptions();
             setIsLoadingScreenVisible(false);
+        } else {
+            const brandSelected = listOptions.brands.find((brand) => brand.id === product.brand.id);
+            if (brandSelected) {
+                const listOptionCategories = initListOptionCategories(brandSelected);
+                const categoryName = getKeyByValue(listOptionCategories.selectedIds, productRef.current.category.id);
+                console.log(categoryName);
+                setProduct({ ...product, category: categoryName });
+                setCategories(listOptionCategories);
+            } else {
+                setProduct({ ...product, brand: null });
+            }
         }
         props.navigation.setOptions({ title: "Modifier les informations" });
     };
 
     /**
-     * Navigation to dedicated page catalog 
+     * Delete product and ,avigation to dedicated page catalog
      */
     const handleDeleteProduct = () => {
-        props.navigation.navigate("Catalog", {
-            screen: props.route.params.screen,
-            params: { deleteProduct: true, sellProduct: false }
-        });
+        // FetchServicesetIsLoading(true);
+        setIsLoadingScreenVisible(true);
+        FetchService.delete(product.id, user.token).then(result => {
+            if (result) {
+                setIsLoadingScreenVisible(false);
+                props.navigation.navigate("Catalog", {
+                    screen: props.route.params.screen,
+                    params: { deleteProduct: true, sellProduct: null, reference: null, fromBottomMenu: null }
+                });
+            }
+        }).catch(error => {
+            setIsLoadingScreenVisible(false);
+            // TODO: change text
+            console.error(error);
+            Alert.alert("Once Again", "Delete product error");
+        })
+        
     };
 
     /**
@@ -327,14 +358,27 @@ const ProductDetail = (props) => {
         });
 
         // TODO: erreur 500 mais après ça, les donnés a changé
-        FetchService.patch(productRef.current["@id"], data, user.token)
-            .then((result) => {
-                console.log(result);
-            })
-            .catch((error) => {
-                console.error(error);
-                Alert.Alert("Erreur", "Modify product error");
-            });
+        if (Object.keys(data).length > 0) {
+            setIsLoadingScreenVisible(true);
+            console.log(productRef.current["@id"]);
+            FetchService.patch(productRef.current["@id"], data, user.token)
+                .then((result) => {
+                    console.log(result);
+                    if (result) {
+                        setEditable(false);
+                        props.navigation.setOptions({ title: "Informations produit" });
+                        setIsLoadingScreenVisible(false);
+                    }
+                })
+                .catch((error) => {
+                    setIsLoadingScreenVisible(false);
+                    // TODO: change text
+                    console.error(error);
+                    Alert.alert("Product Detail", "Modify product error");
+                });
+        } else {
+            handleResetModification();
+        }
     };
 
     const handleResetModification = () => {
@@ -367,10 +411,10 @@ const ProductDetail = (props) => {
                     {product.images.length > 0 && (
                         <View style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: 15 }}>
                             {product.images.map((image) => (
-                                <View key={image.id} style={{ width: "33.3%", aspectRatio: 1, padding: 5, position: "relative" }}>
+                                <View key={image["@id"]} style={{ width: "33.3%", aspectRatio: 1, padding: 5, position: "relative" }}>
                                     {editable && (
                                         <TouchableOpacity
-                                            onPress={() => handleDeletePhoto(image.id)}
+                                            onPress={() => handleDeletePhoto(image["@id"])}
                                             style={{
                                                 position: "absolute",
                                                 top: -2,
@@ -385,7 +429,7 @@ const ProductDetail = (props) => {
                                     )}
                                     <Image
                                         source={{
-                                            uri: "https://pixabay.com/photos/tree-sunset-clouds-sky-silhouette-736885/"
+                                            uri: "https://reactnative.dev/img/tiny_logo.png"
                                         }}
                                         style={{
                                             width: "100%",

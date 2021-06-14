@@ -14,7 +14,7 @@ export const initialCustomer = {
 };
 
 export const initialProduct = {
-    name: null,
+    title: null,
     images: [],
     brand: null,
     category: null,
