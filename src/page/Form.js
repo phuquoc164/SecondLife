@@ -14,7 +14,7 @@ import ModalPhoto from '../components/ModalPhoto';
 import ModalScanner from '../components/ModalScanner';
 import AutocompleteInput from '../components/AutocompleteInput';
 import {initialArticle, initialInformation, listStates} from '../lib/constants';
-import {convertFormDatatoRequestData, filterArray, validateEmail, verifyData} from '../lib/Helpers';
+import { validateEmail } from '../lib/Helpers';
 import FetchService from '../lib/FetchService';
 import {colors} from '../lib/colors';
 
@@ -65,9 +65,9 @@ const Form = props => {
 	});
 	const [showError, setShowError] = useState(false);
 	const { customers, listLastNames, listFirstNames, listEmails } = props.listCustomers;
-	const listLastNamesFiltered = useRef(filterArray(listLastNames, information.lastName));
-	const listFirstNamesFiltered = useRef(filterArray(listFirstNames, information.firstName));
-	const listEmailsFiltered = useRef(filterArray(listEmails, information.email));
+	const listLastNamesFiltered = useRef(listLastNames);
+	const listFirstNamesFiltered = useRef(listFirstNames);
+	const listEmailsFiltered = useRef(listEmails);
 
 	const setCategories = (categories) => {
 		categoriesRef.current = categories;
@@ -193,15 +193,15 @@ const Form = props => {
 
 	const handleAddArticle = () => {
 		setLoading(true);
-		const isErrorInformation = verifyData(information);
-		const isErrorArticle = verifyData(article, hideSize);
+		const isErrorInformation = true;
+		const isErrorArticle = true;
 
 		if (isErrorInformation || isErrorArticle) {
 			Alert.alert("Formulaire invalide", "Veuillez corriger les champs encadrés en rouge.");
 			setShowError(true);
 			setLoading(false);
 		} else {
-			const data = convertFormDatatoRequestData(information, article);
+			const data = '';
 			FetchService.post("products", data, props.token)
 				.then(response => {
 					if (response.success) {
@@ -286,15 +286,15 @@ const Form = props => {
 
 	const handleSaveModification = () => {
 		setLoading(true);
-		const isErrorInformation = verifyData(information);
-		const isErrorArticle = verifyData(article, hideSize);
+		const isErrorInformation = true;
+		const isErrorArticle = true;
 
 		if (isErrorInformation || isErrorArticle) {
 			Alert.alert("Formulaire invalide", "Veuillez corriger les champs encadrés en rouge.");
 			setShowError(true);
 			setLoading(false);
 		} else {
-			const data = convertFormDatatoRequestData(information, article);
+			const data = '';
 
 			FetchService.patch(props.productModified.uri, data, props.token)
 				.then(response => {
@@ -523,7 +523,7 @@ const Form = props => {
 								placeholder="Nom client"
 								value={information.lastName}
 								onChangeText={lastName => {
-									listLastNamesFiltered.current = filterArray(listLastNames, lastName);
+									listLastNamesFiltered.current = listLastNames;
 									setInformation({ ...information, lastName });
 								}}
 								options={listLastNamesFiltered.current}
@@ -544,7 +544,7 @@ const Form = props => {
 								placeholder="Prénom client"
 								value={information.firstName}
 								onChangeText={firstName => {
-									listFirstNamesFiltered.current = filterArray(listFirstNames, firstName);
+									listFirstNamesFiltered.current = listFirstNames;
 									setInformation({ ...information, firstName });
 								}}
 								options={listFirstNamesFiltered.current}
@@ -581,7 +581,7 @@ const Form = props => {
 								autoCapitalize="none"
 								keyboardType="email-address"
 								onChangeText={email => {
-									listEmailsFiltered.current = filterArray(listEmails, email);
+									listEmailsFiltered.current = listEmails;
 									setInformation({ ...information, email });
 								}}
 								options={listEmailsFiltered.current}
