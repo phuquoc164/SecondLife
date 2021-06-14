@@ -135,17 +135,12 @@ export default class FetchService {
 
         const url = DOMAIN + endPoint;
 
-        let response;
         return fetch(url, setting)
             .then((res) => {
-                response = res;
-                return res.json();
-            })
-            .then((body) => {
-                if (response && response.status === 204) {
-                    return Promise.resolve(body);
+                if (res && res.status === 204) {
+                    return Promise.resolve("Success");
                 }
-                return Promise.reject(response.status);
+                return Promise.reject(res.status);
             });
     };
 
@@ -163,13 +158,15 @@ export default class FetchService {
 
         const url = DOMAIN + endPoint;
         let response;
-
+        console.log(url, setting);
         return fetch(url, setting)
             .then((res) => {
+                console.log(res);
                 response = res;
                 return res.json();
             })
             .then((body) => {
+                console.log(body);
                 if (response && response.status === 200 && !!body) {
                     return Promise.resolve(body);
                 }
