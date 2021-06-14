@@ -4,7 +4,6 @@ import { SafeAreaView, Text, View, TouchableOpacity, Image, TextInput, Linking, 
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
-import { useScrollToTop } from "@react-navigation/native";
 
 /** App */
 import Picker from "../../components/Picker";
@@ -65,7 +64,7 @@ const AddProduct = (props) => {
     };
 
     React.useEffect(() => {
-        if (props.route.params.forceReset) {
+        if (props.route.params?.forceReset) {
             setProduct(initialProduct);
             setBtnStatus("");
             setCategories({
@@ -75,7 +74,9 @@ const AddProduct = (props) => {
                 prefix: {}
             });
             resetArgus();
-            useScrollToTop(scrollRef);
+            if (scrollRef) {
+                scrollRef.current.scrollToPosition(0, 0);
+            }
         } else {
             getListOptions();
         }
@@ -409,6 +410,7 @@ const AddProduct = (props) => {
                 });
         }
     };
+    console.log(scrollRef);
 
     if (listOptions.isLoading) {
         return <View style={styles.mainScreen}>{loading()}</View>;
