@@ -5,7 +5,7 @@ import { SafeAreaView, ScrollView, View, TouchableOpacity, Text, Image, TextInpu
 /** App */
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
-import ModalScanner from '../../components/ModalScanner';
+import ModalScanner from "../../components/ModalScanner";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 
@@ -13,7 +13,7 @@ const screenPageCatalog = {
     partner: "OnceAgain",
     sell: "Rayon",
     donation: "Donation"
-}
+};
 
 const ResultPage = (props) => {
     const [product, setProduct] = React.useState({});
@@ -34,10 +34,10 @@ const ResultPage = (props) => {
     const handleScanSuccess = (event) => {
         const data = JSON.parse(event.data);
         if (data && data.type === "product") {
-            setProduct({ ...product, reference: data.reference});
+            setProduct({ ...product, reference: data.reference });
         }
         setIsModalScanner(false);
-    }
+    };
 
     /**
      * Handle Add other product
@@ -80,7 +80,7 @@ const ResultPage = (props) => {
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         }
-    }
+    };
 
     return (
         <SafeAreaView style={styles.mainScreen}>
@@ -114,6 +114,7 @@ const ResultPage = (props) => {
                         <View style={[styles.addProductInputContainer, styles.positionRelative, { marginBottom: 10 }]}>
                             <Text style={styles.addProductLabel}>Référence</Text>
                             <TextInput
+                                autoCapitalize="none"
                                 style={[styles.addProductInput, { marginRight: 40 }]}
                                 placeholder="ex: 5341ezf845"
                                 placeholderTextColor={colors.gray2}
@@ -132,7 +133,7 @@ const ResultPage = (props) => {
                                 style={[styles.addProductInput]}
                                 placeholder="0,00€"
                                 placeholderTextColor={colors.gray2}
-                                value={`${product.price}`}
+                                value={product.price}
                                 onFocus={() => {
                                     if (product.price) {
                                         const newValue = product.price.replace("€", "");
@@ -167,7 +168,7 @@ const ResultPage = (props) => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-            <ModalScanner visible={isModalScanner} handleScanSuccess={handleScanSuccess} />
+            <ModalScanner visible={isModalScanner} handleScanSuccess={handleScanSuccess} onCancel={() => setIsModalScanner(false)} />
         </SafeAreaView>
     );
 };
