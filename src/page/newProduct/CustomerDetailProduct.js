@@ -1,6 +1,6 @@
 /** React */
 import React from "react";
-import { SafeAreaView, ScrollView, TouchableOpacity, Text, View } from "react-native";
+import { SafeAreaView, ScrollView, TouchableOpacity, Text, View, Alert } from "react-native";
 import styles from "../../assets/css/styles";
 import FormCustomer from "../../components/FormCustomer";
 
@@ -31,9 +31,9 @@ const CustomerDetailProduct = (props) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 // TODO: change text
-                Alert.alert("Error");
+                console.error(error);
+                Alert.alert("Customer error", "Get customer error");
             });
     };
 
