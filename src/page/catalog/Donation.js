@@ -76,8 +76,9 @@ const Donation = (props) => {
         FetchService.get(endpoint, user.token)
             .then((result) => {
                 if (!!result) {
+                    console.log("Mes dons", result);
                     setData(result["hydra:member"]);
-                    if (props.route.params?.reference) {
+                    if (reference) {
                         const newData = result["hydra:member"].filter((product) => product.reference === reference);
                         setFilter({
                             keyword: reference,

@@ -5,7 +5,6 @@ import LinearGradient from "react-native-linear-gradient";
 
 /** App */
 import styles from "../assets/css/styles";
-import { colors } from "../lib/colors";
 
 const CustomButton = (props) => (
     <TouchableOpacity onPress={props.onPress} style={[{ width: "100%", paddingVertical: 10, borderRadius: 6 }, props.btnContainerStyle]}>

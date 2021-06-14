@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import DatePicker from "react-native-date-picker";
-import styles from "../assets/css/styles";
 
 /** App */
 import CustomModal from "./CustomModal";
+import styles from "../assets/css/styles";
 
 const maxDate = new Date();
 

@@ -130,3 +130,29 @@ export const filterArray = (array, filtered, limit = 5) => {
     const newArray = array.filter((singleData) => singleData.toLowerCase().includes(filtered.toLowerCase()));
     return newArray.slice(0, limit);
 };
+
+// The component to display image slide
+{/* <ScrollView
+    horizontal={true}
+    contentContainerStyle={{ width: `${100 * (nbImages <= 3 ? 1 : 2)}%` }}
+    showsHorizontalScrollIndicator={false}
+    scrollEventThrottle={200}
+    decelerationRate="fast">
+    {product.product.pictures.map((picture) => (
+        <View
+            key={picture.name}
+            style={{
+                width: `${100 / nbImages}%`,
+                maxWidth: "50%",
+                aspectRatio: 1,
+                padding: 5
+            }}>
+            <Image
+                source={{
+                    uri: "data:image/png;base64," + picture.content
+                }}
+                style={{ width: "100%", height: "100%", resizeMode: "cover" }}
+            />
+        </View>
+    ))}
+</ScrollView>; */}
