@@ -15,7 +15,7 @@ import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
 import { convertDateToDisplay, getKeyByValue, loading, loadingScreen } from "../../lib/Helpers";
 import { colors } from "../../lib/colors";
-import { stateDict } from "../../lib/constants";
+import { DOMAIN, stateDict } from "../../lib/constants";
 
 const ProductDetail = (props) => {
     const [editable, setEditable] = useState(false);
@@ -429,7 +429,7 @@ const ProductDetail = (props) => {
                                     )}
                                     <Image
                                         source={{
-                                            uri: "https://reactnative.dev/img/tiny_logo.png"
+                                            uri: DOMAIN + image.contentUrl
                                         }}
                                         style={{
                                             width: "100%",

@@ -1,6 +1,5 @@
 import { Platform } from "react-native";
-
-const DOMAIN = "http://api-tsl.thunderstone.tech";
+import { DOMAIN } from "./constants";
 
 export default class FetchService {
     static login = (email, password) => {
