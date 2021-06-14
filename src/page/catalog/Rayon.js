@@ -1,6 +1,6 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, ScrollView } from "react-native";
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, ScrollView, Alert } from "react-native";
 
 /** App */
 import styles from "../../assets/css/styles";
@@ -26,42 +26,60 @@ const Rayon = (props) => {
     const { user } = React.useContext(AuthContext);
 
     React.useEffect(() => {
-        !isLoading && setIsLoading(true);
+        setIsLoading(true);
         setProductdetail(null);
         getListProducts();
     }, [tabActive]);
 
     React.useEffect(() => {
-        if (dataDetailed) {
+        const { deleteProduct, sellProduct, reference, fromBottomMenu } = props.route.params;
+        if (deleteProduct && productDetail) {
+            const newListProducts = listProducts.filter((product) => product["@id"] !== productDetail["@id"]);
+            setListProducts(newListProducts);
+            setFilter({
+                keyword: "",
+                listProducts: newData
+            });
+            if (listProductsSelected.ids.includes(productDetail["@id"])) {
+                const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== productDetail["@id"]);
+                const newIds = listProductsSelected.ids.filter((id) => id !== productDetail["@id"]);
+                setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
+            }
+            setProductdetail(null);
+        } else if (sellProduct && productDetail) {
             setIsLoadingScreen(true);
-            const { deleteProduct, sellProduct } = props.route.params;
-            if (deleteProduct) {
-                //TODO: erreeur unexpected end of json input
-                FetchService.delete(productDetail["@id"], user.token).then((result) => {
-                    if (result) {
-                        const newData = data.filter((product) => product["@id"] !== productDetail["@id"]);
-                        setData(newData);
-                        setFilter({
-                            keyword: "",
-                            listOptions: newData
-                        });
-                        if (listProductsSelected.ids.includes(productDetail["@id"])) {
-                            const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== productDetail["@id"]);
-                            const newIds = listProductsSelected.ids.filter((id) => id !== productDetail["@id"]);
-                            setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
-                        }
+            // TODO: handle sell Product
+            const data = {
+                statuses: [{ status: "sell", statusState: true }]
+            };
+            FetchService.patch(productDetail["@id"], data, user.token)
+                .then((result) => {
+                    if (!!result) {
                         setProductdetail(null);
                         setIsLoadingScreen(false);
+                        props.navigation.setParams({ sellProduct: null });
                     }
-                }).catch(error => {
+                })
+                .catch((error) => {
                     console.error(error);
-                    Alert.alert("Erreur", "Delete product fail");
+                    Alert.alert("Rayon", "Mettre en rayon erreur");
                 });
-            } else if (sellProduct) {
-                // TODO: handle sell Product
+        } else if (reference) {
+            if (listProducts.length > 0 && tabActive === "sell") {
+                const newListProducts = listProducts.filter((product) => product.reference === reference);
+                setFilter({
+                    keyword: reference,
+                    listProducts: newListProducts
+                });
+                props.navigation.setParams({ reference: null });
+            } else if (tabActive === "sold") {
+                setTabActive("sell");
             }
+        } else if (fromBottomMenu) {
+            setIsLoading(true);
+            setProductdetail(null);
+            getListProducts();
         }
-        
     }, [props.route.params]);
 
     const getListProducts = () => {
@@ -70,16 +88,26 @@ const Rayon = (props) => {
             .then((result) => {
                 if (!!result && result["@id"] === "/products") {
                     setListProducts(result["hydra:member"]);
-                    setFilter({
-                        keyword: "",
-                        listProducts: result["hydra:member"]
-                    });
+                    if (props.route.params?.reference) {
+                        const newListProducts = result["hydra:member"].filter((product) => product.reference === props.route.params?.reference);
+                        setFilter({
+                            keyword: props.route.params?.reference,
+                            listProducts: newListProducts
+                        });
+                        props.navigation.setParams({ reference: null });
+                    } else {
+                        setFilter({
+                            keyword: "",
+                            listProducts: result["hydra:member"]
+                        });
+                    }
                     setIsLoading(false);
                 }
             })
             .catch((error) => {
+                // TODO: change text
                 console.error(error);
-                Alert.alert("Error", "Can't get list products");
+                Alert.alert("Rayon Erreur", "Get list products error");
             });
     };
 
@@ -230,13 +258,14 @@ const Rayon = (props) => {
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
         const newFilterProducts = listProducts.filter((product) => {
-            const { title, brand, seller, createAt } = product;
+            const { title, brand, seller, createAt, reference } = product;
             const date = convertDateToDisplay(createAt);
             return (
                 title.toLowerCase().includes(filterToLower) ||
                 brand.name.toLowerCase().includes(filterToLower) ||
                 seller.name.toLowerCase().includes(filterToLower) ||
-                date.includes(filterToLower)
+                date.includes(filterToLower) ||
+                reference.toLowerCase().includes(filterToLower)
             );
         });
 
@@ -259,9 +288,39 @@ const Rayon = (props) => {
     };
 
     // TODO: handle mettre comme envoyé
-    const handleSellProducts = () => {
+    const handleSellProducts = async () => {
         setIsLoadingScreen(true);
-        // const
+        const nbProductsSelected = listProductsSelected.ids.length;
+        let idSucess = [];
+        let indexErrors = [];
+
+        for (let index = 0; index < nbProductsSelected; index++) {
+            const data = { statuses: [{ status: "sell", statusState: true }] };
+            try {
+                let result = await FetchService.patch(listProductsSelected.ids[index], data, user.token);
+                if (result) {
+                    idSucess.push(listProductsSelected.ids[index]);
+                } else {
+                    indexErrors.push(index);
+                }
+            } catch (error) {
+                console.error(error);
+                indexErrors.push(index);
+            }
+        }
+        if (idSucess.length > 0) {
+            const newListProducts = listProducts.filter((product) => !idSucess.includes(product["@id"]));
+            setListProducts(newListProducts);
+        }
+        const newListProductsSelectedAllInfo = indexErrors.map((index) => listProductsSelected.allInfo[index]);
+        const newListIdProductsSelected = indexErrors.map((index) => listProductsSelected.ids[index]);
+        setListProductsSelected({ allInfo: newListProductsSelectedAllInfo, ids: newListIdProductsSelected });
+        setIsLoadingScreen(false);
+        if (indexErrors > 0) {
+            const messageError = "On ne peut pas mettre en rayon les produits: " + newListProductsSelectedAllInfo.map(product => product.title).split(", ");
+            Alert.alert("Erreur", messageError);
+        }
+
     };
 
     const nbProductsSelected = listProductsSelected.ids.length;
