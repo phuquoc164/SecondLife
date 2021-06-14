@@ -15,8 +15,7 @@ const ListCustomers = (props) => {
         filteredCustomers: [],
         filter: ""
     });
-    const { user } = React.useContext(AuthContext);
-    const token = user.token;
+    const { user, signOut } = React.useContext(AuthContext);
     const routeParams = props.route.params;
 
     React.useEffect(() => {
@@ -24,7 +23,7 @@ const ListCustomers = (props) => {
     }, [props.route.params]);
 
     const getListCustomers = () => {
-        FetchService.get("/customers", token)
+        FetchService.get("/customers", user.token)
             .then((result) => {
                 if (result && result["hydra:member"]?.length > 0) {
                     setState({
@@ -35,9 +34,13 @@ const ListCustomers = (props) => {
                 }
             })
             .catch((error) => {
-                console.error(error);
                 //TODO: modify test
-                Alert.alert("Erreur list customer");
+                if (error === 401) {
+                    Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
+                } else {
+                    console.error(error);
+                    Alert.alert("Customer error", "Get list customers error");
+                }
             });
     };
 

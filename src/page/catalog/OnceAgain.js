@@ -28,62 +28,81 @@ const OnceAgain = (props) => {
     });
     const [dataDetailed, setDataDetail] = useState(null);
 
-    const { user } = React.useContext(AuthContext);
+    const { user, signOut } = React.useContext(AuthContext);
 
     React.useEffect(() => {
-        !isLoading && setIsLoading(true);
         setDataDetail(null);
         getData();
     }, [tabActive]);
 
-    // Delete produit from product detail
     React.useEffect(() => {
-        if (props.route.params.deleteProduct && dataDetailed) {
-            setIsLoadingScreen(true);
-            //TODO: erreeur unexpected end of json input
-            FetchService.delete(dataDetailed["@id"], user.token)
-                .then((result) => {
-                    if (result) {
-                        const newData = data.filter((product) => product["@id"] !== dataDetailed["@id"]);
-                        setData(newData);
-                        setFilter({
-                            keyword: "",
-                            listOptions: newData
-                        });
-                        if (listProductsSelected.ids.includes(dataDetailed["@id"])) {
-                            const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== dataDetailed["@id"]);
-                            const newIds = listProductsSelected.ids.filter((id) => id !== dataDetailed["@id"]);
-                            setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
-                        }
-                        setDataDetail(null);
-                        setIsLoadingScreen(false);
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    Alert.alert("Erreur", "Delete product fail");
+        if (props.route.params) {
+            const { deleteProduct, reference, fromBottomMenu } = props.route.params;
+            if (deleteProduct && dataDetailed) {
+                const newData = data.filter((product) => product["@id"] !== dataDetailed["@id"]);
+                setData(newData);
+                setFilter({
+                    keyword: "",
+                    listOptions: newData
                 });
+                if (listProductsSelected.ids.includes(dataDetailed["@id"])) {
+                    const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== dataDetailed["@id"]);
+                    const newIds = listProductsSelected.ids.filter((id) => id !== dataDetailed["@id"]);
+                    setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
+                }
+                setDataDetail(null);
+            } else if (reference) {
+                if (data.length > 0 && tabActive === "products") {
+                    const newData = data.filter((product) => product.reference === reference);
+                    setFilter({
+                        keyword: reference,
+                        listOptions: newData
+                    });
+                    props.navigation.setParams({ reference: null });
+                } else if (tabActive === "shipment") {
+                    setTabActive("products");
+                }
+            } else if (fromBottomMenu) {
+                setIsLoading(true);
+                setDataDetail(null);
+                getData();
+            }
         }
     }, [props.route.params]);
 
     // get product or get shipments
     const getData = () => {
-        const endpoint = tabActive === "products" ? "/products?isSentToPartner=0" : "/shipments";
+        const endpoint = tabActive === "products" ? "/products?isSentToPartner=0" : "/shipments?type=partner";
         FetchService.get(endpoint, user.token)
             .then((result) => {
-                if (!!result && result["@id"] === `/${tabActive}`) {
+                console.log(result);
+                if (!!result) {
                     setData(result["hydra:member"]);
-                    setFilter({
-                        keyword: "",
-                        listOptions: result["hydra:member"]
-                    });
-                    isLoading && setIsLoading(false);
+                    if (props.route.params?.reference) {
+                        const newData = result["hydra:member"].filter((product) => product.reference === reference);
+                        setFilter({
+                            keyword: reference,
+                            listOptions: newData
+                        });
+                        props.navigation.setParams({ reference: null });
+                    } else {
+                        setFilter({
+                            keyword: "",
+                            listOptions: result["hydra:member"]
+                        });
+                    }
+                    setIsLoading(false);
                     isLoadingScreen && setIsLoadingScreen(false);
                 }
             })
             .catch((error) => {
-                console.error(error);
-                Alert.alert("Error", "Can't get data");
+                if (error === 401) {
+                    Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
+                } else {
+                    // TODO: change text
+                    console.error(error);
+                    Alert.alert("Once Again", "Get data error");
+                }
             });
     };
 
@@ -113,7 +132,7 @@ const OnceAgain = (props) => {
         <View key={item["@id"]} style={[styles.singleProduct, { alignItems: "flex-start" }]}>
             <View>
                 <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{item.poolNumber}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: xxx</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(item.sentAt)}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Statut: {SHIPMENT_STATUS[item.status]}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Nombre d'articles: {item.totalProducts}</Text>
             </View>
@@ -196,6 +215,10 @@ const OnceAgain = (props) => {
         }
     };
 
+    /**
+     * handle filter list data by the input filter
+     * @param {*} filter
+     */
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
         if (tabActive === "products") {
@@ -217,13 +240,9 @@ const OnceAgain = (props) => {
             });
         } else {
             const newFilterShipments = data.filter((shipment) => {
-                const { status, totalProducts, poolNumber } = shipment;
+                const { totalProducts, poolNumber } = shipment;
 
-                return (
-                    SHIPMENT_STATUS[status].toLowerCase().includes(filterToLower) ||
-                    totalProducts.toString().includes(filterToLower) ||
-                    poolNumber.toString().includes(filterToLower)
-                );
+                return totalProducts.toString().includes(filterToLower) || poolNumber.toString().includes(filterToLower);
             });
 
             setFilter({
@@ -233,14 +252,17 @@ const OnceAgain = (props) => {
         }
     };
 
+    /**
+     * handle send request to send products to OnceAgain
+     */
     const handleSendProducts = () => {
         setIsLoadingScreen(true);
         const productsShipment = listProductsSelected.ids.map((id) => {
             return { product: id };
         });
 
-        const data = { products: [...productsShipment] };
-        FetchService.post("/shipment", data, user.token)
+        const dataApi = { products: [...productsShipment], type: "partner" };
+        FetchService.post("/shipments", dataApi, user.token)
             .then((result) => {
                 if (result && result["@id"]) {
                     const newData = data.filter((product) => !listProductsSelected.ids.includes(product["@id"]));
@@ -254,11 +276,16 @@ const OnceAgain = (props) => {
                 }
             })
             .catch((error) => {
+                // TODO: change text
                 console.error(error);
-                Alert.alert("Erreur", "Shipment erreur");
+                Alert.alert("Once Again", "Send shipment error");
             });
     };
 
+    /**
+     * handle display product detail
+     * @param {*} item
+     */
     const handleDisplayProductDetail = (item) => {
         setDataDetail(item);
         props.navigation.navigate("Catalog", {
@@ -278,12 +305,21 @@ const OnceAgain = (props) => {
         <View style={[styles.mainScreen, { paddingBottom: 150 }]}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
-                    <TouchableOpacity onPress={() => setTabActive("products")} style={{ alignSelf: "center" }}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            setIsLoading(true);
+                            setTabActive("products");
+                        }}
+                        style={{ alignSelf: "center" }}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "products" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>À envoyer</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.flex1}>
-                    <TouchableOpacity onPress={() => setTabActive("shipments")}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            setIsLoading(true);
+                            setTabActive("shipments");
+                        }}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "shipments" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>Envoyés</Text>
                     </TouchableOpacity>
                 </View>
@@ -296,7 +332,9 @@ const OnceAgain = (props) => {
                 <>
                     <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
                         <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation de l'envoi en cours</Text>
-                        <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>{15 - nbProductsSelected} produits à sélectionner</Text>
+                        <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>
+                            {15 - nbProductsSelected > 0 ? 15 - nbProductsSelected : 0} produits à sélectionner
+                        </Text>
                         <View style={{ alignItems: "center", paddingVertical: 15 }}>
                             <ProgressCircle
                                 percent={percent}
@@ -331,16 +369,19 @@ const OnceAgain = (props) => {
                         </View>
                     </View>
 
-                    <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
-                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
-                        <TouchableOpacity onPress={handleSelectAllProducts}>
-                            {data.length === listProductsSelected.allInfo.length ? (
-                                <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
-                            ) : (
-                                <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
-                            )}
-                        </TouchableOpacity>
-                    </View>
+                    {data.length !== 0 && (
+                        <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
+                            <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
+                            <TouchableOpacity onPress={handleSelectAllProducts}>
+                                {data.length === listProductsSelected.allInfo.length ? (
+                                    <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
+                                ) : (
+                                    <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
                     <SafeAreaView style={{ marginBottom: 450 }}>
                         <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
                     </SafeAreaView>
