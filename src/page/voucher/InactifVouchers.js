@@ -95,9 +95,8 @@ const InactifVouchers = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Voucher error", "Get voucher error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -121,9 +120,8 @@ const InactifVouchers = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: Change text
                 console.error(error);
-                Alert.alert("Voucher error", "reactiver voucher error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 

@@ -95,9 +95,8 @@ const Donation = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Donation", "Get data error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -270,9 +269,8 @@ const Donation = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Donation", "Send shipment error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 

@@ -60,9 +60,8 @@ const ProductDetail = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Product Detail", "Get Product error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -111,7 +110,7 @@ const ProductDetail = (props) => {
                 });
             } else {
                 console.debug("Camera permission denied");
-                Alert.alert("Demande de permission", "Nous avons besoin de la permission d'accéder à votre caméra.", [
+                Alert.alert("Demande de permission", "Nous avons besoin des permissions pour accéder à votre caméra.", [
                     { text: "Annuler", style: "cancel" },
                     { text: "Paramètres", onPress: () => Linking.openSettings() }
                 ]);
@@ -150,10 +149,14 @@ const ProductDetail = (props) => {
                 });
             } else {
                 console.debug("Photo permission denied");
-                Alert.alert("Demande de permission", "Nous avons besoin de la permission d'accéder à votre bibliothèque média.", [
-                    { text: "Annuler", style: "cancel" },
-                    { text: "Paramètres", onPress: () => Linking.openSettings() }
-                ]);
+                Alert.alert(
+                    "Demande de permission",
+                    "Nous avons besoin des permissions pour accéder à votre bibliothèque photo.",
+                    [
+                        { text: "Annuler", style: "cancel" },
+                        { text: "Paramètres", onPress: () => Linking.openSettings() }
+                    ]
+                );
             }
         } catch (error) {
             console.warn(err);
@@ -179,9 +182,8 @@ const ProductDetail = (props) => {
             })
             .catch((error) => {
                 setIsLoadingScreen(false);
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Product Detail", errorMessage);
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -201,9 +203,8 @@ const ProductDetail = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Product Detail", "Delete image error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -330,9 +331,8 @@ const ProductDetail = (props) => {
             }
         }).catch(error => {
             setIsLoadingScreenVisible(false);
-            // TODO: change text
             console.error(error);
-            Alert.alert("Once Again", "Delete product error");
+            Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
         })
         
     };
@@ -357,7 +357,6 @@ const ProductDetail = (props) => {
             }
         });
 
-        // TODO: erreur 500 mais après ça, les donnés a changé
         if (Object.keys(data).length > 0) {
             setIsLoadingScreenVisible(true);
             console.log(productRef.current["@id"]);
@@ -372,9 +371,8 @@ const ProductDetail = (props) => {
                 })
                 .catch((error) => {
                     setIsLoadingScreenVisible(false);
-                    // TODO: change text
                     console.error(error);
-                    Alert.alert("Product Detail", "Modify product error");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         } else {
             handleResetModification();

@@ -31,9 +31,8 @@ const CustomerDetailProduct = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Customer error", "Get customer error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 

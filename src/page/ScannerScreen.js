@@ -44,10 +44,10 @@ const ScannerScreen = (props) => {
                 })
                 .catch((error) => {
                     if (error === 401) {
-                        Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
+                        Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter !", [{ text: "Se connecter", onPress: signOut }]);
                     } else {
                         console.error(error);
-                        Alert.alert("Erreur", "On ne peut pas trouver le produit avec votre qr code");
+                        Alert.alert("Erreur", "Ce produit est introuvable");
                     }
                 })
                 .finally(() => {
@@ -59,7 +59,7 @@ const ScannerScreen = (props) => {
                 params: { reference: data.reference, customer: null, available: null, usedOrExpired: null, fromBottomMenu: null }
             });
         } else {
-            Alert.alert("Erreur", "On ne peut pas détecter votre qrcode");
+            Alert.alert("Erreur", "Qrcode invalide");
         }
     };
 

@@ -109,12 +109,11 @@ const ActifVouchers = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change texte
                 if (error === 401) {
                     Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
                 } else {
                     console.error(error);
-                    Alert.alert("Voucher error", "Get voucher error");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 }
             });
     };
@@ -137,9 +136,8 @@ const ActifVouchers = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: Change text
                 console.error(error);
-                Alert.alert("Voucher error", "Déactiver voucher error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 

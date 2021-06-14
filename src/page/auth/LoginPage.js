@@ -91,9 +91,9 @@ const LoginPage = (props) => {
         } catch (error) {
             console.error(typeof error);
             if (error === 401 || error === 404) {
-                Alert.alert("Erreur", "Votre email ou votre mot de passe n'est pas correct, veuillez re-essayer!");
+                Alert.alert("Erreur", "Votre email ou votre mot de passe n'est pas correct, veuillez re-essayer !");
             } else {
-                Alert.alert("Erreur de serveur", "Veuillez-vous réessayer!");
+                Alert.alert("Erreur du serveur", "Veuillez réessayer ultérieurement !");
             }
         } finally {
             setIsLoading(false);

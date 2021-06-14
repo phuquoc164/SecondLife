@@ -34,12 +34,11 @@ const ListCustomers = (props) => {
                 }
             })
             .catch((error) => {
-                //TODO: modify test
                 if (error === 401) {
                     Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
                 } else {
                     console.error(error);
-                    Alert.alert("Customer error", "Get list customers error");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 }
             });
     };

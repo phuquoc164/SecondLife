@@ -48,7 +48,6 @@ const Rayon = (props) => {
             setProductdetail(null);
         } else if (sellProduct && productDetail) {
             setIsLoadingScreen(true);
-            // TODO: handle sell Product
             const data = {
                 statuses: [{ status: "sell", statusState: true }]
             };
@@ -62,7 +61,7 @@ const Rayon = (props) => {
                 })
                 .catch((error) => {
                     console.error(error);
-                    Alert.alert("Rayon", "Mettre en rayon erreur");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         } else if (reference) {
             if (listProducts.length > 0 && tabActive === "sell") {
@@ -105,9 +104,8 @@ const Rayon = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Rayon Erreur", "Get list products error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -287,7 +285,6 @@ const Rayon = (props) => {
         });
     };
 
-    // TODO: handle mettre comme envoyé
     const handleSellProducts = async () => {
         setIsLoadingScreen(true);
         const nbProductsSelected = listProductsSelected.ids.length;
@@ -317,10 +314,10 @@ const Rayon = (props) => {
         setListProductsSelected({ allInfo: newListProductsSelectedAllInfo, ids: newListIdProductsSelected });
         setIsLoadingScreen(false);
         if (indexErrors > 0) {
-            const messageError = "On ne peut pas mettre en rayon les produits: " + newListProductsSelectedAllInfo.map(product => product.title).split(", ");
-            Alert.alert("Erreur", messageError);
+            Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+            // const messageError = "On ne peut pas mettre en rayon les produits: " + newListProductsSelectedAllInfo.map((product) => product.title).split(", ");
+            // Alert.alert("Erreur", messageError);
         }
-
     };
 
     const nbProductsSelected = listProductsSelected.ids.length;
@@ -342,7 +339,6 @@ const Rayon = (props) => {
             <InputSearch placeholder="Chercher une commande..." placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             {isLoading && loading()}
 
-            {/* TODO: find the way to display well the list of produits */}
             {!isLoading && tabActive === "sell" && (
                 <>
                     <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>

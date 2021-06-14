@@ -137,7 +137,7 @@ const AddProduct = (props) => {
                 });
             } else {
                 console.debug("Camera permission denied");
-                Alert.alert("Demande de permission", "Nous avons besoin de la permission d'accéder à votre caméra.", [
+                Alert.alert("Demande de permission", "Nous avons besoin des permissions pour accéder à votre caméra.", [
                     { text: "Annuler", style: "cancel" },
                     { text: "Paramètres", onPress: () => Linking.openSettings() }
                 ]);
@@ -176,7 +176,7 @@ const AddProduct = (props) => {
                 });
             } else {
                 console.debug("Photo permission denied");
-                Alert.alert("Demande de permission", "Nous avons besoin de la permission d'accéder à votre bibliothèque média.", [
+                Alert.alert("Demande de permission", "Nous avons besoin des permissions pour accéder à votre bibliothèque photos.", [
                     { text: "Annuler", style: "cancel" },
                     { text: "Paramètres", onPress: () => Linking.openSettings() }
                 ]);
@@ -211,7 +211,7 @@ const AddProduct = (props) => {
             .catch((error) => {
                 setIsLoadingScreen(false);
                 console.error(error);
-                Alert.alert("Image Error", "Add image to server error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -232,9 +232,8 @@ const AddProduct = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Image Error", "Delete image error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -319,9 +318,8 @@ const AddProduct = (props) => {
                 setIsLoadingScreen(false);
             })
             .catch((error) => {
-                // TODO: chang text
                 console.error(error);
-                Alert.alert("Error", "Get argus information error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
@@ -330,12 +328,10 @@ const AddProduct = (props) => {
      * @returns
      */
     const handlSubmitForm = () => {
-        // TODO: verify product before create data
         const listErreurs = verifyProduct(product);
         console.log(listErreurs);
         if (listErreurs.length > 0) {
-            // TODO: change text
-            Alert.alert("Erreur", "Veuillez vérifier les données à champ rouge");
+            Alert.alert("Erreur", "Veuillez renseigner tous les champs encadrés en rouge");
             setListErreurs(listErreurs);
             return;
         }
@@ -396,7 +392,7 @@ const AddProduct = (props) => {
                                 setIsLoadingBtnsubmit(false);
                             }).catch(error => {
                                 console.error(error);
-                                Alert.alert("Error", "get product onceagain error");
+                                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                             });
                         } else {
                             props.navigation.navigate("NewProduct", {
@@ -407,10 +403,9 @@ const AddProduct = (props) => {
                     }
                 })
                 .catch((error) => {
-                    // TODO: change text
                     setIsLoadingBtnsubmit(false);
                     console.error(error);
-                    Alert.alert("Error", "Add product error");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         }
     };

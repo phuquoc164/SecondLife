@@ -99,9 +99,8 @@ const OnceAgain = (props) => {
                 if (error === 401) {
                     Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
                 } else {
-                    // TODO: change text
                     console.error(error);
-                    Alert.alert("Once Again", "Get data error");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 }
             });
     };
@@ -276,9 +275,8 @@ const OnceAgain = (props) => {
                 }
             })
             .catch((error) => {
-                // TODO: change text
                 console.error(error);
-                Alert.alert("Once Again", "Send shipment error");
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 

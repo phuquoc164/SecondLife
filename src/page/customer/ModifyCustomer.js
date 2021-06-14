@@ -27,9 +27,8 @@ const ModifyCustomer = (props) => {
                     }
                 })
                 .catch((error) => {
-                    // TODO: change text
                     console.error(error);
-                    Alert.alert("Customer error", "Modify customer error");
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         } else {
             props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customer, customerId: null } });

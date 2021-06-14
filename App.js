@@ -74,7 +74,7 @@ const App = () => {
                     dispatch({ type: "SIGN_IN", user });
                 } catch (error) {
                     console.error("save user data error", error);
-                    Alert.alert("Erreur système", "Veuillez-vous réessayer!");
+                    Alert.alert("Erreur système", "Veuillez réessayer ultérieurement !");
                 }
             },
             signOut: async () => {
