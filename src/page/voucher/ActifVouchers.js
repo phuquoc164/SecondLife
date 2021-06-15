@@ -168,8 +168,10 @@ const ActifVouchers = (props) => {
         const newFilteredVouchers = vouchers.available.filter((voucher) => {
             const { voucherAmount, expirationDate, customer, reference } = voucher;
             const expirationDateFormatted = convertDateToDisplay(expirationDate);
-
+            const customerFullName = customer.firstname + " " + customer.lastname;
+            
             return (
+                customerFullName.toLowerCase().includes(filterToLower) ||
                 customer.firstname.toLowerCase().includes(filterToLower) ||
                 customer.lastname.toLowerCase().includes(filterToLower) ||
                 customer.email.includes(filterToLower) ||

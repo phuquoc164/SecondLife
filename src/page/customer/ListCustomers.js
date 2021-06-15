@@ -20,7 +20,7 @@ const ListCustomers = (props) => {
 
     React.useEffect(() => {
         getListCustomers();
-        const willFocusSubscription = props.navigation.addListener('focus', () => {
+        const willFocusSubscription = props.navigation.addListener("focus", () => {
             getListCustomers();
         });
 
@@ -54,7 +54,7 @@ const ListCustomers = (props) => {
         } else {
             props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customerId: item["@id"] } });
         }
-    }
+    };
 
     if (state.allCustomers.length === 0) return loading();
 
@@ -85,8 +85,13 @@ const ListCustomers = (props) => {
         const filterToLower = filter.toLowerCase();
         const newfilteredCustomers = state.allCustomers.filter((customer) => {
             const { firstname, lastname, email, phone } = customer;
+            const fullname = firstname + " " + lastname;
             return (
-                firstname.toLowerCase().includes(filterToLower) || lastname.toLowerCase().includes(filterToLower) || email.includes(filterToLower) || phone.includes(filterToLower)
+                fullname.toLowerCase().includes(filterToLower) ||
+                firstname.toLowerCase().includes(filterToLower) ||
+                lastname.toLowerCase().includes(filterToLower) ||
+                email.includes(filterToLower) ||
+                phone.includes(filterToLower)
             );
         });
         setState({
