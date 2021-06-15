@@ -157,15 +157,12 @@ export default class FetchService {
 
         const url = DOMAIN + endPoint;
         let response;
-        console.log(url, setting);
         return fetch(url, setting)
             .then((res) => {
-                console.log(res);
                 response = res;
                 return res.json();
             })
             .then((body) => {
-                console.log(body);
                 if (response && response.status === 200 && !!body) {
                     return Promise.resolve(body);
                 }

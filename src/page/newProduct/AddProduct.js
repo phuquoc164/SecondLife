@@ -223,7 +223,6 @@ const AddProduct = (props) => {
     const handleDeletePhoto = (imageId) => {
         FetchService.delete(imageId, user.token)
             .then((result) => {
-                console.log(result);
                 if (!!result) {
                     const newImages = product.images.filter((image) => image.id !== imageId);
                     setProduct({
@@ -304,7 +303,6 @@ const AddProduct = (props) => {
         setIsLoadingScreen(true);
         FetchService.get(endPoint, user.token)
             .then((result) => {
-                console.log(result);
                 if (!!result && result["hydra:member"].length > 0) {
                     const argus = result["hydra:member"][0];
                     setArgus({
@@ -330,7 +328,6 @@ const AddProduct = (props) => {
      */
     const handlSubmitForm = () => {
         const listErreurs = verifyProduct(product);
-        console.log(listErreurs);
         if (listErreurs.length > 0) {
             Alert.alert("Erreur", "Veuillez renseigner tous les champs encadrés en rouge");
             setListErreurs(listErreurs);
@@ -371,12 +368,10 @@ const AddProduct = (props) => {
         } else {
             FetchService.post("/products", data, user.token)
                 .then((result) => {
-                    console.log("fetch product", result, btnStatus);
                     if (result && result["@id"]) {
                         if (btnStatus === "partner") {
                             const data = { products: [{ product: result["@id"] }], type: "partner" };
                             FetchService.get("/products?isSentToPartner=0", user.token).then((listProductsPartner) => {
-                                console.log(listProductsPartner);
                                 if (listProductsPartner) {
                                     const nbProducts = listProductsPartner["hydra:totalItems"];
                                     let description = "";
@@ -410,7 +405,6 @@ const AddProduct = (props) => {
                 });
         }
     };
-    console.log(scrollRef);
 
     if (listOptions.isLoading) {
         return <View style={styles.mainScreen}>{loading()}</View>;
