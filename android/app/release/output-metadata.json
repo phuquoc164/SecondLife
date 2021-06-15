@@ -15,8 +15,8 @@
           "value": "x86_64"
         }
       ],
-      "versionCode": 4194315,
-      "versionName": "2.1.0",
+      "versionCode": 4194316,
+      "versionName": "2.1.1",
       "outputFile": "app-x86_64-release.apk"
     },
     {
@@ -27,21 +27,9 @@
           "value": "x86"
         }
       ],
-      "versionCode": 2097163,
-      "versionName": "2.1.0",
+      "versionCode": 2097164,
+      "versionName": "2.1.1",
       "outputFile": "app-x86-release.apk"
-    },
-    {
-      "type": "ONE_OF_MANY",
-      "filters": [
-        {
-          "filterType": "ABI",
-          "value": "arm64-v8a"
-        }
-      ],
-      "versionCode": 3145739,
-      "versionName": "2.1.0",
-      "outputFile": "app-arm64-v8a-release.apk"
     },
     {
       "type": "ONE_OF_MANY",
@@ -51,9 +39,21 @@
           "value": "armeabi-v7a"
         }
       ],
-      "versionCode": 1048587,
-      "versionName": "2.1.0",
+      "versionCode": 1048588,
+      "versionName": "2.1.1",
       "outputFile": "app-armeabi-v7a-release.apk"
+    },
+    {
+      "type": "ONE_OF_MANY",
+      "filters": [
+        {
+          "filterType": "ABI",
+          "value": "arm64-v8a"
+        }
+      ],
+      "versionCode": 3145740,
+      "versionName": "2.1.1",
+      "outputFile": "app-arm64-v8a-release.apk"
     }
   ]
 }
