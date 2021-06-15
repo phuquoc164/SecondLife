@@ -22,7 +22,7 @@ const MenuHelper = (props) => (
                 title="Aide"
                 isLinear={true}
                 titleStyle={[styles.font24]}
-                onPress={() => props.navigation.navigate("Help")}
+                onPress={() => props.navigation.navigate("Profil", { screen: "NeedHelp" })}
             />
             <CustomButton
                 btnContainerStyle={{ backgroundColor: colors.white, marginTop: 20 }}
