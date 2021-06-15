@@ -149,14 +149,10 @@ const ProductDetail = (props) => {
                 });
             } else {
                 console.debug("Photo permission denied");
-                Alert.alert(
-                    "Demande de permission",
-                    "Nous avons besoin des permissions pour accéder à votre bibliothèque photo.",
-                    [
-                        { text: "Annuler", style: "cancel" },
-                        { text: "Paramètres", onPress: () => Linking.openSettings() }
-                    ]
-                );
+                Alert.alert("Demande de permission", "Nous avons besoin des permissions pour accéder à votre bibliothèque photo.", [
+                    { text: "Annuler", style: "cancel" },
+                    { text: "Paramètres", onPress: () => Linking.openSettings() }
+                ]);
             }
         } catch (error) {
             console.warn(err);
@@ -263,25 +259,26 @@ const ProductDetail = (props) => {
         const listSelectedCategoryIds = {};
         const listCategoryIds = {};
         const listPrefix = {};
-        brand.categories && brand.categories.forEach((category, index) => {
-            listPrefix[category.name] = index;
-            listCategoryIds[index + category.name] = category["@id"];
-            listCategories.push(category);
-            let categoryName = category.name;
-            category.children.forEach((child) => {
-                categoryName += "/" + child.name;
-                listCategoryIds[index + child.name] = child["@id"];
-                if (child.children.length > 0) {
-                    child.children.forEach((c) => {
-                        listCategoryIds[index + c.name] = c["@id"];
-                        listSelectedCategoryIds[categoryName + "/" + c.name] = c["@id"];
-                    });
-                } else {
-                    listSelectedCategoryIds[categoryName] = child["@id"];
-                }
-                categoryName = category.name;
+        brand.categories &&
+            brand.categories.forEach((category, index) => {
+                listPrefix[category.name] = index;
+                listCategoryIds[index + category.name] = category["@id"];
+                listCategories.push(category);
+                let categoryName = category.name;
+                category.children.forEach((child) => {
+                    categoryName += "/" + child.name;
+                    listCategoryIds[index + child.name] = child["@id"];
+                    if (child.children.length > 0) {
+                        child.children.forEach((c) => {
+                            listCategoryIds[index + c.name] = c["@id"];
+                            listSelectedCategoryIds[categoryName + "/" + c.name] = c["@id"];
+                        });
+                    } else {
+                        listSelectedCategoryIds[categoryName] = child["@id"];
+                    }
+                    categoryName = category.name;
+                });
             });
-        });
 
         return {
             options: listCategories,
@@ -320,20 +317,21 @@ const ProductDetail = (props) => {
     const handleDeleteProduct = () => {
         // FetchServicesetIsLoading(true);
         setIsLoadingScreenVisible(true);
-        FetchService.delete(product.id, user.token).then(result => {
-            if (result) {
+        FetchService.delete(product.id, user.token)
+            .then((result) => {
+                if (result) {
+                    setIsLoadingScreenVisible(false);
+                    props.navigation.navigate("Catalog", {
+                        screen: props.route.params.screen,
+                        params: { deleteProduct: true, sellProduct: null, reference: null, forceUpdate: null }
+                    });
+                }
+            })
+            .catch((error) => {
                 setIsLoadingScreenVisible(false);
-                props.navigation.navigate("Catalog", {
-                    screen: props.route.params.screen,
-                    params: { deleteProduct: true, sellProduct: null, reference: null, forceUpdate: null }
-                });
-            }
-        }).catch(error => {
-            setIsLoadingScreenVisible(false);
-            console.error(error);
-            Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
-        })
-        
+                console.error(error);
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+            });
     };
 
     /**
@@ -578,20 +576,22 @@ const ProductDetail = (props) => {
                 )}
 
                 {/* Description */}
-                <View style={styles.addProductInputContainer}>
-                    <Text style={styles.addProductLabel}>Description</Text>
-                    <TextInput
-                        editable={editable}
-                        style={[styles.addProductInput]}
-                        placeholder={"Une remarque, un renseignement supplémentaire à fournir sur le produit ?\nC'est ici."}
-                        placeholderTextColor={colors.gray2}
-                        multiline={true}
-                        numberOfLines={5}
-                        textAlignVertical="top"
-                        value={product.description}
-                        onChangeText={(description) => setProduct({ ...product, description })}
-                    />
-                </View>
+                {(editable || product.description) && (
+                    <View style={styles.addProductInputContainer}>
+                        <Text style={styles.addProductLabel}>Description</Text>
+                        <TextInput
+                            editable={editable}
+                            style={[styles.addProductInput]}
+                            placeholder={"Une remarque, un renseignement supplémentaire à fournir sur le produit ?\nC'est ici."}
+                            placeholderTextColor={colors.gray2}
+                            multiline={true}
+                            numberOfLines={5}
+                            textAlignVertical="top"
+                            value={product.description}
+                            onChangeText={(description) => setProduct({ ...product, description })}
+                        />
+                    </View>
+                )}
 
                 {/* Seller */}
                 {!editable ? (
@@ -651,7 +651,9 @@ const ProductDetail = (props) => {
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Prénom: {productRef.current.customer.firstname}</Text>
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Nom: {productRef.current.customer.lastname}</Text>
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Email: {productRef.current.customer.email}</Text>
-                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Tel: {productRef.current.customer.phone ? productRef.current.customer.phone : "Pas des donées"}</Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>
+                            Tel: {productRef.current.customer.phone ? productRef.current.customer.phone : "Pas des donées"}
+                        </Text>
                     </View>
                 </View>
                 {editable ? (

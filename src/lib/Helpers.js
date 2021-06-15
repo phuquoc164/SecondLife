@@ -104,10 +104,10 @@ export const getSimpleDiff = (oldObject, newObject) => {
 export const verifyProduct = (product) => {
     const listErreurs = [];
     Object.keys(product).forEach((key) => {
-        if (key === "price" || key === "reference") return;
+        if (key === "price" || key === "reference" || key === "description") return;
         if (key === "images" && (!product.images || product.images.length === 0)) {
             listErreurs.push("images");
-        } else if (key === "name" && key === "description" && (!product[key] || product[key] === "")) {
+        } else if (key === "name" && (!product[key] || product[key] === "")) {
             listErreurs.push(key);
         } else if (key === "voucherAmount" && (!product.voucherAmount || product.voucherAmount === "0" || product.voucherAmount === "")) {
             listErreurs.push("voucherAmount");

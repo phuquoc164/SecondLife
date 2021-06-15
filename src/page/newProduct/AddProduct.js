@@ -243,6 +243,7 @@ const AddProduct = (props) => {
      */
     const handleSelectBrand = (brand) => {
         setModal("");
+        setIsLoadingScreen(true);
         if (!product.brand || product.brand.id !== brand.id) {
             // reset argus
             if (argus.fetchArgus) {
@@ -281,6 +282,7 @@ const AddProduct = (props) => {
                 ids: listCategoryIds,
                 prefix: listPrefix
             });
+            setIsLoadingScreen(false);
         }
     };
 
@@ -293,12 +295,12 @@ const AddProduct = (props) => {
         let endPoint = "/arguses?brand=" + product.brand.name;
         if (data.type === "category") {
             if (!product.state || !product.state.value) return;
-            const categoriesData = data.value.split("/");
-            endPoint += "&category=" + categoriesData[categoriesData.length - 1] + "&state=" + product.state.value;
+            const categoriesData = data.value.replace("/", ".");
+            endPoint += "&category=" + categoriesData + "&state=" + product.state.value;
         } else if (data.type === "state") {
             if (!product.category) return;
-            const categoriesData = product.category.split("/");
-            endPoint += "&category=" + categoriesData[categoriesData.length - 1] + "&state=" + data.value.value;
+            const categoriesData = product.category.replace("/", ".");
+            endPoint += "&category=" + categoriesData + "&state=" + data.value.value;
         }
         setIsLoadingScreen(true);
         FetchService.get(endPoint, user.token)
@@ -317,6 +319,7 @@ const AddProduct = (props) => {
                 setIsLoadingScreen(false);
             })
             .catch((error) => {
+                setIsLoadingScreen(false);
                 console.error(error);
                 Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
@@ -356,9 +359,12 @@ const AddProduct = (props) => {
             customer: props.route.params.customerId,
             size: product.size.id,
             state: product.state.id,
-            description: product.description,
             price: 0
         };
+
+        if (product.description && product.description !== "") {
+            data["description"] = product.description;
+        }
 
         if (btnStatus === "sell") {
             props.navigation.navigate("NewProduct", {
@@ -530,7 +536,7 @@ const AddProduct = (props) => {
                 </TouchableOpacity>
 
                 {/* Description */}
-                <View style={[styles.addProductInputContainer, listErreurs.includes("description") && { borderColor: colors.red }]}>
+                <View style={styles.addProductInputContainer}>
                     <Text style={styles.addProductLabel}>Description</Text>
                     <TextInput
                         style={[styles.addProductInput]}
@@ -575,8 +581,8 @@ const AddProduct = (props) => {
                         <Text style={[styles.font24, styles.fontSofiaRegular]}>💡</Text>
                         <Text style={{ marginLeft: 15, fontSize: 16, lineHeight: 22, width: "87%", color: "#707070", fontFamily: "SofiaPro-Regular" }}>
                             {argus.buyingPrice
-                                ? `Si l’article n’est pas vendu, notre partenaire s’engage à le racheter au prix de ${argus.buyingPrice}€`
-                                : "Notre partenaire ne reprend malheureusement pas cet article."}
+                                ? `Prix de rachat: ${argus.buyingPrice}€`
+                                : "Nous ne reprenons malheureusement pas cet article."}
                         </Text>
                     </View>
                 )}
@@ -584,7 +590,7 @@ const AddProduct = (props) => {
                 <TouchableOpacity
                     onPress={() => setBtnStatus("partner")}
                     style={[styles.addProductInputContainer, btnStatus === "partner" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : { padding: 20 }]}>
-                    <Text style={[styles.addProductLabel, styles.textCenter]}>Envoi partenaire</Text>
+                    <Text style={[styles.addProductLabel, styles.textCenter]}>Envoi</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
