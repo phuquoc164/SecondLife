@@ -14,7 +14,6 @@ const authReducer = (prevState, action) => {
             return {
                 ...prevState,
                 isSignout: false,
-                fromLogin: true,
                 user: { ...action.user }
             };
         case "SIGN_OUT":
@@ -36,7 +35,6 @@ const authReducer = (prevState, action) => {
 const authInitalState = {
     isLoading: true,
     isSignout: false,
-    fromLogin: false,
     user: {
         token: null,
         firstname: null,

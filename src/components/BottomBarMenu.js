@@ -53,7 +53,7 @@ const BottomBarMenu = ({ state, navigation }) => {
 
                     if (!event.defaultPrevented) {
                         if (name === "Home") {
-                            navigation.navigate("Home", { params: { animation: false } });
+                            navigation.navigate("Home");
                         } else {
                             navigation.navigate(name, {
                                 screen: listItemsData[name].screen,

@@ -208,7 +208,7 @@ const App = () => {
     );
 
     return (
-        <AuthContext.Provider value={{ user: state.user, fromLogin: state.fromLogin, ...authContext }}>
+        <AuthContext.Provider value={{ user: state.user, ...authContext }}>
             <NavigationContainer>
                 {state.user.token ? (
                     <>
