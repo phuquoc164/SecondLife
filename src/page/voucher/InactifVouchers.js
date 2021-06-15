@@ -205,7 +205,7 @@ const InactifVouchers = (props) => {
             {filter.vouchers.length > 0 ? (
                 <FlatList data={filter.vouchers} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
             ) : (
-                <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucune vouchers</Text>
+                <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun voucher</Text>
             )}
             <ModalConfirmation
                 visible={modalConfirmation}

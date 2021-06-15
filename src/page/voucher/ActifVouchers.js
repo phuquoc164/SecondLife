@@ -80,11 +80,9 @@ const ActifVouchers = (props) => {
         setIsLoading(true);
         FetchService.get("/vouchers", user.token)
             .then((result) => {
-                console.log(result);
                 if (result && result["hydra:member"] && result["hydra:member"].length > 0) {
                     const available = [];
                     const usedOrExpired = [];
-                    console.log("go here ne");
                     result["hydra:member"].forEach((voucher) => {
                         if (voucher.used || voucher.expired) {
                             usedOrExpired.push(voucher);
@@ -193,7 +191,7 @@ const ActifVouchers = (props) => {
 
     return (
         <SafeAreaView style={styles.mainScreen}>
-            {!props.route.params?.customer ? (
+            {!props.route.params?.customer || props.route.params?.forceUpdate ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
                 <View style={{ paddingVertical: 10 }}></View>
@@ -202,7 +200,7 @@ const ActifVouchers = (props) => {
             {filter.vouchers.length > 0 ? (
                 <FlatList data={filter.vouchers} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
             ) : (
-                <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucune vouchers</Text>
+                <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun voucher</Text>
             )}
             <ModalConfirmation
                 visible={modalConfirmation}
