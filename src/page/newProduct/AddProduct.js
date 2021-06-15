@@ -376,8 +376,8 @@ const AddProduct = (props) => {
             FetchService.post("/products", data, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
+                        setProduct(initialProduct);
                         if (btnStatus === "partner") {
-                            const data = { products: [{ product: result["@id"] }], type: "partner" };
                             FetchService.get("/products?isSentToPartner=0", user.token).then((listProductsPartner) => {
                                 if (listProductsPartner) {
                                     const nbProducts = listProductsPartner["hydra:totalItems"];
