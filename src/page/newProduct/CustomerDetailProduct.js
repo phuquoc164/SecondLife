@@ -8,7 +8,7 @@ import FormCustomer from "../../components/FormCustomer";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 import FetchService from "../../lib/FetchService";
-import { loading } from "../../lib/Helpers";
+import { convertDateToApi, getSimpleDiff, loading } from "../../lib/Helpers";
 
 const CustomerDetailProduct = (props) => {
     const [customer, setCustomer] = React.useState(null);
@@ -43,7 +43,26 @@ const CustomerDetailProduct = (props) => {
 
     // TODO: modify customer
     const handleModifyCustomer = (newCustomer) => {
-
+        newCustomer.birthday = convertDateToApi(newCustomer.birthday);
+        const diffs = getSimpleDiff(customer, newCustomer);
+        const data = { store, ...diffs };
+        if (Object.keys(diffs).length > 0) {
+            FetchService.patch(customer["@id"], data, token)
+                .then((result) => {
+                    if (!!result) {
+                        setCustomer(result);
+                        setEditable(false);
+                        props.navigation.setOptions({ title: "Informations client" });
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+                });
+        } else {
+            setEditable(false);
+            props.navigation.setOptions({ title: "Informations client" });
+        }
     };
 
     if (!customer) {
