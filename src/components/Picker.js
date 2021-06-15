@@ -5,7 +5,6 @@ import { FlatList, Image, KeyboardAvoidingView, Modal, Platform, SafeAreaView, T
 /** App */
 import styles from "../assets/css/styles";
 import { colors } from "../lib/colors";
-import { InputSearch } from "../lib/Helpers";
 
 const Picker = (props) => {
     const [filter, setFilter] = React.useState({
@@ -32,8 +31,7 @@ const Picker = (props) => {
                 borderBottomWidth: 1,
                 borderBottomColor: colors.gray,
                 backgroundColor: colors.lightGray
-            }}
-		>
+            }}>
             <Text style={[styles.textDarkBlue, styles.font18, props.selected && props.selected.name === item.name ? styles.fontSofiaSemiBold : styles.fontSofiaRegular]}>
                 {item.name}
             </Text>
@@ -49,20 +47,10 @@ const Picker = (props) => {
         </View>
     );
 
-    const filterData = (filter) => {
-        const filterToLower = filter.toLowerCase();
-        const newOptions = props.items.filter((item) => item.name.toLowerCase().includes(filterToLower));
-        setFilter({
-            keyword: filter,
-            options: newOptions
-        });
-    };
-
     return (
         <Modal animationType="slide" visible={props.visible}>
             {renderHeader()}
             <SafeAreaView style={[styles.mainScreen, { flex: 1 }]}>
-                {props.renderSearch && <InputSearch placeholder="Cherchez une marque" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />}
                 <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} enabled>
                     <FlatList data={filter.options} renderItem={renderItem} keyExtractor={(item) => item.id} />
                 </KeyboardAvoidingView>

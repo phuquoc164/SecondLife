@@ -15,6 +15,7 @@ import { colors } from "../../lib/colors";
 import { initialProduct, stateDict } from "../../lib/constants";
 import { AuthContext } from "../../lib/AuthContext";
 import { loading, loadingScreen, verifyProduct } from "../../lib/Helpers";
+import PickerBrand from '../../components/PickerBrand';
 
 const AddProduct = (props) => {
     const { user } = React.useContext(AuthContext);
@@ -88,7 +89,7 @@ const AddProduct = (props) => {
      */
     const getListOptions = async () => {
         try {
-            const brandApi = await FetchService.get("/brands", user.token);
+            const brandApi = await FetchService.get("/brands?page=1", user.token);
             const sizeApi = await FetchService.get("/sizes", user.token);
             const stateApi = await FetchService.get("/states", user.token);
             const sellerApi = await FetchService.get("/sellers", user.token);
@@ -98,7 +99,7 @@ const AddProduct = (props) => {
             const listStates = stateApi["hydra:member"].map((state) => ({ id: state["@id"], name: stateDict[state["state"]], value: state["state"] }));
             const listSellers = sellerApi["hydra:member"].map((seller) => ({ id: seller["@id"], name: seller.name }));
             setListOptions({
-                brands: listBrands.sort((a, b) => (a.name > b.name ? 1 : -1)),
+                brands: listBrands,
                 sizes: listSizes,
                 states: listStates,
                 sellers: listSellers,
@@ -630,12 +631,12 @@ const AddProduct = (props) => {
 
                 {/* ========================================== */}
                 {/* Modal Brand */}
-                <Picker
+                <PickerBrand
                     visible={modal === "brand"}
                     title="Sélectionnez une marque"
                     items={listOptions.brands}
                     selected={product.brand}
-                    renderSearch={true}
+                    token={user.token}
                     handleClose={() => setModal("")}
                     onSelected={(brand) => handleSelectBrand(brand)}
                 />
