@@ -13,6 +13,7 @@ import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../..
 
 // tab give => list Products
 // tab gave => list shipments
+let willFocusSubscription = null;
 const Donation = (props) => {
     const [isLoadingScreen, setIsLoadingScreen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +38,7 @@ const Donation = (props) => {
 
     React.useEffect(() => {
         if (props.route.params) {
-            const { deleteProduct, reference, forceUpdate } = props.route.params;
+            const { deleteProduct, reference } = props.route.params;
             if (deleteProduct && dataDetailed) {
                 const newData = data.filter((product) => product["@id"] !== dataDetailed["@id"]);
                 setData(newData);
@@ -62,13 +63,21 @@ const Donation = (props) => {
                 } else if (tabActive === "gave") {
                     setTabActive("give");
                 }
-            } else if (forceUpdate) {
-                setIsLoading(true);
-                setDataDetail(null);
-                getData();
             }
         }
     }, [props.route.params]);
+
+    React.useEffect(() => {
+        willFocusSubscription = props.navigation.addListener("focus", () => {
+            setIsLoading(true);
+            setDataDetail(null);
+            getData();
+        });
+
+        return () => {
+            willFocusSubscription.remove();
+        };
+    }, []);
 
     // get product or get shipments
     const getData = (reference) => {
@@ -76,7 +85,6 @@ const Donation = (props) => {
         FetchService.get(endpoint, user.token)
             .then((result) => {
                 if (!!result) {
-                    console.log("Mes dons", result);
                     setData(result["hydra:member"]);
                     if (reference) {
                         const newData = result["hydra:member"].filter((product) => product.reference === reference);
@@ -106,8 +114,8 @@ const Donation = (props) => {
      * @param {*} param0
      * @returns
      */
-    const renderListProducts = ({ item }) => (
-        <View key={item["@id"]} style={styles.singleProduct}>
+    const renderListProducts = ({ item, index }) => (
+        <View key={item["@id"]} style={[styles.singleProduct, index === filter.listOptions.length - 1 && { marginBottom: 30 }]}>
             <TouchableOpacity onPress={() => handleDisplayProductDetail(item)}>
                 <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.title}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand.name}</Text>
@@ -123,8 +131,8 @@ const Donation = (props) => {
         </View>
     );
 
-    const renderShipments = ({ item }) => (
-        <View key={item["@id"]} style={[styles.singleProduct, { alignItems: "flex-start" }]}>
+    const renderShipments = ({ item, index }) => (
+        <View key={item["@id"]} style={[styles.singleProduct, { alignItems: "flex-start" }, index === filter.listOptions.length - 1 && { marginBottom: 30 }]}>
             <View>
                 <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{item.poolNumber}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(item.sentAt)}</Text>
@@ -292,11 +300,44 @@ const Donation = (props) => {
     const nbProductsSelected = listProductsSelected.ids.length;
     const placeHolderFilter = tabActive === "give" ? "Chercher une commande..." : "Chercher un n° de suivi...";
 
+    /**
+     * render dashboard
+     */
+    const renderDashboard = () => (
+        <>
+            <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
+                <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation des dons en cours</Text>
+                <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>{nbProductsSelected} produits sélectionnés</Text>
+                <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>{nbProductsSelected}</Text>
+                <View style={{ alignSelf: "center", marginBottom: 10 }}>
+                    <TouchableOpacity disabled={nbProductsSelected === 0} onPress={handleSendProducts} style={[styles.btnSend, nbProductsSelected === 0 && { opacity: 0.5 }]}>
+                        <Image source={require("../../assets/images/don.png")} style={styles.imageBtnSend} />
+                        <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { top: -0.5, paddingRight: 10, paddingLeft: 5 }]}>Marquer comme donné</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {data.length !== 0 && (
+                <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
+                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
+                    <TouchableOpacity onPress={handleSelectAllProducts}>
+                        {data.length === listProductsSelected.allInfo.length ? (
+                            <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
+                        ) : (
+                            <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
+                        )}
+                    </TouchableOpacity>
+                </View>
+            )}
+        </>
+    );
+
     return (
         <View style={styles.mainScreen}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
                     <TouchableOpacity
+                        disabled={tabActive === "give"}
                         onPress={() => {
                             setIsLoading(true);
                             setTabActive("give");
@@ -307,10 +348,12 @@ const Donation = (props) => {
                 </View>
                 <View style={styles.flex1}>
                     <TouchableOpacity
+                        disabled={tabActive === "gave"}
                         onPress={() => {
                             setIsLoading(true);
                             setTabActive("gave");
-                        }}>
+                        }}
+                        style={{ alignSelf: "center" }}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "gave" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>Donnés</Text>
                     </TouchableOpacity>
                 </View>
@@ -318,48 +361,21 @@ const Donation = (props) => {
             {!dataDetailed && <InputSearch placeholder={placeHolderFilter} placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />}
 
             {isLoading && loading()}
-            {!isLoading && tabActive === "give" && (
-                <>
-                    <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
-                        <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation des dons en cours</Text>
-                        <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>{nbProductsSelected} produits sélectionnés</Text>
-                        <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>{nbProductsSelected}</Text>
-                        <View style={{ alignSelf: "center", marginBottom: 10 }}>
-                            <TouchableOpacity
-                                disabled={nbProductsSelected === 0}
-                                onPress={handleSendProducts}
-                                style={[styles.btnSend, nbProductsSelected === 0 && { opacity: 0.5 }]}>
-                                <Image source={require("../../assets/images/don.png")} style={styles.imageBtnSend} />
-                                <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { top: -0.5, paddingRight: 10, paddingLeft: 5 }]}>
-                                    Marquer comme donné
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
 
-                    {data.length !== 0 && (
-                        <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
-                            <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
-                            <TouchableOpacity onPress={handleSelectAllProducts}>
-                                {data.length === listProductsSelected.allInfo.length ? (
-                                    <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
-                                ) : (
-                                    <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    <SafeAreaView style={{ marginBottom: 440 }}>
-                        <FlatList data={filter.data} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
+            {!isLoading && filter.listOptions.length > 0 ? (
+                tabActive === "give" ? (
+                    <SafeAreaView style={{ marginBottom: 120 }}>
+                        <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} ListHeaderComponent={renderDashboard} />
                     </SafeAreaView>
-                </>
+                ) : (
+                    <SafeAreaView style={{ marginBottom: dataDetailed ? 0 : 120 }}>
+                        {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
+                    </SafeAreaView>
+                )
+            ) : (
+                <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun produit</Text>
             )}
 
-            {!isLoading && tabActive === "gave" && (
-                <SafeAreaView>
-                    {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
-                </SafeAreaView>
-            )}
             {loadingScreen(isLoadingScreen)}
         </View>
     );

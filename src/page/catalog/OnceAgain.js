@@ -13,6 +13,7 @@ import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../..
 
 // if tabActive === "products" => data is listProducts
 // if tabActive === "shipment" => data is shipment
+let willFocusSubscription = null;
 const OnceAgain = (props) => {
     const [isLoadingScreen, setIsLoadingScreen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +38,7 @@ const OnceAgain = (props) => {
 
     React.useEffect(() => {
         if (props.route.params) {
-            const { deleteProduct, reference, forceUpdate } = props.route.params;
+            const { deleteProduct, reference } = props.route.params;
             if (deleteProduct && dataDetailed) {
                 const newData = data.filter((product) => product["@id"] !== dataDetailed["@id"]);
                 setData(newData);
@@ -62,20 +63,27 @@ const OnceAgain = (props) => {
                 } else if (tabActive === "shipment") {
                     setTabActive("products");
                 }
-            } else if (forceUpdate) {
-                setIsLoading(true);
-                setDataDetail(null);
-                getData();
             }
         }
     }, [props.route.params]);
+
+    React.useEffect(() => {
+        willFocusSubscription = props.navigation.addListener("focus", () => {
+            setIsLoading(true);
+            setDataDetail(null);
+            getData();
+        });
+
+        return () => {
+            willFocusSubscription.remove();
+        };
+    }, []);
 
     // get product or get shipments
     const getData = () => {
         const endpoint = tabActive === "products" ? "/products?isSentToPartner=0" : "/shipments?type=partner";
         FetchService.get(endpoint, user.token)
             .then((result) => {
-                console.log(result);
                 if (!!result) {
                     setData(result["hydra:member"]);
                     if (props.route.params?.reference) {
@@ -110,8 +118,8 @@ const OnceAgain = (props) => {
      * @param {*} param0
      * @returns
      */
-    const renderListProducts = ({ item }) => (
-        <View key={item["@id"]} style={styles.singleProduct}>
+    const renderListProducts = ({ item, index }) => (
+        <View key={item["@id"]} style={[styles.singleProduct, index === filter.listOptions.length - 1 && { marginBottom: 30 }]}>
             <TouchableOpacity onPress={() => handleDisplayProductDetail(item)}>
                 <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.title}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand.name}</Text>
@@ -127,8 +135,8 @@ const OnceAgain = (props) => {
         </View>
     );
 
-    const renderShipments = ({ item }) => (
-        <View key={item["@id"]} style={[styles.singleProduct, { alignItems: "flex-start" }]}>
+    const renderShipments = ({ item, index }) => (
+        <View key={item["@id"]} style={[styles.singleProduct, { alignItems: "flex-start" }, index === filter.listOptions.length - 1 && { marginBottom: 30 }]}>
             <View>
                 <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{item.poolNumber}</Text>
                 <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(item.sentAt)}</Text>
@@ -299,11 +307,69 @@ const OnceAgain = (props) => {
     const percent = nbProductsSelected >= 15 ? 100 : (nbProductsSelected / 15) * 100;
     const placeHolderFilter = tabActive === "products" ? "Chercher une commande..." : "Chercher un n° de suivi...";
 
+    /**
+     * render dash board
+     */
+    const renderDashboard = () => (
+        <>
+            <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
+                <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation de l'envoi en cours</Text>
+                <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>
+                    {15 - nbProductsSelected > 0 ? 15 - nbProductsSelected : 0} produits à sélectionner
+                </Text>
+                <View style={{ alignItems: "center", paddingVertical: 15 }}>
+                    <ProgressCircle
+                        percent={percent}
+                        radius={55}
+                        borderWidth={3}
+                        color={percent >= 100 ? colors.green : colors.red}
+                        shadowColor={colors.gray}
+                        bgColor={colors.white}
+                        outerCircleStyle={{
+                            transform: [{ rotate: "-45deg" }]
+                        }}>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                transform: [{ rotate: "45deg" }],
+                                position: "relative"
+                            }}>
+                            <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, { top: -5 }]}>
+                                {nbProductsSelected}
+                                <Text style={[styles.textGreen, styles.fontSofiaRegular, styles.positionAbsolute, styles.font18, { bottom: 18 }]}>/15</Text>
+                            </Text>
+                        </View>
+                    </ProgressCircle>
+                </View>
+                <View style={{ alignSelf: "center", marginBottom: 10 }}>
+                    <TouchableOpacity disabled={percent < 100} onPress={handleSendProducts} style={[styles.btnSend, percent < 100 && { opacity: 0.5 }]}>
+                        <Image source={require("../../assets/images/flight-btn.png")} style={styles.imageBtnSend} />
+                        <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { top: -0.5, paddingRight: 10, paddingLeft: 5 }]}>Marquer comme envoyé</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {data.length !== 0 && (
+                <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
+                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
+                    <TouchableOpacity onPress={handleSelectAllProducts}>
+                        {data.length === listProductsSelected.allInfo.length ? (
+                            <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
+                        ) : (
+                            <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
+                        )}
+                    </TouchableOpacity>
+                </View>
+            )}
+        </>
+    );
+
     return (
         <View style={[styles.mainScreen, { paddingBottom: 150 }]}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
                     <TouchableOpacity
+                        disabled={tabActive === "products"}
                         onPress={() => {
                             setIsLoading(true);
                             setTabActive("products");
@@ -314,10 +380,12 @@ const OnceAgain = (props) => {
                 </View>
                 <View style={styles.flex1}>
                     <TouchableOpacity
+                        disabled={tabActive === "shipments"}
                         onPress={() => {
                             setIsLoading(true);
                             setTabActive("shipments");
-                        }}>
+                        }}
+                        style={{ alignSelf: "center" }}>
                         <Text style={[styles.menuNavigationLabel, tabActive !== "shipments" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>Envoyés</Text>
                     </TouchableOpacity>
                 </View>
@@ -325,72 +393,20 @@ const OnceAgain = (props) => {
             {!dataDetailed && <InputSearch placeholder={placeHolderFilter} placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />}
 
             {isLoading && loading()}
-            {/* TODO: find the way for scroll view  */}
-            {!isLoading && tabActive === "products" && (
-                <>
-                    <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
-                        <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation de l'envoi en cours</Text>
-                        <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>
-                            {15 - nbProductsSelected > 0 ? 15 - nbProductsSelected : 0} produits à sélectionner
-                        </Text>
-                        <View style={{ alignItems: "center", paddingVertical: 15 }}>
-                            <ProgressCircle
-                                percent={percent}
-                                radius={55}
-                                borderWidth={3}
-                                color={percent >= 100 ? colors.green : colors.red}
-                                shadowColor={colors.gray}
-                                bgColor={colors.white}
-                                outerCircleStyle={{
-                                    transform: [{ rotate: "-45deg" }]
-                                }}>
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        transform: [{ rotate: "45deg" }],
-                                        position: "relative"
-                                    }}>
-                                    <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, { top: -5 }]}>
-                                        {nbProductsSelected}
-                                        <Text style={[styles.textGreen, styles.fontSofiaRegular, styles.positionAbsolute, styles.font18, { bottom: 18 }]}>/15</Text>
-                                    </Text>
-                                </View>
-                            </ProgressCircle>
-                        </View>
-                        <View style={{ alignSelf: "center", marginBottom: 10 }}>
-                            <TouchableOpacity disabled={percent < 100} onPress={handleSendProducts} style={[styles.btnSend, percent < 100 && { opacity: 0.5 }]}>
-                                <Image source={require("../../assets/images/flight-btn.png")} style={styles.imageBtnSend} />
-                                <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { top: -0.5, paddingRight: 10, paddingLeft: 5 }]}>
-                                    Marquer comme envoyé
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    {data.length !== 0 && (
-                        <View style={{ alignSelf: "flex-end", margin: 20, paddingRight: 20, flexDirection: "row", alignItems: "center" }}>
-                            <Text style={[styles.font16, styles.fontSofiaRegular, styles.textDarkBlue, { letterSpacing: 2, paddingRight: 10 }]}>Tout sélectionner</Text>
-                            <TouchableOpacity onPress={handleSelectAllProducts}>
-                                {data.length === listProductsSelected.allInfo.length ? (
-                                    <Image source={require("../../assets/images/selected.png")} style={{ width: 30, height: 30 }} />
-                                ) : (
-                                    <Image source={require("../../assets/images/not-selected.png")} style={{ width: 30, height: 30 }} />
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                    )}
-
-                    <SafeAreaView style={{ marginBottom: 450 }}>
-                        <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />
+            {!isLoading && filter.listOptions.length > 0 ? (
+                tabActive === "products" ? (
+                    <SafeAreaView style={{ marginBottom: 60 }}>
+                        <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} ListHeaderComponent={renderDashboard} />
                     </SafeAreaView>
-                </>
+                ) : (
+                    <SafeAreaView style={{ marginBottom: dataDetailed ? 0 : 60 }}>
+                        {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
+                    </SafeAreaView>
+                )
+            ) : (
+                <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun produit</Text>
             )}
 
-            {!isLoading && tabActive === "shipments" && (
-                <SafeAreaView>
-                    {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
-                </SafeAreaView>
-            )}
             {loadingScreen(isLoadingScreen)}
         </View>
     );
