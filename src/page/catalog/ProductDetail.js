@@ -195,7 +195,7 @@ const ProductDetail = (props) => {
         FetchService.delete(imageId, user.token)
             .then((result) => {
                 if (!!result) {
-                    const newImages = product.images.filter((image) => image.id !== imageId);
+                    const newImages = product.images.filter((image) => image["@id"] !== imageId);
                     setProduct({
                         ...product,
                         images: newImages
@@ -305,7 +305,6 @@ const ProductDetail = (props) => {
             if (brandSelected) {
                 const listOptionCategories = initListOptionCategories(brandSelected);
                 const categoryName = getKeyByValue(listOptionCategories.selectedIds, productRef.current.category.id);
-                console.log(categoryName);
                 setProduct({ ...product, category: categoryName });
                 setCategories(listOptionCategories);
             } else {
@@ -359,10 +358,8 @@ const ProductDetail = (props) => {
 
         if (Object.keys(data).length > 0) {
             setIsLoadingScreenVisible(true);
-            console.log(productRef.current["@id"]);
             FetchService.patch(productRef.current["@id"], data, user.token)
                 .then((result) => {
-                    console.log(result);
                     if (result) {
                         setEditable(false);
                         props.navigation.setOptions({ title: "Informations produit" });
@@ -654,7 +651,7 @@ const ProductDetail = (props) => {
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Prénom: {productRef.current.customer.firstname}</Text>
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Nom: {productRef.current.customer.lastname}</Text>
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Email: {productRef.current.customer.email}</Text>
-                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Tel: </Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Tel: {productRef.current.customer.phone ? productRef.current.customer.phone : "Pas des donées"}</Text>
                     </View>
                 </View>
                 {editable ? (
@@ -662,7 +659,7 @@ const ProductDetail = (props) => {
                         <TouchableOpacity
                             onPress={handleSaveModification}
                             style={[styles.greenScreen, { marginHorizontal: 20, paddingVertical: 10, borderRadius: 10, marginVertical: 10 }]}>
-                            <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Sauvegarder</Text>
+                            <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Enregistrer</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={handleResetModification} style={styles.buttonWithBorderGreen}>
                             <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>{"Annuler les\nmodifications"}</Text>
