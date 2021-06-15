@@ -316,6 +316,10 @@ const Rayon = (props) => {
         if (idSucess.length > 0) {
             const newListProducts = listProducts.filter((product) => !idSucess.includes(product["@id"]));
             setListProducts(newListProducts);
+            setFilter({
+                keyword: "",
+                listProducts: newListProducts
+            });
         }
         const newListProductsSelectedAllInfo = indexErrors.map((index) => listProductsSelected.allInfo[index]);
         const newListIdProductsSelected = indexErrors.map((index) => listProductsSelected.ids[index]);
