@@ -9,7 +9,6 @@ import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../../lib/Helpers";
 
-let willFocusSubscription = null;
 const Rayon = (props) => {
     const [isLoadingScreen, setIsLoadingScreen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -79,15 +78,13 @@ const Rayon = (props) => {
     }, [props.route.params]);
 
     React.useEffect(() => {
-        willFocusSubscription = props.navigation.addListener("focus", () => {
+        const willFocusSubscription = props.navigation.addListener("focus", () => {
             setIsLoading(true);
             setProductdetail(null);
             getListProducts();
         });
 
-        return () => {
-            willFocusSubscription.remove();
-        };
+        return willFocusSubscription;
     }, []);
 
     const getListProducts = () => {

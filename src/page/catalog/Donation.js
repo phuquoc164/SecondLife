@@ -13,7 +13,6 @@ import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../..
 
 // tab give => list Products
 // tab gave => list shipments
-let willFocusSubscription = null;
 const Donation = (props) => {
     const [isLoadingScreen, setIsLoadingScreen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -68,15 +67,13 @@ const Donation = (props) => {
     }, [props.route.params]);
 
     React.useEffect(() => {
-        willFocusSubscription = props.navigation.addListener("focus", () => {
+        const willFocusSubscription = props.navigation.addListener("focus", () => {
             setIsLoading(true);
             setDataDetail(null);
             getData();
         });
 
-        return () => {
-            willFocusSubscription.remove();
-        };
+        return willFocusSubscription;
     }, []);
 
     // get product or get shipments

@@ -9,7 +9,6 @@ import FetchService from "../../lib/FetchService";
 import { colors } from "../../lib/colors";
 import { InputSearch, loading } from "../../lib/Helpers";
 
-let willFocusSubscription = null;
 const ListCustomers = (props) => {
     const [state, setState] = React.useState({
         allCustomers: [],
@@ -21,13 +20,11 @@ const ListCustomers = (props) => {
 
     React.useEffect(() => {
         getListCustomers();
-        willFocusSubscription = props.navigation.addListener('focus', () => {
+        const willFocusSubscription = props.navigation.addListener('focus', () => {
             getListCustomers();
         });
 
-        return () => {
-            willFocusSubscription.remove();
-        }
+        return willFocusSubscription;
     }, []);
 
     const getListCustomers = () => {
