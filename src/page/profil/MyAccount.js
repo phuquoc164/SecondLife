@@ -40,8 +40,8 @@ const MyAccount = () => {
                     <Text style={[styles.textCenter, styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { paddingVertical: 15 }]}>Pour modifier vos informations,</Text>
                     <View style={{ display: "flex", flexDirection: "row" }}>
                         <Text style={[styles.textCenter, styles.textDarkBlue, styles.font17, styles.fontSofiaRegular]}>rendez-vous sur </Text>
-                        <TouchableOpacity style={{ paddingBottom: 15 }} onPress={() => Linking.openURL("https://thesecondelife.io")}>
-                            <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { textDecorationLine: "underline" }]}>thesecondelife.io</Text>
+                        <TouchableOpacity style={{ paddingBottom: 15 }} onPress={() => Linking.openURL("https://thesecondlife.io")}>
+                            <Text style={[styles.textDarkBlue, styles.font17, styles.fontSofiaRegular, { textDecorationLine: "underline" }]}>thesecondlife.io</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

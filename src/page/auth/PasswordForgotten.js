@@ -19,9 +19,9 @@ const PasswordForgotten = (props) => {
             <View style={{ display: "flex", alignItems: "center" }}>
                 <Text style={[styles.fontSofiaRegular, styles.textCenter, stylesComponent.text]}>{route.params.title}</Text>
                 <Image source={require("../../assets/images/arrow-down.png")} style={{ width: 30, height: 49 }} />
-                <TouchableOpacity onPress={() => Linking.openURL("https://thesecondelife.io")}>
+                <TouchableOpacity onPress={() => Linking.openURL("https://thesecondlife.io")}>
                     <LinearGradient style={stylesComponent.button} colors={["#0EE38A", "#A3F8FF"]} useAngle={true} angle={170}>
-                        <Text style={[styles.fontSofiaMedium, stylesComponent.buttonText]}>thesecondelife.io</Text>
+                        <Text style={[styles.fontSofiaMedium, stylesComponent.buttonText]}>thesecondlife.io</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>
