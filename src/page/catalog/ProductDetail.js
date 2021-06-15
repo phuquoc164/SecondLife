@@ -315,7 +315,6 @@ const ProductDetail = (props) => {
      * Delete product and ,avigation to dedicated page catalog
      */
     const handleDeleteProduct = () => {
-        // FetchServicesetIsLoading(true);
         setIsLoadingScreenVisible(true);
         FetchService.delete(product.id, user.token)
             .then((result) => {
@@ -695,7 +694,7 @@ const ProductDetail = (props) => {
                 <ModalPhoto visible={modal === "photo"} onCancel={() => setModal("")} handleTakePhoto={handleTakePhoto} handleSelectPhoto={handleSelectPhoto} />
                 <ModalConfirmation
                     visible={modalConfirmation}
-                    description={"Êtes-vous sûr de vouloir\nsupprimer ce produit ?"}
+                    description={"Êtes-vous sûr de vouloir supprimer ce produit ?\nCela supprimera le bon d'achat associé"}
                     handleSubmit={handleDeleteProduct}
                     handleCancel={() => setModalConfirmation(false)}
                 />
