@@ -32,47 +32,49 @@ const Rayon = (props) => {
     }, [tabActive]);
 
     React.useEffect(() => {
-        const { deleteProduct, sellProduct, reference } = props.route.params;
-        if (deleteProduct && productDetail) {
-            const newListProducts = listProducts.filter((product) => product["@id"] !== productDetail["@id"]);
-            setListProducts(newListProducts);
-            setFilter({
-                keyword: "",
-                listProducts: newData
-            });
-            if (listProductsSelected.ids.includes(productDetail["@id"])) {
-                const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== productDetail["@id"]);
-                const newIds = listProductsSelected.ids.filter((id) => id !== productDetail["@id"]);
-                setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
-            }
-            setProductdetail(null);
-        } else if (sellProduct && productDetail) {
-            setIsLoadingScreen(true);
-            const data = {
-                statuses: [{ status: "sell", statusState: true }]
-            };
-            FetchService.patch(productDetail["@id"], data, user.token)
-                .then((result) => {
-                    if (!!result) {
-                        setProductdetail(null);
-                        setIsLoadingScreen(false);
-                        props.navigation.setParams({ sellProduct: null });
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
-                });
-        } else if (reference) {
-            if (listProducts.length > 0 && tabActive === "sell") {
-                const newListProducts = listProducts.filter((product) => product.reference === reference);
+        if (props.route.params) {
+            const { deleteProduct, sellProduct, reference } = props.route.params;
+            if (deleteProduct && productDetail) {
+                const newListProducts = listProducts.filter((product) => product["@id"] !== productDetail["@id"]);
+                setListProducts(newListProducts);
                 setFilter({
-                    keyword: reference,
-                    listProducts: newListProducts
+                    keyword: "",
+                    listProducts: newData
                 });
-                props.navigation.setParams({ reference: null });
-            } else if (tabActive === "sold") {
-                setTabActive("sell");
+                if (listProductsSelected.ids.includes(productDetail["@id"])) {
+                    const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== productDetail["@id"]);
+                    const newIds = listProductsSelected.ids.filter((id) => id !== productDetail["@id"]);
+                    setListProductsSelected({ allInfo: newAllInfo, ids: newIds });
+                }
+                setProductdetail(null);
+            } else if (sellProduct && productDetail) {
+                setIsLoadingScreen(true);
+                const data = {
+                    statuses: [{ status: "sell", statusState: true }]
+                };
+                FetchService.patch(productDetail["@id"], data, user.token)
+                    .then((result) => {
+                        if (!!result) {
+                            setProductdetail(null);
+                            setIsLoadingScreen(false);
+                            props.navigation.setParams({ sellProduct: null });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+                    });
+            } else if (reference) {
+                if (listProducts.length > 0 && tabActive === "sell") {
+                    const newListProducts = listProducts.filter((product) => product.reference === reference);
+                    setFilter({
+                        keyword: reference,
+                        listProducts: newListProducts
+                    });
+                    props.navigation.setParams({ reference: null });
+                } else if (tabActive === "sold") {
+                    setTabActive("sell");
+                }
             }
         }
     }, [props.route.params]);
@@ -181,12 +183,12 @@ const Rayon = (props) => {
                     <Text style={styles.addProductLabel}>Etat</Text>
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.state.state}</Text>
                 </View>
-                {productDetail.description &&
+                {productDetail.description && (
                     <View style={styles.addProductInputContainer}>
                         <Text style={styles.addProductLabel}>Description</Text>
                         <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.description}</Text>
                     </View>
-                }
+                )}
                 <View style={styles.addProductInputContainer}>
                     <Text style={styles.addProductLabel}>Seller</Text>
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.seller.name}</Text>
