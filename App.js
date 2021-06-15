@@ -38,7 +38,7 @@ import NeedHelp from './src/page/profil/NeedHelp';
 const RootStack = createStackNavigator();
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-
+const SPECIAL_TITLES = ["Informations produit", "Informations client"];
 const App = () => {
     const [state, dispatch] = useReducer(authReducer, authInitalState);
 
@@ -118,7 +118,7 @@ const App = () => {
                         <Image source={require("./src/assets/images/history.png")} style={styles.historyImage} />
                     </TouchableOpacity>
                 )}
-                {hasBackBtn && (!scene.descriptor.options.title || scene.descriptor.options.title === "Informations produit") && backButton()}
+                {hasBackBtn && (!scene.descriptor.options.title || SPECIAL_TITLES.includes(scene.descriptor.options.title)) && backButton()}
 
                 {/* Back button special for catalog page */}
                 {scene.descriptor.options.handleGoBack && (
