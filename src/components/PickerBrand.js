@@ -30,7 +30,7 @@ const PickerBrand = (props) => {
             key={item.id}
             style={{
                 paddingVertical: 15,
-                paddingHorizontal: 15,
+                paddingHorizontal: 20,
                 borderBottomWidth: 1,
                 borderBottomColor: colors.gray,
                 backgroundColor: colors.lightGray

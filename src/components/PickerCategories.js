@@ -160,7 +160,8 @@ const PickerCategories = (props) => {
     const renderListItemBase = (item, showArrow = true) => (
         <View
             style={{
-                padding: 15,
+                paddingVertical: 15,
+                paddingHorizontal: 20,
                 borderBottomWidth: 1,
                 borderBottomColor: colors.gray,
                 backgroundColor: colors.lightGray,
