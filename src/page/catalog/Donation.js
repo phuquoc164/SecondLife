@@ -1,8 +1,7 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert } from "react-native";
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert, ScrollView } from "react-native";
 
-/** App */
 /** App */
 import styles from "../../assets/css/styles";
 import { AuthContext } from "../../lib/AuthContext";
@@ -166,7 +165,7 @@ const Donation = (props) => {
                                 <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, { marginRight: 10 }]}>{index + 1}.</Text>
                                 <View>
                                     <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{product.title}</Text>
-                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{product.reference}</Text>
+                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Ref: {product.reference}</Text>
                                     <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>
                                         Customer: {product.customer.firstname} {product.customer.lastname}
                                     </Text>
