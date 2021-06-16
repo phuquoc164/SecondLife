@@ -66,17 +66,10 @@ const ListCustomers = (props) => {
                     <Text style={[styles.font12, styles.fontSofiaRegular, styles.textMediumGray]}>Email: {item.email}</Text>
                     <Text style={[styles.font12, styles.fontSofiaRegular, styles.textMediumGray]}>N° tel: {item.phone}</Text>
                 </View>
-                {routeParams && routeParams.addProduct ? (
-                    <View style={[styles.flex2]}>
-                        <Text style={[styles.font14, styles.fontSofiaSemiBold, styles.textCenter, { paddingBottom: 10 }]}>Produits en vente:</Text>
-                        <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textGreen, styles.textCenter]}>{item.forSellProducts}</Text>
-                    </View>
-                ) : (
-                    <View style={[styles.flex2]}>
-                        <Text style={[styles.font14, styles.fontSofiaSemiBold, styles.textCenter, { paddingBottom: 10 }]}>Bon d'achats:</Text>
-                        <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textGreen, styles.textCenter]}>{item.availableVouchers.length}</Text>
-                    </View>
-                )}
+                <View style={[styles.flex2]}>
+                    <Text style={[styles.font14, styles.fontSofiaSemiBold, styles.textCenter, { paddingBottom: 10 }]}>Bons d'achats:</Text>
+                    <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textGreen, styles.textCenter]}>{item.availableVouchers.length}</Text>
+                </View>
             </View>
         </TouchableOpacity>
     );
