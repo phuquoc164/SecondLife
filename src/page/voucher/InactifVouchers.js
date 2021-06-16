@@ -76,7 +76,7 @@ const InactifVouchers = (props) => {
     const getListVouchers = () => {
         FetchService.get("/vouchers", user.token)
             .then((result) => {
-                if (result && result["hydra:member"] && result["hydra:member"].length > 0) {
+                if (result && result["hydra:member"]) {
                     const available = [];
                     const usedOrExpired = [];
                     result["hydra:member"].forEach((voucher) => {

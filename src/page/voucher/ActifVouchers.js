@@ -78,9 +78,10 @@ const ActifVouchers = (props) => {
 
     const getListVouchers = (reference = null) => {
         setIsLoading(true);
+        console.log("go here");
         FetchService.get("/vouchers", user.token)
             .then((result) => {
-                if (result && result["hydra:member"] && result["hydra:member"].length > 0) {
+                if (result && result["hydra:member"]) {
                     const available = [];
                     const usedOrExpired = [];
                     result["hydra:member"].forEach((voucher) => {
