@@ -78,7 +78,6 @@ const ActifVouchers = (props) => {
 
     const getListVouchers = (reference = null) => {
         setIsLoading(true);
-        console.log("go here");
         FetchService.get("/vouchers", user.token)
             .then((result) => {
                 if (result && result["hydra:member"]) {
