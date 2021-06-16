@@ -34,7 +34,7 @@ const ResultPage = (props) => {
     const handleScanSuccess = (event) => {
         const data = JSON.parse(event.data);
         if (data && data.type === "product") {
-            setProduct({ ...product, reference: data.reference });
+            setProduct({ ...product, reference: `${data.reference}` });
         }
         setIsModalScanner(false);
     };

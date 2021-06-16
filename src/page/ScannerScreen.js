@@ -39,7 +39,7 @@ const ScannerScreen = (props) => {
                     }
                     props.navigation.navigate("Catalog", {
                         screen: catalogScreen,
-                        params: { reference: data.reference, deleteProduct: null, sellProduct: null }
+                        params: { reference: `${data.reference}`, deleteProduct: null, sellProduct: null }
                     });
                 })
                 .catch((error) => {
@@ -56,7 +56,7 @@ const ScannerScreen = (props) => {
         } else if (data.type && data.type === "voucher") {
             props.navigation.navigate("Voucher", {
                 screen: "ActifVouchers",
-                params: { reference: data.reference, customer: null, available: null, usedOrExpired: null, forceUpdate: null }
+                params: { reference: `${data.reference}`, customer: null, available: null, usedOrExpired: null, forceUpdate: null }
             });
         } else {
             Alert.alert("Erreur", "Qrcode invalide");
