@@ -80,7 +80,7 @@ const PickerBrand = (props) => {
                     loading()
                 ) : (
                     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} enabled>
-                        <FlatList data={filter.options} renderItem={renderItem} keyExtractor={(item) => item.id} onEndReached={() => console.log("do smth")}/>
+                        <FlatList data={filter.options} renderItem={renderItem} keyExtractor={(item) => item.id} />
                     </KeyboardAvoidingView>
                 )}
             </SafeAreaView>
