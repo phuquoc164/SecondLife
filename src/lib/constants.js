@@ -36,7 +36,7 @@ export const stateDict = {
 
 export const TITLE = {
     clients: ["Clients", "Informations client", "Modifier les informations"],
-    catalog: ["Catalogue Envoi", "Catalogue rayon", "Mes dons\xa0 ♥️"],
+    catalog: ["Catalogue envoi", "Catalogue rayon", "Mes dons\xa0 ♥️"],
     voucher: ["Bon d'achat", "Historique"],
     profil: ["Compte"],
     products: ["Nouveau Lifer", "Trouver un client", "Informations client", "Ajouter un produit"]
