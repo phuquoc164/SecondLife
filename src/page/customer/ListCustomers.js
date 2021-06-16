@@ -15,6 +15,7 @@ const ListCustomers = (props) => {
         filteredCustomers: [],
         filter: ""
     });
+    const [isLoading, setIsLoading] = React.useState(true);
     const { user, signOut } = React.useContext(AuthContext);
     const routeParams = props.route.params;
 
@@ -28,6 +29,7 @@ const ListCustomers = (props) => {
     }, []);
 
     const getListCustomers = () => {
+        setIsLoading(true);
         FetchService.get("/customers", user.token)
             .then((result) => {
                 if (result && result["hydra:member"]?.length > 0) {
@@ -36,12 +38,14 @@ const ListCustomers = (props) => {
                         filteredCustomers: result["hydra:member"],
                         filter: ""
                     });
+                    setIsLoading(false);
                 }
             })
             .catch((error) => {
                 if (error === 401) {
                     Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
                 } else {
+                    setIsLoading(false);
                     console.error(error);
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 }
@@ -76,28 +80,42 @@ const ListCustomers = (props) => {
 
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
-        const newfilteredCustomers = state.allCustomers.filter((customer) => {
-            const { firstname, lastname, email, phone } = customer;
-            const fullname = firstname + " " + lastname;
-            return (
-                fullname.toLowerCase().includes(filterToLower) ||
-                firstname.toLowerCase().includes(filterToLower) ||
-                lastname.toLowerCase().includes(filterToLower) ||
-                email.includes(filterToLower) ||
-                phone.includes(filterToLower)
-            );
-        });
-        setState({
-            ...state,
-            filteredCustomers: newfilteredCustomers,
-            filter
-        });
+        if (state.allCustomers.length === 0) {
+            setState({
+                ...state,
+                filter
+            });
+        } else {
+            const newfilteredCustomers = state.allCustomers.filter((customer) => {
+                const { firstname, lastname, email, phone } = customer;
+                const fullname = firstname + " " + lastname;
+                return (
+                    fullname.toLowerCase().includes(filterToLower) ||
+                    firstname.toLowerCase().includes(filterToLower) ||
+                    lastname.toLowerCase().includes(filterToLower) ||
+                    email.includes(filterToLower) ||
+                    phone.includes(filterToLower)
+                );
+            });
+            setState({
+                ...state,
+                filteredCustomers: newfilteredCustomers,
+                filter
+            });
+        }
     };
 
     return (
         <SafeAreaView style={styles.mainScreen}>
             <InputSearch placeholder="Chercher un client" placeholderTextColor={colors.lightBlue} value={state.filter} filterData={filterData} />
-            <FlatList data={state.filteredCustomers} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
+            {isLoading && loading()}
+            {!isLoading &&
+                (state.allCustomers.length > 0 ? (
+                    <FlatList data={state.filteredCustomers} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
+                ) : (
+                    <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun customer</Text>
+                ))
+            }
         </SafeAreaView>
     );
 };
