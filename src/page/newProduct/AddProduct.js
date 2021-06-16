@@ -581,9 +581,7 @@ const AddProduct = (props) => {
                     <View style={[styles.addProductInputContainer, { backgroundColor: "rgba(216, 255, 0, 0.22)", flexDirection: "row", alignItems: "center", padding: 15 }]}>
                         <Text style={[styles.font24, styles.fontSofiaRegular]}>💡</Text>
                         <Text style={{ marginLeft: 15, fontSize: 16, lineHeight: 22, width: "87%", color: "#707070", fontFamily: "SofiaPro-Regular" }}>
-                            {argus.buyingPrice
-                                ? `Prix de rachat: ${argus.buyingPrice}€`
-                                : "Nous ne reprenons malheureusement pas cet article."}
+                            {argus.buyingPrice ? `Prix de rachat: ${argus.buyingPrice}€` : "Nous ne reprenons malheureusement pas cet article."}
                         </Text>
                     </View>
                 )}
@@ -661,6 +659,7 @@ const AddProduct = (props) => {
                 <Picker
                     visible={modal === "size"}
                     title="Sélectionnez une taille"
+                    placeholderInputSearch="Cherchez une taille"
                     items={listOptions.sizes}
                     selected={product.size}
                     handleClose={() => setModal("")}
