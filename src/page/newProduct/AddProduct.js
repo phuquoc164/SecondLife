@@ -372,6 +372,7 @@ const AddProduct = (props) => {
                 screen: "ResultPage",
                 params: { data: { ...data, price: null, reference: null }, typeCatalog: "sell", sellingPrice: argus.sellingPrice }
             });
+            setIsLoadingBtnsubmit(false);
         } else {
             FetchService.post("/products", data, user.token)
                 .then((result) => {
@@ -402,6 +403,7 @@ const AddProduct = (props) => {
                                 screen: "ResultPage",
                                 params: { typeCatalog: "donation", description: "Vous venez d’ajouter un nouveau produit pour votre association 🎉" }
                             });
+                            setIsLoadingBtnsubmit(false);
                         }
                     }
                 })
