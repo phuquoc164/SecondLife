@@ -7,7 +7,7 @@ import LinearGradient from "react-native-linear-gradient";
 import styles from "../../assets/css/styles";
 import { colors } from "../../lib/colors";
 
-const NeedHelp = (props) => (
+const NeedHelp = () => (
     <View style={{ backgroundColor: "#EEF7FF", height: "100%", alignItems: "center", paddingHorizontal: 20 }}>
         <Image source={require("../../assets/images/The-Second-Life-NOIR.png")} style={{ width: 200, height: 102.4, marginBottom: 40, marginTop: 60 }} />
         <View style={{ backgroundColor: colors.white, borderRadius: 35, width: "100%", paddingVertical: 40, position: "relative" }}>

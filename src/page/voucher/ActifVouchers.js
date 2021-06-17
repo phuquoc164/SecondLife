@@ -27,10 +27,15 @@ const ActifVouchers = (props) => {
     const [isLoading, setIsLoading] = useState(true);
     const { user, signOut } = React.useContext(AuthContext);
 
+
+    /**
+     * update data when props of navigation change
+     */
     React.useEffect(() => {
         if (props.route.params) {
             const paramsNavigation = props.route.params;
             if (paramsNavigation.available && paramsNavigation.usedOrExpired) {
+                // navigate from list vouchers history
                 setIsLoading(true);
                 const { available, usedOrExpired } = paramsNavigation;
                 setVouchers({ available, usedOrExpired });
@@ -40,6 +45,7 @@ const ActifVouchers = (props) => {
                 });
                 setIsLoading(false);
             } else if (paramsNavigation.customer && !paramsNavigation.forceUpdate) {
+                // navigate from page customer detail
                 setIsLoading(true);
                 const { customer } = paramsNavigation;
                 const available = [];
@@ -68,14 +74,19 @@ const ActifVouchers = (props) => {
                 });
                 setIsLoading(false);
             } else if (paramsNavigation.reference) {
+                // navigate from page scanner
                 getListVouchers(paramsNavigation.reference);
                 props.navigation.setParams({ reference: null });
             } else if (paramsNavigation.forceUpdate) {
+                // navigate when we push the bottom bar item
                 getListVouchers();
             }
         }
     }, [props.route.params]);
 
+    /** 
+     * send request to get list vouchers
+     */
     const getListVouchers = (reference = null) => {
         setIsLoading(true);
         FetchService.get("/vouchers", user.token)
@@ -91,6 +102,7 @@ const ActifVouchers = (props) => {
                         }
                     });
                     setVouchers({ available, usedOrExpired });
+                    // if we have reference, we have to update the keyword of filter with value of reference
                     if (reference) {
                         const voucherFiltered = available.filter((voucher) => voucher.reference === props.route.params.reference);
                         setFilter({
@@ -116,6 +128,9 @@ const ActifVouchers = (props) => {
             });
     };
 
+    /**
+     * send request to mask voucher as used
+     */
     const handleMaskAsUsedVoucher = () => {
         const data = { used: true };
         setModalConfirmation(false);
@@ -139,6 +154,11 @@ const ActifVouchers = (props) => {
             });
     };
 
+    /**
+     * render single voucher
+     * @param {} param0 
+     * @returns 
+     */
     const renderItem = ({ item, index }) => (
         <SwipeableComponent
             key={item["@id"]}
@@ -163,6 +183,10 @@ const ActifVouchers = (props) => {
         </SwipeableComponent>
     );
 
+    /**
+     * filter data
+     * @param {*} filter 
+     */
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
         const newFilteredVouchers = vouchers.available.filter((voucher) => {

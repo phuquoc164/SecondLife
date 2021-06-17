@@ -41,7 +41,6 @@ const CustomerDetailProduct = (props) => {
         props.navigation.setOptions({ title: "Modifier les informations" });
     };
 
-    // TODO: modify customer
     const handleModifyCustomer = (newCustomer) => {
         newCustomer.birthday = convertDateToApi(newCustomer.birthday);
         const diffs = getSimpleDiff(customer, newCustomer);

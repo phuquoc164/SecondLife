@@ -22,6 +22,10 @@ const ResultPage = (props) => {
 
     const { user } = React.useContext(AuthContext);
 
+    /**
+     * if type catalog we have to show the champ reference and input
+     * if not, we display the page result
+     */
     React.useEffect(() => {
         if (props.route.params.typeCatalog === "sell") {
             setProduct(props.route.params.data);
@@ -31,6 +35,10 @@ const ResultPage = (props) => {
         }
     }, [props.route.params]);
 
+    /**
+     * handle scanner qr code of reference product
+     * @param {*} event 
+     */
     const handleScanSuccess = (event) => {
         const data = JSON.parse(event.data);
         if (data && data.type === "product") {
@@ -44,8 +52,10 @@ const ResultPage = (props) => {
      */
     const handleAddOtherProduct = () => {
         if (props.route.params.typeCatalog !== "sell") {
+            // return to form product
             props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { forceReset: true } });
         } else {
+            // add product and return to form product
             product.price = parseInt(product.price.replace("€", ""));
             FetchService.post("/products", product, user.token)
                 .then((result) => {
@@ -66,8 +76,10 @@ const ResultPage = (props) => {
     const handleFinish = () => {
         const { typeCatalog } = props.route.params;
         if (typeCatalog !== "sell") {
+            // go to page catalog
             props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] });
         } else {
+            // add product and go to page catalog
             product.price = parseInt(product.price.replace("€", ""));
             FetchService.post("/products", product, user.token)
                 .then((result) => {
@@ -110,7 +122,7 @@ const ResultPage = (props) => {
                 )}
                 {!showPageResult && (
                     <>
-                        {/* Refernce */}
+                        {/* Reference */}
                         <View style={[styles.addProductInputContainer, styles.positionRelative, { marginBottom: 10 }]}>
                             <Text style={styles.addProductLabel}>Référence</Text>
                             <TextInput

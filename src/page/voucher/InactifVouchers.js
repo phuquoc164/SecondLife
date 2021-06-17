@@ -28,6 +28,7 @@ const InactifVouchers = (props) => {
     const [isLoading, setIsLoading] = useState(true);
     const { user } = React.useContext(AuthContext);
 
+    /** Update data when we have change of params */
     React.useEffect(() => {
         if (props.route.params) {
             setIsLoading(true);
@@ -73,6 +74,9 @@ const InactifVouchers = (props) => {
         }
     }, [props.route.params]);
 
+    /**
+     * send request to get list vouchers
+     */
     const getListVouchers = () => {
         FetchService.get("/vouchers", user.token)
             .then((result) => {
@@ -100,6 +104,9 @@ const InactifVouchers = (props) => {
             });
     };
 
+    /**
+     * send request to server to reactivate 
+     */
     const handleReactivateVoucher = () => {
         setModalConfirmation(false);
         let newDate = new Date();
@@ -125,6 +132,11 @@ const InactifVouchers = (props) => {
             });
     };
 
+    /**
+     * render single voucher
+     * @param param0 
+     * @returns 
+     */
     const renderItem = ({ item, index }) => {
         const btnText = item.used ? "Utilisé" : "Expiré";
         const btnColors = item.used ? ["#0EE38A", "#A3F8FF"] : ["#8A98BA", "#FFFFFF"];
@@ -170,6 +182,10 @@ const InactifVouchers = (props) => {
         );
     };
 
+    /**
+     * handle filter data
+     * @param filter 
+     */
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
         const newFilteredVouchers = vouchers.usedOrExpired.filter((voucher) => {

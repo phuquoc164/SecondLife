@@ -64,6 +64,9 @@ const AddProduct = (props) => {
         });
     };
 
+    /** 
+     * Reset data when we have the param force reset
+     */
     React.useEffect(() => {
         if (props.route.params?.forceReset) {
             setProduct(initialProduct);
@@ -384,7 +387,7 @@ const AddProduct = (props) => {
                                     const nbProducts = listProductsPartner["hydra:totalItems"];
                                     let description = "";
                                     if (nbProducts >=15) {
-                                        description = "Vous avez ajouté 15 produits, rendez-vous sur votre back-office pour télécharger votre étiquette d'envoi !";
+                                        description = "Félicitations, vous avez ajouté 15 produits ! Contactez nous pour recevoir votre étiquette d'envoi !";
                                     } else {
                                         description = "Il vous reste " + (15 - nbProducts) + " produits à ajouter avant de pouvoir les envoyer à notre partenaire.";
                                     }
@@ -477,7 +480,7 @@ const AddProduct = (props) => {
                 </View>
 
                 {/* Nom */}
-                <View style={[styles.addProductInputContainer, listErreurs.includes("name") && { borderColor: colors.red }]}>
+                <View style={[styles.addProductInputContainer, listErreurs.includes("title") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Nom</Text>
                     <TextInput
                         style={[styles.addProductInput]}
