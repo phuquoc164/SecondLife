@@ -19,6 +19,7 @@ const ResultPage = (props) => {
     const [product, setProduct] = React.useState({});
     const [showPageResult, setShowPageResult] = React.useState(props.route.params.typeCatalog !== "sell");
     const [isModalScanner, setIsModalScanner] = React.useState(false);
+    const [listErreurs, setListErreurs] = React.useState([]);
 
     const { user } = React.useContext(AuthContext);
 
@@ -37,7 +38,7 @@ const ResultPage = (props) => {
 
     /**
      * handle scanner qr code of reference product
-     * @param {*} event 
+     * @param {*} event
      */
     const handleScanSuccess = (event) => {
         const data = JSON.parse(event.data);
@@ -56,6 +57,11 @@ const ResultPage = (props) => {
             props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { forceReset: true } });
         } else {
             // add product and return to form product
+            const isGoodData = verifyData();
+            if (!isGoodData) {
+                Alert.alert("Erreur", "Veuillez renseigner tous les champs encadrés en rouge");
+                return;
+            }
             product.price = parseInt(product.price.replace("€", ""));
             FetchService.post("/products", product, user.token)
                 .then((result) => {
@@ -80,6 +86,11 @@ const ResultPage = (props) => {
             props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] });
         } else {
             // add product and go to page catalog
+            const isGoodData = verifyData();
+            if (!isGoodData) {
+                Alert.alert("Erreur", "Veuillez renseigner tous les champs encadrés en rouge");
+                return;
+            }
             product.price = parseInt(product.price.replace("€", ""));
             FetchService.post("/products", product, user.token)
                 .then((result) => {
@@ -92,6 +103,19 @@ const ResultPage = (props) => {
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         }
+    };
+
+    const verifyData = () => {
+        const listErreurs = [];
+        if (!product.price) {
+            listErreurs.push("price");
+        }
+
+        if (!product.reference || product.reference === "") {
+            listErreurs.push("reference");
+        }
+        setListErreurs(listErreurs);
+        return listErreurs.length === 0;
     };
 
     return (
@@ -123,7 +147,13 @@ const ResultPage = (props) => {
                 {!showPageResult && (
                     <>
                         {/* Reference */}
-                        <View style={[styles.addProductInputContainer, styles.positionRelative, { marginBottom: 10 }]}>
+                        <View
+                            style={[
+                                styles.addProductInputContainer,
+                                styles.positionRelative,
+                                { marginBottom: 10 },
+                                listErreurs.includes("reference") && { borderColor: colors.red }
+                            ]}>
                             <Text style={styles.addProductLabel}>Référence</Text>
                             <TextInput
                                 autoCapitalize="none"
@@ -139,7 +169,7 @@ const ResultPage = (props) => {
                         </View>
 
                         {/* Price */}
-                        <View style={[styles.addProductInputContainer, { marginBottom: 10 }]}>
+                        <View style={[styles.addProductInputContainer, { marginBottom: 10 }, listErreurs.includes("price") && { borderColor: colors.red }]}>
                             <Text style={styles.addProductLabel}>Prix de vente boutique</Text>
                             <TextInput
                                 style={[styles.addProductInput]}
@@ -153,9 +183,11 @@ const ResultPage = (props) => {
                                     }
                                 }}
                                 onBlur={() => {
-                                    if (product.price) {
+                                    if (product.price && product.price !== "") {
                                         const newValue = (product.price + "€").replace(",", ".");
                                         setProduct({ ...product, price: newValue });
+                                    } else if (product.price === "") {
+                                        setProduct({ ...product, price: null });
                                     }
                                 }}
                                 keyboardType="decimal-pad"
