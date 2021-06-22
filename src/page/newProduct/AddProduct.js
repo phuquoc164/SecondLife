@@ -296,6 +296,7 @@ const AddProduct = (props) => {
      * @returns
      */
     const handleArgus = (data) => {
+        if (!product.brand || !product.brand.name) return;
         let endPoint = "/arguses?brand=" + product.brand.name;
         if (data.type === "category") {
             if (!product.state || !product.state.value) return;
