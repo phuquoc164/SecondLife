@@ -39,7 +39,7 @@ const Rayon = (props) => {
                 setListProducts(newListProducts);
                 setFilter({
                     keyword: "",
-                    listProducts: newData
+                    listProducts: newListProducts
                 });
                 if (listProductsSelected.ids.includes(productDetail["@id"])) {
                     const newAllInfo = listProductsSelected.allInfo.filter((product) => product["@id"] !== productDetail["@id"]);
