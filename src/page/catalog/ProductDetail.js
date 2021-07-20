@@ -7,6 +7,7 @@ import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 
 /** App */
 import Picker from "../../components/Picker";
+import PickerBrand from '../../components/PickerBrand';
 import PickerCategories from "../../components/PickerCategories";
 import ModalConfirmation from "../../components/ModalConfirmation";
 import ModalPhoto from "../../components/ModalPhoto";
@@ -338,14 +339,19 @@ const ProductDetail = (props) => {
      */
     const handleSaveModification = () => {
         let data = {};
+        let isError = false;
         Object.keys(product).forEach((key) => {
             if (["brand", "size", "seller", "state"].includes(key)) {
-                if (productRef.current[key]["@id"] !== product[key].id) {
+                if (!product[key] || !product[key].id) {
+                    isError = true;
+                } else if (productRef.current[key]["@id"] !== product[key].id) {
                     data[key] = product[key].id;
                 }
             } else if (key === "category") {
                 const idSelected = categoriesRef.current.selectedIds[product.category];
-                if (idSelected !== productRef.current.category["@id"]) {
+                if (!idSelected) {
+                    isError = true;
+                } else if (idSelected !== productRef.current.category["@id"]) {
                     data[key] = idSelected;
                 }
             } else if (productRef.current[key] !== product[key]) {
@@ -353,6 +359,10 @@ const ProductDetail = (props) => {
             }
         });
 
+        if (isError) {
+            Alert.alert("Erreur", "Veuillez vous saisir toutes les informations");
+            return;
+        }
         if (Object.keys(data).length > 0) {
             setIsLoadingScreenVisible(true);
             FetchService.patch(productRef.current["@id"], data, user.token)
@@ -501,12 +511,12 @@ const ProductDetail = (props) => {
 
                         {/* ========================================== */}
                         {/* Modal Brand */}
-                        <Picker
+                        <PickerBrand
                             visible={modal === "brand"}
                             title="Sélectionnez une marque"
                             items={listOptions.brands}
                             selected={product.brand}
-                            renderSearch={true}
+                            token={user.token}
                             handleClose={() => setModal("")}
                             onSelected={(brand) => handleSelectBrand(brand)}
                         />
