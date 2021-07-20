@@ -41,11 +41,15 @@ const ResultPage = (props) => {
      * @param {*} event
      */
     const handleScanSuccess = (event) => {
-        const data = JSON.parse(event.data);
-        if (data && data.type === "product") {
-            setProduct({ ...product, reference: `${data.reference}` });
+        try {
+            const data = JSON.parse(event.data);
+            if (data && data.type === "product") {
+                setProduct({ ...product, reference: `${data.reference}` });
+            }
+            setIsModalScanner(false);
+        } catch (error) {
+            Alert.alert("Erreur", "Qrcode invalide");
         }
-        setIsModalScanner(false);
     };
 
     /**
@@ -177,7 +181,7 @@ const ResultPage = (props) => {
                                 placeholderTextColor={colors.gray2}
                                 value={product.price}
                                 onFocus={() => {
-                                    if (product.price) {
+                                    if (product.price && product.price.includes("€")) {
                                         const newValue = product.price.replace("€", "");
                                         setProduct({ ...product, price: newValue });
                                     }

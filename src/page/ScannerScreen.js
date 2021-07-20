@@ -22,45 +22,50 @@ const ScannerScreen = (props) => {
     }, [props.route.params]);
 
     const handleReadQRCode = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type && data.type === "product") {
-            setIsLoadingScreen(true);
-            FetchService.get("/products/?reference=" + data.reference, user.token)
-                .then((result) => {
-                    const product = result["hydra:member"][0];
-                    const status = product.currentStatus.status;
-                    let catalogScreen = "";
-                    if (status === "sell") {
-                        catalogScreen = "Rayon";
-                    } else if (status === "partner") {
-                        catalogScreen = "OnceAgain";
-                    } else {
-                        catalogScreen = "Donation";
-                    }
-                    props.navigation.navigate("Catalog", {
-                        screen: catalogScreen,
-                        params: { reference: `${data.reference}`, deleteProduct: null, sellProduct: null }
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type && data.type === "product") {
+                setIsLoadingScreen(true);
+                FetchService.get("/products/?reference=" + data.reference, user.token)
+                    .then((result) => {
+                        const product = result["hydra:member"][0];
+                        const status = product.currentStatus.status;
+                        let catalogScreen = "";
+                        if (status === "sell") {
+                            catalogScreen = "Rayon";
+                        } else if (status === "partner") {
+                            catalogScreen = "OnceAgain";
+                        } else {
+                            catalogScreen = "Donation";
+                        }
+                        props.navigation.navigate("Catalog", {
+                            screen: catalogScreen,
+                            params: { reference: `${data.reference}`, deleteProduct: null, sellProduct: null }
+                        });
+                    })
+                    .catch((error) => {
+                        if (error === 401) {
+                            Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter !", [{ text: "Se connecter", onPress: signOut }]);
+                        } else {
+                            console.error(error);
+                            Alert.alert("Erreur", "Ce produit est introuvable");
+                        }
+                    })
+                    .finally(() => {
+                        setIsLoadingScreen(false);
                     });
-                })
-                .catch((error) => {
-                    if (error === 401) {
-                        Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter !", [{ text: "Se connecter", onPress: signOut }]);
-                    } else {
-                        console.error(error);
-                        Alert.alert("Erreur", "Ce produit est introuvable");
-                    }
-                })
-                .finally(() => {
-                    setIsLoadingScreen(false);
+            } else if (data.type && data.type === "voucher") {
+                props.navigation.navigate("Voucher", {
+                    screen: "ActifVouchers",
+                    params: { reference: `${data.reference}`, customer: null, available: null, usedOrExpired: null, forceUpdate: null }
                 });
-        } else if (data.type && data.type === "voucher") {
-            props.navigation.navigate("Voucher", {
-                screen: "ActifVouchers",
-                params: { reference: `${data.reference}`, customer: null, available: null, usedOrExpired: null, forceUpdate: null }
-            });
-        } else {
+            } else {
+                Alert.alert("Erreur", "Qrcode invalide");
+            }
+        } catch (error) {
             Alert.alert("Erreur", "Qrcode invalide");
         }
+         
     };
 
     const renderCamera = () => {
