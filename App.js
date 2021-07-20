@@ -57,8 +57,9 @@ const App = () => {
 
             dispatch({ type: "RESTORE_USER", user });
         };
-
-        getUserAsync();
+        if (!state.isSignout) {
+            getUserAsync();
+        }
 
         if (Platform.OS === "ios") {
             SplashScreen.hide();
