@@ -10,16 +10,12 @@ import { InputSearch, loading } from "../lib/Helpers";
 
 const PickerBrand = (props) => {
     const [isLoading, setIsLoading] = React.useState(false);
-    const [filter, setFilter] = React.useState({
-        keyword: "",
-        options: props.items
-    });
+    const [options, setOptions] = React.useState(props.items);
+    const [filter, setFilter] = React.useState("");
 
     React.useEffect(() => {
-        setFilter({
-            keyword: "",
-            options: props.items
-        });
+        setOptions(props.items);
+        setFilter("");
     }, [props.items]);
 
     const renderItem = ({ item }) => (
@@ -51,17 +47,14 @@ const PickerBrand = (props) => {
     );
 
     const filterData = (filter) => {
-        setFilter({...filter, keyword: filter});
+        setFilter(filter);
         setIsLoading(true);
         const endPoint = filter === "" ? "/brands?page=1" : "/brands?name=" + filter;
         FetchService.get(endPoint, props.token)
             .then((result) => {
                 if (result) {
                     const listOptions = result["hydra:member"].map((brand) => ({ id: brand["@id"], name: brand.name, categories: brand.categories }));
-                    setFilter({
-                        keyword: filter,
-                        options: listOptions
-                    });
+                    setOptions(listOptions);
                     setIsLoading(false);
                 }
             })
@@ -75,12 +68,12 @@ const PickerBrand = (props) => {
         <Modal animationType="slide" visible={props.visible}>
             {renderHeader()}
             <SafeAreaView style={[styles.mainScreen, { flex: 1 }]}>
-                <InputSearch placeholder="Cherchez une marque" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
+                <InputSearch placeholder="Cherchez une marque" placeholderTextColor={colors.lightBlue} value={filter} filterData={filterData} />
                 {isLoading ? (
                     loading()
                 ) : (
                     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} enabled>
-                        <FlatList data={filter.options} renderItem={renderItem} keyExtractor={(item) => item.id} />
+                        <FlatList data={options} renderItem={renderItem} keyExtractor={(item) => item.id} />
                     </KeyboardAvoidingView>
                 )}
             </SafeAreaView>
