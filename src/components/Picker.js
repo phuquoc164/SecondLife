@@ -1,138 +1,75 @@
 /** React */
 import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import PickerModal from "react-native-picker-modal-view";
+import { FlatList, Image, KeyboardAvoidingView, Modal, Platform, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 
 /** App */
-import { colors } from "../assets/colors";
+import styles from "../assets/css/styles";
+import { colors } from "../lib/colors";
+import { InputSearch } from "../lib/Helpers";
 
-const Picker = props => {
-	const renderSelectView = (showModal, typeData, labelNoSelect) => (
-		<View
-			style={{
-				position: "relative",
-				flexDirection: "row",
-				alignItems: "center"
-			}}>
-			<TouchableOpacity
-				style={{
-					...styles.input,
-					width: "100%",
-					borderColor: !props.showError || typeData ? colors.gray : colors.red
-				}}
-				onPress={showModal}>
-				<Text
-					style={{
-						color: typeData ? colors.black : colors.gray
-					}}>
-					{typeData ? typeData.Name : labelNoSelect}
-				</Text>
-			</TouchableOpacity>
-			<Image source={require("../assets/images/chevron-down.png")} style={styles.imageChevronDown} />
-		</View>
-	);
+const Picker = (props) => {
+    const [filter, setFilter] = React.useState({
+        keyword: "",
+        options: props.items
+    });
 
-	const renderListItem = (defaultSelected, item) => (
-		<View style={styles.styleListItem}>
-			<View
-				style={{
-					flex: 1,
-					flexDirection: "row",
-					justifyContent: "space-between",
-					alignItems: "center"
-				}}>
-				<View style={{ flex: 1, flexDirection: "column" }}>
-					<Text
-						style={{
-							fontSize: item.subTitle ? 17 : 15,
-							fontWeight: defaultSelected && defaultSelected.Name === item.Name ? "bold" : "normal"
-						}}>
-						{item.Name}
-					</Text>
-					{item.subTitle && <Text style={{ color: "#808B96", marginRight: 10 }}>{item.subTitle}</Text>}
-				</View>
-				<Image source={require("../assets/images/chevron-left.png")} style={{ width: 9, height: 13.5 }} />
-			</View>
-		</View>
-	);
+    React.useEffect(() => {
+        setFilter({
+            keyword: "",
+            options: props.items
+        });
+    }, [props.items]);
 
-	const renderSearch = handleClose => (
-		<View
-			style={{
-				alignItems: "center",
-				paddingVertical: 20,
-				position: "relative"
-			}}>
-			<Text style={styles.label}>{props.titleSearch}</Text>
-			<TouchableOpacity onPress={handleClose} style={{ position: "absolute", right: 15, top: 15 }}>
-				<Image source={require("../assets/images/cross-black.png")} style={{ width: 19.5, height: 19 }} />
-			</TouchableOpacity>
-		</View>
-	);
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            onPress={() => {
+                props.onSelected(item);
+            }}
+            key={item.id}
+            style={{
+                paddingVertical: 15,
+                paddingHorizontal: 20,
+                borderBottomWidth: 1,
+                borderBottomColor: colors.gray,
+                backgroundColor: colors.lightGray
+            }}>
+            <Text style={[styles.textDarkBlue, styles.font18, props.selected && props.selected.name === item.name ? styles.fontSofiaSemiBold : styles.fontSofiaRegular]}>
+                {item.name}
+            </Text>
+        </TouchableOpacity>
+    );
 
-	if (props.renderSearch) {
-		return (
-			<PickerModal
-				renderSelectView={(disabled, selected, showModal) => renderSelectView(showModal, props.dataSelected, props.placeholder)}
-				onSelected={selected => {
-					if (Object.keys(selected).length > 0) {
-						props.onSelected(selected);
-					}
-				}}
-				items={props.items}
-				selected={props.dataSelected}
-				autoGenerateAlphabeticalIndex={props.autoGenerateAlphabeticalIndex}
-				showAlphabeticalIndex={props.showAlphabeticalIndex}
-				requireSelection={false}
-				renderListItem={renderListItem}
-				renderSearch={renderSearch}
-			/>
-		);
-	}
+    const renderHeader = () => (
+        <View style={styles.header}>
+            <TouchableOpacity onPress={props.handleClose} style={styles.backImageBtn}>
+                <Image source={require("../assets/images/back_btn.png")} style={styles.backImage} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{props.title}</Text>
+        </View>
+    );
 
-	return (
-		<PickerModal
-			renderSelectView={(disabled, selected, showModal) => renderSelectView(showModal, props.dataSelected, props.placeholder)}
-			onSelected={selected => {
-				if (Object.keys(selected).length > 0) {
-					props.onSelected(selected);
-				}
-			}}
-			items={props.items}
-			selected={props.dataSelected}
-			autoGenerateAlphabeticalIndex={props.autoGenerateAlphabeticalIndex}
-			showAlphabeticalIndex={props.showAlphabeticalIndex}
-			requireSelection={false}
-			renderListItem={renderListItem}
-		/>
-	);
+    const filterData = (filter) => {
+        const filterToLower = filter.toLowerCase();
+        const newOptions = props.items.filter((item) => item.name.toLowerCase().includes(filterToLower));
+        setFilter({
+            keyword: filter,
+            options: newOptions
+        });
+    };
+
+    return (
+        <Modal animationType="slide" visible={props.visible}>
+            {renderHeader()}
+            <SafeAreaView style={[styles.mainScreen, { flex: 1 }]}>
+                {props.placeholderInputSearch && (
+                    <InputSearch placeholder={props.placeholderInputSearch} placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
+                )}
+                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} enabled>
+                    <FlatList data={filter.options} renderItem={renderItem} keyExtractor={(item) => item.id} />
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </Modal>
+    );
 };
-
-const styles = StyleSheet.create({
-	input: {
-		height: 30,
-		paddingVertical: 5,
-		paddingHorizontal: 0,
-		borderBottomWidth: 1
-	},
-	imageChevronDown: {
-		width: 14,
-		height: 9,
-		right: 15
-	},
-	styleListItem: {
-		paddingVertical: 15,
-		paddingHorizontal: 15,
-		borderBottomWidth: 1,
-		borderBottomColor: colors.gray
-	},
-	label: {
-		color: colors.black,
-		fontWeight: "bold",
-		fontSize: 20,
-		marginBottom: 5,
-		textTransform: "capitalize"
-	}
-});
 
 export default Picker;

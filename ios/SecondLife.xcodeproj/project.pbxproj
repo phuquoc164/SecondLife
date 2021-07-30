@@ -20,6 +20,11 @@
 		6FA662037273693738980CD9 /* libPods-SecondLife.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 67D023167D41D048B3A55CD3 /* libPods-SecondLife.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		F52D4AE1B81D4CAA647D0BE5 /* libPods-SecondLife-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0015EA8C01847E313440988F /* libPods-SecondLife-tvOSTests.a */; };
+		3F5F076B949C4D25869B9B28 /* SofiaPro-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */; };
+		0582300E9C6747288A462B9B /* SofiaPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */; };
+		F9A3736215854CC8BA9B3713 /* SofiaPro-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */; };
+		F0870D5196CC4CB19D1F3930 /* SofiaPro-UltraLight-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */; };
+		946C5F0E2E4D4F41A223BC19 /* SofiaPro-UltraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = C9CAC620AFD04E26A9C4AB5A /* SofiaPro-UltraLight.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +72,11 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
 		FB9E299437A8EF90790EEFE0 /* Pods-SecondLife.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SecondLife.debug.xcconfig"; path = "Target Support Files/Pods-SecondLife/Pods-SecondLife.debug.xcconfig"; sourceTree = "<group>"; };
+		25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */ = {isa = PBXFileReference; name = "SofiaPro-Medium.otf"; path = "../src/assets/fonts/SofiaPro-Medium.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */ = {isa = PBXFileReference; name = "SofiaPro-Regular.otf"; path = "../src/assets/fonts/SofiaPro-Regular.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */ = {isa = PBXFileReference; name = "SofiaPro-SemiBold.otf"; path = "../src/assets/fonts/SofiaPro-SemiBold.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */ = {isa = PBXFileReference; name = "SofiaPro-UltraLight-Italic.otf"; path = "../src/assets/fonts/SofiaPro-UltraLight-Italic.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C9CAC620AFD04E26A9C4AB5A /* SofiaPro-UltraLight.otf */ = {isa = PBXFileReference; name = "SofiaPro-UltraLight.otf"; path = "../src/assets/fonts/SofiaPro-UltraLight.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -180,6 +190,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				43E4275E9355BDCA96EE5ADC /* Pods */,
+				13D8A1D463B646F69FF67AA8 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -196,6 +207,19 @@
 			);
 			name = Products;
 			sourceTree = "<group>";
+		};
+		13D8A1D463B646F69FF67AA8 /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */,
+				54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */,
+				292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */,
+				F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */,
+				C9CAC620AFD04E26A9C4AB5A /* SofiaPro-UltraLight.otf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -342,6 +366,11 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				3F5F076B949C4D25869B9B28 /* SofiaPro-Medium.otf in Resources */,
+				0582300E9C6747288A462B9B /* SofiaPro-Regular.otf in Resources */,
+				F9A3736215854CC8BA9B3713 /* SofiaPro-SemiBold.otf in Resources */,
+				F0870D5196CC4CB19D1F3930 /* SofiaPro-UltraLight-Italic.otf in Resources */,
+				946C5F0E2E4D4F41A223BC19 /* SofiaPro-UltraLight.otf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

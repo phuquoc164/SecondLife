@@ -1,7 +1,21 @@
 {
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "editor.fontSize": 14,
-    "prettier.jsxBracketSameLine": true,
-    "prettier.printWidth": 160,
+    "editor.formatOnPaste": true,
+    "prettier.arrowParens": "avoid",
+    "prettier.printWidth": 120,
     "prettier.tabWidth": 4,
-    "prettier.trailingComma": "none"
+    "prettier.trailingComma": "none",
+    "prettier.useTabs": true,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "editor.semanticTokenColorCustomizations": null,
+    "editor.tokenColorCustomizations": null,
+    "editor.useTabStops": false,
+    "editor.codeActionsOnSave": null,
 }
