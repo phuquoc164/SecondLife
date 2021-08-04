@@ -1,10 +1,11 @@
 /** React */
 import React, { useState } from "react";
-import { View, SafeAreaView, Text, FlatList, Alert } from "react-native";
+import { View, Text, FlatList, Alert, Platform } from "react-native";
 
 /** App */
 import ModalConfirmation from "../../components/ModalConfirmation";
 import SwipeableComponent from "../../components/SwipeableComponent";
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
@@ -13,6 +14,7 @@ import { convertDateToDisplay, InputSearch } from "../../lib/Helpers";
 import { loading } from "../../lib/Helpers";
 
 let voucherSwiped = null;
+const marginBottomText = Platform.OS === "ios" ? 6 : 0;
 
 const ActifVouchers = (props) => {
     const [vouchers, setVouchers] = useState({
@@ -26,7 +28,6 @@ const ActifVouchers = (props) => {
     const [modalConfirmation, setModalConfirmation] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const { user, signOut } = React.useContext(AuthContext);
-
 
     /**
      * update data when props of navigation change
@@ -84,7 +85,7 @@ const ActifVouchers = (props) => {
         }
     }, [props.route.params]);
 
-    /** 
+    /**
      * send request to get list vouchers
      */
     const getListVouchers = (reference = null) => {
@@ -156,8 +157,8 @@ const ActifVouchers = (props) => {
 
     /**
      * render single voucher
-     * @param {} param0 
-     * @returns 
+     * @param {} param0
+     * @returns
      */
     const renderItem = ({ item, index }) => (
         <SwipeableComponent
@@ -171,13 +172,25 @@ const ActifVouchers = (props) => {
             }}>
             <View style={styles.singleVoucher}>
                 <View>
-                    <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${item.customer.firstname} ${item.customer.lastname}`}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.customer.email}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.reference ? item.reference.substring(0, 10) : item["@id"]}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaSemiBold, styles.textMediumGray]}>{convertDateToDisplay(item.expirationDate, true)}</Text>
+                    <Text
+                        style={[
+                            styles.font24,
+                            styles.fontSofiaSemiBold,
+                            styles.textDarkBlue,
+                            { marginVertical: Platform.OS === "ios" ? 10 : 0 }
+                        ]}>{`${item.customer.firstname} ${item.customer.lastname}`}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue, { marginBottom: marginBottomText }]}>{item.customer.email}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue, { marginBottom: marginBottomText }]}>
+                        {item.reference ? item.reference.substring(0, 10) : item["@id"]}
+                    </Text>
+                    <Text style={[styles.font16, styles.fontSofiaSemiBold, styles.textMediumGray, { marginBottom: marginBottomText }]}>
+                        {convertDateToDisplay(item.expirationDate, true)}
+                    </Text>
                 </View>
                 <View>
-                    <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, styles.textRight]}>{item.voucherAmount}€</Text>
+                    <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, styles.textRight, { marginVertical: Platform.OS === "ios" ? 10 : 0 }]}>
+                        {item.voucherAmount}€
+                    </Text>
                 </View>
             </View>
         </SwipeableComponent>
@@ -185,7 +198,7 @@ const ActifVouchers = (props) => {
 
     /**
      * filter data
-     * @param {*} filter 
+     * @param {*} filter
      */
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
@@ -193,7 +206,7 @@ const ActifVouchers = (props) => {
             const { voucherAmount, expirationDate, customer, reference } = voucher;
             const expirationDateFormatted = convertDateToDisplay(expirationDate);
             const customerFullName = customer.firstname + " " + customer.lastname;
-            
+
             return (
                 customerFullName.toLowerCase().includes(filterToLower) ||
                 customer.firstname.toLowerCase().includes(filterToLower) ||
@@ -216,7 +229,7 @@ const ActifVouchers = (props) => {
     }
 
     return (
-        <SafeAreaView style={styles.mainScreen}>
+        <SafeAreaViewParent edges={["bottom"]} style={styles.mainScreen}>
             {!props.route.params?.customer || props.route.params?.forceUpdate ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
@@ -237,7 +250,7 @@ const ActifVouchers = (props) => {
                     voucherSwiped = null;
                 }}
             />
-        </SafeAreaView>
+        </SafeAreaViewParent>
     );
 };
 
