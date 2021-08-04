@@ -1,6 +1,6 @@
 /** React */
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Easing, ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions } from "react-native";
+import { Animated, Easing, ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions, Platform } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
 /** App */
@@ -71,11 +71,11 @@ const LoginPage = (props) => {
             const profil = await FetchService.get("/users/me", resultToken.token);
             let subscription = "";
             if (!!profil) {
-                profil.company.subscriptions.forEach(sub => {
+                profil.company.subscriptions.forEach((sub) => {
                     if (!sub.expired) {
                         subscription = sub.subscription.name;
                     }
-                })
+                });
                 const user = {
                     token: resultToken.token,
                     firstname: profil.firstname,
@@ -124,7 +124,10 @@ const LoginPage = (props) => {
                 ]}>
                 <View style={[styles.positionRelative, stylesLogin.inputGroup]}>
                     <Text style={[styles.positionAbsolute, styles.fontSofiaRegular, stylesLogin.label, { opacity: email.opacityLabel }]}>Votre email</Text>
-                    <Image source={require("../../assets/images/user.png")} style={([styles.positionAbsolute], { width: 12, height: 16, top: 34, left: 15 })} />
+                    <Image
+                        source={require("../../assets/images/user.png")}
+                        style={([styles.positionAbsolute], { width: 12, height: 16, top: Platform.OS === "ios" ? 28 : 34, left: 15 })}
+                    />
                     <TextInput
                         style={[
                             stylesLogin.input,
@@ -147,8 +150,13 @@ const LoginPage = (props) => {
                 </View>
                 <View style={[styles.positionRelative, stylesLogin.inputGroup]}>
                     <Text style={[styles.positionAbsolute, styles.fontSofiaRegular, stylesLogin.label, { opacity: password.opacityLabel }]}>Votre mot de passe</Text>
-                    <Image source={require("../../assets/images/password.png")} style={([styles.positionAbsolute], { width: 15, height: 16, top: 34, left: 15 })} />
-                    <TouchableOpacity style={[styles.positionAbsolute, { top: 34, right: 15, zIndex: 30 }]} onPress={() => setShowPassword(!showPassword)}>
+                    <Image
+                        source={require("../../assets/images/password.png")}
+                        style={([styles.positionAbsolute], { width: 15, height: 16, top: Platform.OS === "ios" ? 28 : 34, left: 15 })}
+                    />
+                    <TouchableOpacity
+                        style={[styles.positionAbsolute, { top: Platform.OS === "ios" ? 28 : 34, right: 15, zIndex: 30 }]}
+                        onPress={() => setShowPassword(!showPassword)}>
                         <Image source={require("../../assets/images/eye-pw.png")} style={{ width: 20, height: 16 }} />
                     </TouchableOpacity>
                     <TextInput
@@ -192,7 +200,9 @@ const LoginPage = (props) => {
                     </TouchableOpacity>
                     <Text style={[styles.fontSofiaRegular, styles.font14, styles.textCenter]}>Vous n'avez pas encore de compte ?</Text>
                     <TouchableOpacity onPress={() => props.navigation.navigate("PasswordForgotten", { title: "Pour vous inscrire, rendez-vous sur" })}>
-                        <Text style={[styles.fontSofiaMedium, stylesLogin.passwordForgotten, styles.font14, styles.textCenter]}>Inscrivez-vous</Text>
+                        <Text style={[styles.fontSofiaMedium, stylesLogin.passwordForgotten, styles.font14, styles.textCenter, { paddingTop: Platform.OS === "ios" ? 5 : 0 }]}>
+                            Inscrivez-vous
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </Animated.View>
@@ -264,7 +274,7 @@ const stylesLogin = StyleSheet.create({
         paddingHorizontal: 5,
         zIndex: 20,
         fontSize: 15,
-        top: 2,
+        top: Platform.OS === "ios" ? 8 : 2,
         left: 20,
         backgroundColor: colors.white
     },
@@ -284,7 +294,8 @@ const stylesLogin = StyleSheet.create({
     button: {
         borderRadius: 60,
         width: Dimensions.get("window").width - 40,
-        paddingVertical: 15,
+        paddingBottom: 15,
+        paddingTop: Platform.OS === "ios" ? 20 : 15,
         marginVertical: 20
     },
     buttonText: {
