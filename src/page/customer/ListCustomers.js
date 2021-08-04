@@ -1,8 +1,9 @@
 /** React */
 import React from "react";
-import { Alert, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, FlatList } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View, FlatList, Platform } from "react-native";
 
 /** App */
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 import styles from "../../assets/css/styles";
 import { AuthContext } from "../../lib/AuthContext";
 import FetchService from "../../lib/FetchService";
@@ -65,12 +66,22 @@ const ListCustomers = (props) => {
     const renderItem = ({ item }) => (
         <TouchableOpacity key={item["@id"]} onPress={() => handlePressItem(item)}>
             <View style={componentStyle.singleCustomer}>
-                <View style={styles.flex3}>
-                    <Text style={[styles.font18, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${item.firstname} ${item.lastname}`}</Text>
-                    <Text style={[styles.font12, styles.fontSofiaRegular, styles.textMediumGray]}>Email: {item.email}</Text>
-                    <Text style={[styles.font12, styles.fontSofiaRegular, styles.textMediumGray]}>N° tel: {item.phone}</Text>
+                <View style={styles.flex2}>
+                    <Text
+                        style={[
+                            styles.font18,
+                            styles.fontSofiaSemiBold,
+                            styles.textDarkBlue,
+                            Platform.OS === "ios" && componentStyle.paddingBottomIos
+                        ]}>{`${item.firstname} ${item.lastname}`}</Text>
+                    <Text style={[styles.font12, styles.fontSofiaRegular, styles.textMediumGray, Platform.OS === "ios" && componentStyle.paddingBottomIos]}>
+                        Email: {item.email}
+                    </Text>
+                    <Text style={[styles.font12, styles.fontSofiaRegular, styles.textMediumGray, Platform.OS === "ios" && componentStyle.paddingBottomIos]}>
+                        N° tel: {item.phone}
+                    </Text>
                 </View>
-                <View style={[styles.flex2]}>
+                <View style={[styles.flex1]}>
                     <Text style={[styles.font14, styles.fontSofiaSemiBold, styles.textCenter, { paddingBottom: 10 }]}>Bons d'achats:</Text>
                     <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textGreen, styles.textCenter]}>{item.availableVouchers.length}</Text>
                 </View>
@@ -106,7 +117,7 @@ const ListCustomers = (props) => {
     };
 
     return (
-        <SafeAreaView style={styles.mainScreen}>
+        <SafeAreaViewParent>
             <InputSearch placeholder="Chercher un client" placeholderTextColor={colors.lightBlue} value={state.filter} filterData={filterData} />
             {isLoading && loading()}
             {!isLoading &&
@@ -114,9 +125,8 @@ const ListCustomers = (props) => {
                     <FlatList data={state.filteredCustomers} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
                 ) : (
                     <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun customer</Text>
-                ))
-            }
-        </SafeAreaView>
+                ))}
+        </SafeAreaViewParent>
     );
 };
 
@@ -129,6 +139,9 @@ const componentStyle = StyleSheet.create({
         padding: 15,
         marginBottom: 10,
         marginHorizontal: 20
+    },
+    paddingBottomIos: {
+        paddingBottom: 5
     }
 });
 

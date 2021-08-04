@@ -1,6 +1,6 @@
 /** React */
 import React from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 /** App */
 import styles from "../../assets/css/styles";
@@ -68,7 +68,7 @@ const CustomerDetail = (props) => {
                 </TouchableOpacity>
             </View>
 
-            <View style={[componentStyle.informationContainer, { borderWidth: 1, marginBottom: 90 }]}>
+            <View style={[componentStyle.informationContainer, { borderWidth: 1, marginBottom: Platform.OS === "ios" ? 130 : 90 }]}>
                 <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textDarkBlue]}>Historique des bons d'achat:</Text>
                 <View style={componentStyle.productsContainer}>
                     <TouchableOpacity
@@ -109,7 +109,7 @@ const componentStyle = StyleSheet.create({
         marginBottom: 5,
         borderRadius: 20,
         padding: 20,
-        borderColor: colors.gray
+        borderColor: colors.gray,
     },
     subInformationContainer: {
         borderWidth: 1,
@@ -149,7 +149,8 @@ const componentStyle = StyleSheet.create({
         fontSize: 45,
         fontFamily: "SofiaPro-SemiBold",
         textAlign: "center",
-        paddingBottom: 5
+        paddingBottom: 5,
+        paddingTop: Platform.OS === "ios" ? 10 : 0
     },
     subText: {
         paddingVertical: 15
@@ -158,7 +159,8 @@ const componentStyle = StyleSheet.create({
         borderRadius: 15,
         backgroundColor: colors.green,
         width: "80%",
-        paddingVertical: 10,
+        paddingBottom: 10,
+        paddingTop: Platform.OS === "ios" ? 15 : 10,
         marginLeft: "10%",
         marginTop: 20
     },
