@@ -1,6 +1,6 @@
 /** React */
 import React from "react";
-import { Image, View, TextInput, StyleSheet, SafeAreaView, TouchableOpacity, Text } from "react-native";
+import { Image, View, TextInput, StyleSheet, SafeAreaView, TouchableOpacity, Text, Platform } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 /** App */
@@ -200,7 +200,8 @@ const componentStyle = StyleSheet.create({
     },
     input: {
         width: "100%",
-        paddingHorizontal: 20
+        paddingHorizontal: 20,
+        paddingVertical: Platform.OS === "ios" ? 10 : 0,
     },
     smallContainer: {
         width: "46%",

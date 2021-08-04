@@ -11,14 +11,14 @@ const MenuHelper = (props) => (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <View style={{ width: "90%" }}>
             <CustomButton
-                btnContainerStyle={{ borderColor: colors.white, borderWidth: 1, paddingVertical: 0, marginBottom: 5 }}
+                btnContainerStyle={{ borderColor: colors.white, borderWidth: 1, paddingTop: 0, paddingBottom: 0, marginBottom: 5 }}
                 title="Compte"
                 isLinear={true}
                 titleStyle={[styles.font24]}
                 onPress={() => props.navigation.navigate("Profil", { screen: "MyAccount" })}
             />
             <CustomButton
-                btnContainerStyle={{ borderColor: colors.white, borderWidth: 1, paddingVertical: 0 }}
+                btnContainerStyle={{ borderColor: colors.white, borderWidth: 1, paddingTop: 0, paddingBottom: 0 }}
                 title="Aide"
                 isLinear={true}
                 titleStyle={[styles.font24]}

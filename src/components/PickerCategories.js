@@ -1,6 +1,7 @@
 /** React */
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, Text, Image, Modal, SafeAreaView, Platform, FlatList, KeyboardAvoidingView } from "react-native";
+import { View, TouchableOpacity, Text, Image, Modal, Platform, FlatList, KeyboardAvoidingView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 /** App */
 import styles from "../assets/css/styles";
@@ -18,7 +19,7 @@ const PickerCategories = (props) => {
             return {
                 "@id": categoryIds[prefixIndex + name],
                 name
-            }
+            };
         }
         return null;
     };
@@ -63,7 +64,7 @@ const PickerCategories = (props) => {
                     children: child.children
                 });
             });
-			const selectedPicker = data.selectedPicker && item.name === data.selectedPicker.name ? getSelectedPicker(1) : null;
+            const selectedPicker = data.selectedPicker && item.name === data.selectedPicker.name ? getSelectedPicker(1) : null;
 
             setData({
                 selectedPicker,
@@ -170,20 +171,25 @@ const PickerCategories = (props) => {
                 justifyContent: "space-between",
                 alignItems: "center"
             }}>
-            <Text style={[styles.textDarkBlue, styles.font18, data.selectedPicker && data.selectedPicker["@id"] === item["@id"] ? styles.fontSofiaSemiBold : styles.fontSofiaRegular]}>
+            <Text
+                style={[
+                    styles.textDarkBlue,
+                    styles.font18,
+                    data.selectedPicker && data.selectedPicker["@id"] === item["@id"] ? styles.fontSofiaSemiBold : styles.fontSofiaRegular
+                ]}>
                 {item.name}
             </Text>
-            {showArrow && <Image source={require("../assets/images/chevron-left.png")} style={{ width: 25, height: 20.7, top: 3 }} />}
+            {showArrow && <Image source={require("../assets/images/chevron-left.png")} style={{ width: 25, height: 20.7, bottom: 1 }} />}
         </View>
     );
 
     const renderHeader = () => (
-        <View style={styles.header}>
+        <SafeAreaView edges={["top"]} style={styles.header}>
             <TouchableOpacity onPress={handleBackButtonPressed} style={styles.backImageBtn}>
                 <Image source={require("../assets/images/back_btn.png")} style={styles.backImage} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{title}</Text>
-        </View>
+        </SafeAreaView>
     );
 
     return (

@@ -1,6 +1,6 @@
 /** React */
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Image, Platform } from "react-native";
 
 /** App */
 import styles from "../assets/css/styles";
@@ -98,7 +98,7 @@ const BottomBarMenu = ({ state, navigation }) => {
                 return (
                     <TouchableOpacity key={key} onPress={onPress} style={[styles.flex1, stylesMenu.item]}>
                         <Image source={listItemsData[name].image} style={listItemsData[name].imageStyle} />
-                        <Text style={[styles.fontSofiaRegular, styles.font12, styles.textCenter]}>{listItemsData[name].title}</Text>
+                        <Text style={[styles.fontSofiaRegular, styles.font12, styles.textCenter, { marginTop: Platform.OS === "ios" ? 5 : 0 }]}>{listItemsData[name].title}</Text>
                         {isFocused && (
                             <View style={stylesMenu.activeTab}>
                                 <View style={stylesMenu.tab}></View>
