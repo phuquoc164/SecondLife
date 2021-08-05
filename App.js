@@ -1,11 +1,12 @@
 /** React */
 import React, { useEffect, useReducer } from "react";
-import { Alert, Platform, View, Text, TouchableOpacity, Image } from "react-native";
+import { Alert, Platform, Text, View, TouchableOpacity, Image } from "react-native";
 import SplashScreen from "react-native-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NavigationContainer, getFocusedRouteNameFromRoute } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 /** App */
 import LoginPage from "./src/page/auth/LoginPage";
@@ -32,8 +33,9 @@ import Rayon from "./src/page/catalog/Rayon";
 import Donation from "./src/page/catalog/Donation";
 import ResultPage from "./src/page/newProduct/ResultPage";
 import ProductDetail from "./src/page/catalog/ProductDetail";
-import ScannerScreen from './src/page/ScannerScreen';
-import NeedHelp from './src/page/profil/NeedHelp';
+import ScannerScreen from "./src/page/ScannerScreen";
+import NeedHelp from "./src/page/profil/NeedHelp";
+import { colors } from "./src/lib/colors";
 
 const RootStack = createStackNavigator();
 const Stack = createStackNavigator();
@@ -100,7 +102,7 @@ const App = () => {
         const backButton = () => {
             if (title === TITLE.products[0]) {
                 return (
-                    <TouchableOpacity onPress={navigation.goBack} style={{ position: "absolute", top: 27, left: 20, zIndex: 1 }}>
+                    <TouchableOpacity onPress={navigation.goBack} style={{ position: "absolute", bottom: 20, left: 20, zIndex: 1 }}>
                         <Image source={require("./src/assets/images/arrow-right.png")} style={{ width: 35, height: 21 }} />
                     </TouchableOpacity>
                 );
@@ -113,39 +115,41 @@ const App = () => {
             );
         };
         return (
-            <View style={styles.header}>
-                {title === TITLE.voucher[0] && (
-                    <TouchableOpacity onPress={() => navigation.navigate("Voucher", { screen: "InactifVouchers" })} style={styles.historyImageBtn}>
-                        <Image source={require("./src/assets/images/history.png")} style={styles.historyImage} />
-                    </TouchableOpacity>
-                )}
-                {hasBackBtn && (!scene.descriptor.options.title || SPECIAL_TITLES.includes(scene.descriptor.options.title)) && backButton()}
+            <SafeAreaView edges={["top"]} style={{ backgroundColor: colors.white }}>
+                <View style={styles.header}>
+                    {title === TITLE.voucher[0] && (
+                        <TouchableOpacity onPress={() => navigation.navigate("Voucher", { screen: "InactifVouchers" })} style={styles.historyImageBtn}>
+                            <Image source={require("./src/assets/images/history.png")} style={styles.historyImage} />
+                        </TouchableOpacity>
+                    )}
+                    {hasBackBtn && (!scene.descriptor.options.title || SPECIAL_TITLES.includes(scene.descriptor.options.title)) && backButton()}
 
-                {/* Back button special for catalog page */}
-                {scene.descriptor.options.handleGoBack && (
-                    <TouchableOpacity
-                        onPress={() => {
-                            navigation.setOptions({handleGoBack: null});
-                            scene.descriptor.options.handleGoBack();
-                        }}
-                        style={styles.backImageBtn}>
-                        <Image source={require("./src/assets/images/back_btn.png")} style={styles.backImage} />
-                    </TouchableOpacity>
-                )}
+                    {/* Back button special for catalog page */}
+                    {scene.descriptor.options.handleGoBack && (
+                        <TouchableOpacity
+                            onPress={() => {
+                                navigation.setOptions({ handleGoBack: null });
+                                scene.descriptor.options.handleGoBack();
+                            }}
+                            style={styles.backImageBtn}>
+                            <Image source={require("./src/assets/images/back_btn.png")} style={styles.backImage} />
+                        </TouchableOpacity>
+                    )}
 
-                {TITLE.catalog.includes(title) ? (
-                    <TouchableOpacity onPress={() => navigation.navigate("MenuChangeCatalog", { title })}>
-                        <Text style={styles.headerTitle}>{title}</Text>
-                    </TouchableOpacity>
-                ) : (
-                    <Text style={styles.headerTitle}>{titleScreen}</Text>
-                )}
-                {hasInfoBtn && (
-                    <TouchableOpacity onPress={() => navigation.navigate("MenuHelper")} style={styles.infoImageBtn}>
-                        <Image source={require("./src/assets/images/info.png")} style={styles.infoImage} />
-                    </TouchableOpacity>
-                )}
-            </View>
+                    {TITLE.catalog.includes(title) ? (
+                        <TouchableOpacity onPress={() => navigation.navigate("MenuChangeCatalog", { title })}>
+                            <Text style={styles.headerTitle}>{title}</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <Text style={styles.headerTitle}>{titleScreen}</Text>
+                    )}
+                    {hasInfoBtn && (
+                        <TouchableOpacity onPress={() => navigation.navigate("MenuHelper")} style={styles.infoImageBtn}>
+                            <Image source={require("./src/assets/images/info.png")} style={styles.infoImage} />
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </SafeAreaView>
         );
     };
 
@@ -210,57 +214,59 @@ const App = () => {
 
     return (
         <AuthContext.Provider value={{ user: state.user, ...authContext }}>
-            <NavigationContainer>
-                {state.user.token ? (
-                    <>
-                        <RootStack.Navigator
-                            modal="modal"
-                            screenOptions={(navigationProps) => ({
-                                headerShown: false,
-                                cardStyle: { backgroundColor: "transparent" },
-                                cardOverlayEnabled: true,
-                                cardStyleInterpolator: ({ current: { progress } }) => {
-                                    if (navigationProps.route.name === "MenuChangeCatalog") {
-                                        return {};
-                                    }
-                                    return {
-                                        cardStyle: {
-                                            opacity: progress.interpolate({
-                                                inputRange: [0, 0.5, 0.9, 1],
-                                                outputRange: [0, 0.25, 0.7, 1]
-                                            })
-                                        },
-                                        overlayStyle: {
-                                            opacity: progress.interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: [0, 0.7],
-                                                extrapolate: "clamp"
-                                            })
+            <SafeAreaProvider>
+                <NavigationContainer>
+                    {state.user.token ? (
+                        <>
+                            <RootStack.Navigator
+                                modal="modal"
+                                screenOptions={(navigationProps) => ({
+                                    headerShown: false,
+                                    cardStyle: { backgroundColor: "transparent" },
+                                    cardOverlayEnabled: true,
+                                    cardStyleInterpolator: ({ current: { progress } }) => {
+                                        if (navigationProps.route.name === "MenuChangeCatalog") {
+                                            return {};
                                         }
-                                    };
-                                }
-                            })}>
-                            <RootStack.Screen name="MainScreen" component={mainScreen} />
-                            <RootStack.Screen name="MenuHelper" component={MenuHelper} />
-                            <RootStack.Screen name="MenuChangeCatalog" component={MenuChangeCatalog} />
+                                        return {
+                                            cardStyle: {
+                                                opacity: progress.interpolate({
+                                                    inputRange: [0, 0.5, 0.9, 1],
+                                                    outputRange: [0, 0.25, 0.7, 1]
+                                                })
+                                            },
+                                            overlayStyle: {
+                                                opacity: progress.interpolate({
+                                                    inputRange: [0, 1],
+                                                    outputRange: [0, 0.7],
+                                                    extrapolate: "clamp"
+                                                })
+                                            }
+                                        };
+                                    }
+                                })}>
+                                <RootStack.Screen name="MainScreen" component={mainScreen} />
+                                <RootStack.Screen name="MenuHelper" component={MenuHelper} />
+                                <RootStack.Screen name="MenuChangeCatalog" component={MenuChangeCatalog} />
+                            </RootStack.Navigator>
+                        </>
+                    ) : (
+                        <RootStack.Navigator>
+                            <RootStack.Screen
+                                options={{
+                                    headerShown: false,
+                                    // When logging out, a pop animation feels intuitive
+                                    // You can remove this if you want the default 'push' animation
+                                    animationTypeForReplace: state.isSignout ? "pop" : "push"
+                                }}
+                                name="SignIn"
+                                component={LoginPage}
+                            />
+                            <RootStack.Screen options={{ headerShown: false }} name="PasswordForgotten" component={PasswordForgotten} />
                         </RootStack.Navigator>
-                    </>
-                ) : (
-                    <RootStack.Navigator>
-                        <RootStack.Screen
-                            options={{
-                                headerShown: false,
-                                // When logging out, a pop animation feels intuitive
-                                // You can remove this if you want the default 'push' animation
-                                animationTypeForReplace: state.isSignout ? "pop" : "push"
-                            }}
-                            name="SignIn"
-                            component={LoginPage}
-                        />
-                        <RootStack.Screen options={{ headerShown: false }} name="PasswordForgotten" component={PasswordForgotten} />
-                    </RootStack.Navigator>
-                )}
-            </NavigationContainer>
+                    )}
+                </NavigationContainer>
+            </SafeAreaProvider>
         </AuthContext.Provider>
     );
 };

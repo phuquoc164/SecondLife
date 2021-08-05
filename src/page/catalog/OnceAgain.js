@@ -1,15 +1,19 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert, ScrollView } from "react-native";
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert, ScrollView, Platform } from "react-native";
 import ProgressCircle from "react-native-progress-circle";
 
 /** App */
 import styles from "../../assets/css/styles";
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 import { SHIPMENT_STATUS } from "../../lib/constants";
 import FetchService from "../../lib/FetchService";
 import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../../lib/Helpers";
+
+// paddingTop of text in single product
+const paddingTop = Platform.OS === "ios" ? 5 : 0;
 
 // if tabActive === "products" => data is listProducts
 // if tabActive === "shipment" => data is shipment
@@ -118,9 +122,11 @@ const OnceAgain = (props) => {
     const renderListProducts = ({ item, index }) => (
         <View key={item["@id"]} style={[styles.singleProduct, index === filter.listOptions.length - 1 && { marginBottom: 30 }]}>
             <TouchableOpacity onPress={() => handleDisplayProductDetail(item)}>
-                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.title}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand.name}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${item.seller.name} - ${convertDateToDisplay(item.createAt)}`}</Text>
+                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue, { paddingTop }]}>{item.title}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>{item.brand.name}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop: Platform.OS === "ios" ? 2 : 0 }]}>{`${
+                    item.seller.name
+                } - ${convertDateToDisplay(item.createAt)}`}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleSelectProduct(item)}>
                 {listProductsSelected.ids.includes(item["@id"]) ? (
@@ -133,12 +139,14 @@ const OnceAgain = (props) => {
     );
 
     const renderShipments = ({ item, index }) => (
-        <View key={item["@id"]} style={[styles.singleProduct, { alignItems: "flex-start" }, index === filter.listOptions.length - 1 && { marginBottom: 30 }]}>
+        <View
+            key={item["@id"]}
+            style={[styles.singleProduct, { alignItems: "flex-start" }, index === filter.listOptions.length - 1 && { marginBottom: Platform.OS === "ios" ? 120 : 30 }]}>
             <View>
-                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{item.poolNumber}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(item.sentAt)}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Statut: {SHIPMENT_STATUS[item.status]}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Nombre d'articles: {item.totalProducts}</Text>
+                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue, { paddingTop }]}>Envoi n°{item.poolNumber}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Date d'envoi: {convertDateToDisplay(item.sentAt)}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Statut: {SHIPMENT_STATUS[item.status]}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Nombre d'articles: {item.totalProducts}</Text>
             </View>
             <TouchableOpacity
                 onPress={() => {
@@ -147,7 +155,7 @@ const OnceAgain = (props) => {
                     });
                     setDataDetail(item);
                 }}>
-                <Text style={[styles.font14, styles.fontSofiaRegular, styles.textMediumGray]}>Voir le détail</Text>
+                <Text style={[styles.font14, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Voir le détail</Text>
             </TouchableOpacity>
         </View>
     );
@@ -155,24 +163,26 @@ const OnceAgain = (props) => {
     const renderShipmentsDetailed = () => {
         return (
             <ScrollView key={dataDetailed["@id"]}>
-                <View style={[styles.singleProduct, { flexDirection: "column", alignItems: "flex-start" }]}>
+                <View style={[styles.singleProduct, { flexDirection: "column", alignItems: "flex-start", marginBottom: Platform.OS === "ios" ? 60 : 0 }]}>
                     <View>
                         <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{dataDetailed.poolNumber}</Text>
-                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(dataDetailed.sentAt)}</Text>
-                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Statut: {SHIPMENT_STATUS[dataDetailed.status]}</Text>
-                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Nombre d'articles: {dataDetailed.totalProducts}</Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>
+                            Date d'envoi: {convertDateToDisplay(dataDetailed.sentAt)}
+                        </Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Statut: {SHIPMENT_STATUS[dataDetailed.status]}</Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Nombre d'articles: {dataDetailed.totalProducts}</Text>
                     </View>
                     <View style={[styles.divisionHorizontal, { backgroundColor: colors.gray, marginVertical: 10 }]} />
                     {dataDetailed.products.map((productShipment, index) => {
                         const { product } = productShipment;
                         return (
-                            <View key={product["@id"]} style={{ flexDirection: "row" }}>
+                            <View key={product["@id"]} style={{ flexDirection: "row", marginTop: Platform.OS === "ios" && index !== 0 ? 10 : 0 }}>
                                 <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, { marginRight: 10 }]}>{index + 1}.</Text>
                                 <View>
                                     <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{product.title}</Text>
-                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Ref: {product.reference}</Text>
-                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Price: {product.price}€</Text>
-                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>
+                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Ref: {product.reference}</Text>
+                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Price: {product.price}€</Text>
+                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>
                                         Customer: {product.customer.firstname} {product.customer.lastname}
                                     </Text>
                                 </View>
@@ -311,10 +321,10 @@ const OnceAgain = (props) => {
         <>
             <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
                 <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation de l'envoi en cours</Text>
-                <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>
+                <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16, { paddingTop: Platform.OS === "ios" ? 5 : 0 }]}>
                     {15 - nbProductsSelected > 0 ? 15 - nbProductsSelected : 0} produits à sélectionner
                 </Text>
-                <View style={{ alignItems: "center", paddingVertical: 15 }}>
+                <View style={{ alignItems: "center", paddingBottom: 15, paddingTop: Platform.OS === "ios" ? 20 : 15 }}>
                     <ProgressCircle
                         percent={percent}
                         radius={55}
@@ -331,7 +341,7 @@ const OnceAgain = (props) => {
                                 transform: [{ rotate: "45deg" }],
                                 position: "relative"
                             }}>
-                            <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, { top: -5 }]}>
+                            <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, { top: Platform.OS === "ios" ? 0 : -5 }]}>
                                 {nbProductsSelected}
                                 <Text style={[styles.textGreen, styles.fontSofiaRegular, styles.positionAbsolute, styles.font18, { bottom: 18 }]}>/15</Text>
                             </Text>
@@ -362,7 +372,7 @@ const OnceAgain = (props) => {
     );
 
     return (
-        <View style={[styles.mainScreen, { paddingBottom: 150 }]}>
+        <View style={[styles.mainScreen, { paddingBottom: 110 }]}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
                     <TouchableOpacity
@@ -372,7 +382,9 @@ const OnceAgain = (props) => {
                             setTabActive("products");
                         }}
                         style={{ alignSelf: "center" }}>
-                        <Text style={[styles.menuNavigationLabel, tabActive !== "products" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>À envoyer</Text>
+                        <View style={{ borderBottomWidth: tabActive === "products" ? 1 : 0, borderBottomColor: colors.darkBlue }}>
+                            <Text style={[styles.menuNavigationLabel, { color: tabActive === "products" ? colors.darkBlue : colors.mediumGray }]}>À envoyer</Text>
+                        </View>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.flex1}>
@@ -383,7 +395,9 @@ const OnceAgain = (props) => {
                             setTabActive("shipments");
                         }}
                         style={{ alignSelf: "center" }}>
-                        <Text style={[styles.menuNavigationLabel, tabActive !== "shipments" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>Envoyés</Text>
+                        <View style={{ borderBottomWidth: tabActive === "shipments" ? 1 : 0, borderBottomColor: colors.darkBlue }}>
+                            <Text style={[styles.menuNavigationLabel, { color: tabActive === "shipments" ? colors.darkBlue : colors.mediumGray }]}>Envoyés</Text>
+                        </View>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -392,13 +406,21 @@ const OnceAgain = (props) => {
             {isLoading && loading()}
             {!isLoading && filter.listOptions.length > 0 ? (
                 tabActive === "products" ? (
-                    <SafeAreaView style={{ marginBottom: 60 }}>
+                    <SafeAreaViewParent>
                         <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} ListHeaderComponent={renderDashboard} />
-                    </SafeAreaView>
+                    </SafeAreaViewParent>
                 ) : (
-                    <SafeAreaView style={{ marginBottom: dataDetailed ? 0 : 60 }}>
-                        {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
-                    </SafeAreaView>
+                    <SafeAreaViewParent style={{ paddingBottom: 0 }}>
+                        {dataDetailed ? (
+                            renderShipmentsDetailed()
+                        ) : (
+                            <FlatList
+                                data={[...filter.listOptions, ...filter.listOptions, ...filter.listOptions, ...filter.listOptions]}
+                                renderItem={renderShipments}
+                                keyExtractor={(item) => item["@id"]}
+                            />
+                        )}
+                    </SafeAreaViewParent>
                 )
             ) : (
                 <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun produit</Text>

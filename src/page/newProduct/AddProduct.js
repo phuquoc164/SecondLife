@@ -1,6 +1,6 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, Text, View, TouchableOpacity, Image, TextInput, Linking, Platform, Alert, ActivityIndicator } from "react-native";
+import { Text, View, TouchableOpacity, Image, TextInput, Linking, Platform, Alert, ActivityIndicator } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
@@ -9,13 +9,14 @@ import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import Picker from "../../components/Picker";
 import ModalPhoto from "../../components/ModalPhoto";
 import PickerCategories from "../../components/PickerCategories";
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { colors } from "../../lib/colors";
 import { initialProduct, stateDict } from "../../lib/constants";
 import { AuthContext } from "../../lib/AuthContext";
 import { loading, loadingScreen, verifyProduct } from "../../lib/Helpers";
-import PickerBrand from '../../components/PickerBrand';
+import PickerBrand from "../../components/PickerBrand";
 
 const AddProduct = (props) => {
     const { user } = React.useContext(AuthContext);
@@ -64,7 +65,7 @@ const AddProduct = (props) => {
         });
     };
 
-    /** 
+    /**
      * Reset data when we have the param force reset
      */
     React.useEffect(() => {
@@ -383,25 +384,27 @@ const AddProduct = (props) => {
                     if (result && result["@id"]) {
                         setProduct(initialProduct);
                         if (btnStatus === "partner") {
-                            FetchService.get("/products?isSentToPartner=0", user.token).then((listProductsPartner) => {
-                                if (listProductsPartner) {
-                                    const nbProducts = listProductsPartner["hydra:totalItems"];
-                                    let description = "";
-                                    if (nbProducts >=15) {
-                                        description = "Félicitations, vous avez ajouté 15 produits ! Contactez nous pour recevoir votre étiquette d'envoi !";
-                                    } else {
-                                        description = "Il vous reste " + (15 - nbProducts) + " produits à ajouter avant de pouvoir les envoyer à notre partenaire.";
+                            FetchService.get("/products?isSentToPartner=0", user.token)
+                                .then((listProductsPartner) => {
+                                    if (listProductsPartner) {
+                                        const nbProducts = listProductsPartner["hydra:totalItems"];
+                                        let description = "";
+                                        if (nbProducts >= 15) {
+                                            description = "Félicitations, vous avez ajouté 15 produits ! Contactez nous pour recevoir votre étiquette d'envoi !";
+                                        } else {
+                                            description = "Il vous reste " + (15 - nbProducts) + " produits à ajouter avant de pouvoir les envoyer à notre partenaire.";
+                                        }
+                                        props.navigation.navigate("NewProduct", {
+                                            screen: "ResultPage",
+                                            params: { typeCatalog: "partner", description }
+                                        });
                                     }
-                                    props.navigation.navigate("NewProduct", {
-                                        screen: "ResultPage",
-                                        params: { typeCatalog: "partner", description }
-                                    });
-                                }
-                                setIsLoadingBtnsubmit(false);
-                            }).catch(error => {
-                                console.error(error);
-                                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
-                            });
+                                    setIsLoadingBtnsubmit(false);
+                                })
+                                .catch((error) => {
+                                    console.error(error);
+                                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+                                });
                         } else {
                             props.navigation.navigate("NewProduct", {
                                 screen: "ResultPage",
@@ -423,7 +426,7 @@ const AddProduct = (props) => {
         return <View style={styles.mainScreen}>{loading()}</View>;
     }
     return (
-        <SafeAreaView style={styles.mainScreen}>
+        <SafeAreaViewParent>
             <KeyboardAwareScrollView ref={scrollRef}>
                 <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }, listErreurs.includes("images") && { borderColor: colors.red }]}>
                     <Text style={[styles.textCenter, styles.addProductLabel]}>Ajoute jusqu'à 5 photos</Text>
@@ -586,7 +589,15 @@ const AddProduct = (props) => {
                 {argus.fetchArgus && (
                     <View style={[styles.addProductInputContainer, { backgroundColor: "rgba(216, 255, 0, 0.22)", flexDirection: "row", alignItems: "center", padding: 15 }]}>
                         <Text style={[styles.font24, styles.fontSofiaRegular]}>💡</Text>
-                        <Text style={{ marginLeft: 15, fontSize: 16, lineHeight: 22, width: "87%", color: "#707070", fontFamily: "SofiaPro-Regular" }}>
+                        <Text
+                            style={{
+                                marginLeft: 15,
+                                fontSize: 16,
+                                lineHeight: 22,
+                                width: "87%",
+                                color: "#707070",
+                                fontFamily: Platform.OS === "ios" ? "SofiaPro" : "SofiaPro-Regular"
+                            }}>
                             {argus.buyingPrice ? `Prix de rachat: ${argus.buyingPrice}€` : "Nous ne reprenons malheureusement pas cet article."}
                         </Text>
                     </View>
@@ -705,7 +716,7 @@ const AddProduct = (props) => {
                 <ModalPhoto visible={modal === "photo"} onCancel={() => setModal("")} handleTakePhoto={handleTakePhoto} handleSelectPhoto={handleSelectPhoto} />
                 {loadingScreen(isLoadingScreen)}
             </KeyboardAwareScrollView>
-        </SafeAreaView>
+        </SafeAreaViewParent>
     );
 };
 
