@@ -313,7 +313,7 @@ const Donation = (props) => {
             <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
                 <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation des dons en cours</Text>
                 <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16, {paddingTop}]}>{nbProductsSelected} produits sélectionnés</Text>
-                <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>{nbProductsSelected}</Text>
+                <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10, paddingTop }]}>{nbProductsSelected}</Text>
                 <View style={{ alignSelf: "center", marginBottom: 10 }}>
                     <TouchableOpacity disabled={nbProductsSelected === 0} onPress={handleSendProducts} style={[styles.btnSend, nbProductsSelected === 0 && { opacity: 0.5 }]}>
                         <Image source={require("../../assets/images/don.png")} style={styles.imageBtnSend} />
@@ -338,7 +338,7 @@ const Donation = (props) => {
     );
 
     return (
-        <View style={styles.mainScreen}>
+        <View style={[styles.mainScreen, { paddingBottom: 110 }]}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
                     <TouchableOpacity
@@ -373,11 +373,11 @@ const Donation = (props) => {
 
             {!isLoading && filter.listOptions.length > 0 ? (
                 tabActive === "give" ? (
-                    <SafeAreaView style={{ marginBottom: 120 }}>
+                    <SafeAreaView style={{ marginBottom: 90 }}>
                         <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} ListHeaderComponent={renderDashboard} />
                     </SafeAreaView>
                 ) : (
-                    <SafeAreaView style={{ marginBottom: dataDetailed ? 0 : 120 }}>
+                    <SafeAreaView style={{ marginBottom: dataDetailed ? 0 : 90 }}>
                         {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
                     </SafeAreaView>
                 )

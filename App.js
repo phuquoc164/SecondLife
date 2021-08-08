@@ -184,7 +184,7 @@ const App = () => {
     );
 
     const profilScreen = () => (
-        <Stack.Navigator initialRouteName="MyAccount">
+        <Stack.Navigator>
             <Stack.Screen options={{ header: (screenObject) => headerSL(screenObject, TITLE.profil[0], false, false) }} name="MyAccount" component={MyAccount} />
             <Stack.Screen options={{ headerShown: false }} name="NeedHelp" component={NeedHelp} />
         </Stack.Navigator>

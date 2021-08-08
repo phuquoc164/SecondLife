@@ -1,11 +1,11 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert, ScrollView, Platform } from "react-native";
+import { SafeAreaView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert, ScrollView, Platform } from "react-native";
 import ProgressCircle from "react-native-progress-circle";
 
 /** App */
 import styles from "../../assets/css/styles";
-import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 import { SHIPMENT_STATUS } from "../../lib/constants";
@@ -406,21 +406,13 @@ const OnceAgain = (props) => {
             {isLoading && loading()}
             {!isLoading && filter.listOptions.length > 0 ? (
                 tabActive === "products" ? (
-                    <SafeAreaViewParent>
+                    <SafeAreaView style={{ marginBottom: 90 }}>
                         <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} ListHeaderComponent={renderDashboard} />
-                    </SafeAreaViewParent>
+                    </SafeAreaView>
                 ) : (
-                    <SafeAreaViewParent style={{ paddingBottom: 0 }}>
-                        {dataDetailed ? (
-                            renderShipmentsDetailed()
-                        ) : (
-                            <FlatList
-                                data={[...filter.listOptions, ...filter.listOptions, ...filter.listOptions, ...filter.listOptions]}
-                                renderItem={renderShipments}
-                                keyExtractor={(item) => item["@id"]}
-                            />
-                        )}
-                    </SafeAreaViewParent>
+                    <SafeAreaView style={{ marginBottom: dataDetailed ? 0 : 90 }}>
+                        {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
+                    </SafeAreaView>
                 )
             ) : (
                 <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun produit</Text>

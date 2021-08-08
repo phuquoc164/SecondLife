@@ -167,79 +167,77 @@ const Rayon = (props) => {
             statusVoucher = voucher.used ? "Utilisé" : voucher.expired ? "Expiré" : "Valide";
         }
         return (
-            <SafeAreaViewParent>
-                <ScrollView>
+            <ScrollView>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Nom</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.title}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Marque</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.brand.name}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Catégorie</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.category.name}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Taille</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.size.size}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Etat</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.state.state}</Text>
+                </View>
+                {productDetail.description && (
                     <View style={styles.addProductInputContainer}>
-                        <Text style={styles.addProductLabel}>Nom</Text>
-                        <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.title}</Text>
+                        <Text style={styles.addProductLabel}>Description</Text>
+                        <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.description}</Text>
                     </View>
-                    <View style={styles.addProductInputContainer}>
-                        <Text style={styles.addProductLabel}>Marque</Text>
-                        <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.brand.name}</Text>
-                    </View>
-                    <View style={styles.addProductInputContainer}>
-                        <Text style={styles.addProductLabel}>Catégorie</Text>
-                        <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.category.name}</Text>
-                    </View>
-                    <View style={styles.addProductInputContainer}>
-                        <Text style={styles.addProductLabel}>Taille</Text>
-                        <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.size.size}</Text>
-                    </View>
-                    <View style={styles.addProductInputContainer}>
-                        <Text style={styles.addProductLabel}>Etat</Text>
-                        <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.state.state}</Text>
-                    </View>
-                    {productDetail.description && (
-                        <View style={styles.addProductInputContainer}>
-                            <Text style={styles.addProductLabel}>Description</Text>
-                            <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.description}</Text>
+                )}
+                <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Seller</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.seller.name}</Text>
+                </View>
+                <View style={{ marginHorizontal: 20, marginBottom: Platform.OS === "ios" ? 90 : 30 }}>
+                    <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de dépôt: {convertDateToDisplay(productDetail.createAt)}</Text>
+                    {voucher && (
+                        <View>
+                            <Text style={[styles.font20, styles.textDarkBlue, styles.fontSofiaSemiBold, { marginVertical: 20 }]}>Valeur de bon d'achat</Text>
+                            <View
+                                style={{
+                                    borderColor: "rgba(0, 0, 0, 0.22)",
+                                    borderWidth: 1,
+                                    borderRadius: 30,
+                                    backgroundColor: colors.white,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 20,
+                                    width: 140,
+                                    alignSelf: "center",
+                                    marginBottom: 20
+                                }}>
+                                <Text style={[styles.font24, styles.textDarkBlue, styles.fontSofiaSemiBold, styles.textCenter]}>{voucher.voucherAmount}€</Text>
+                            </View>
+                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>Statut: {statusVoucher}</Text>
+                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de validité: {convertDateToDisplay(voucher.expirationDate)}</Text>
                         </View>
                     )}
-                    <View style={styles.addProductInputContainer}>
-                        <Text style={styles.addProductLabel}>Seller</Text>
-                        <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.seller.name}</Text>
+                    <View>
+                        <Text style={[styles.font20, styles.textDarkBlue, styles.fontSofiaSemiBold, { marginVertical: 20 }]}>Informations déposant</Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
+                            Prénom: {productDetail.customer.firstname}
+                        </Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
+                            Nom: {productDetail.customer.lastname}
+                        </Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
+                            Email: {productDetail.customer.email}
+                        </Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>
+                            Tel: {productDetail.customer.phone ? productDetail.customer.phone : "Pas des données"}
+                        </Text>
                     </View>
-                    <View style={{ marginHorizontal: 20, marginBottom: Platform.OS === "ios" ? 90 : 30 }}>
-                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de dépôt: {convertDateToDisplay(productDetail.createAt)}</Text>
-                        {voucher && (
-                            <View>
-                                <Text style={[styles.font20, styles.textDarkBlue, styles.fontSofiaSemiBold, { marginVertical: 20 }]}>Valeur de bon d'achat</Text>
-                                <View
-                                    style={{
-                                        borderColor: "rgba(0, 0, 0, 0.22)",
-                                        borderWidth: 1,
-                                        borderRadius: 30,
-                                        backgroundColor: colors.white,
-                                        paddingVertical: 10,
-                                        paddingHorizontal: 20,
-                                        width: 140,
-                                        alignSelf: "center",
-                                        marginBottom: 20
-                                    }}>
-                                    <Text style={[styles.font24, styles.textDarkBlue, styles.fontSofiaSemiBold, styles.textCenter]}>{voucher.voucherAmount}€</Text>
-                                </View>
-                                <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>Statut: {statusVoucher}</Text>
-                                <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de validité: {convertDateToDisplay(voucher.expirationDate)}</Text>
-                            </View>
-                        )}
-                        <View>
-                            <Text style={[styles.font20, styles.textDarkBlue, styles.fontSofiaSemiBold, { marginVertical: 20 }]}>Informations déposant</Text>
-                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
-                                Prénom: {productDetail.customer.firstname}
-                            </Text>
-                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
-                                Nom: {productDetail.customer.lastname}
-                            </Text>
-                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
-                                Email: {productDetail.customer.email}
-                            </Text>
-                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>
-                                Tel: {productDetail.customer.phone ? productDetail.customer.phone : "Pas des données"}
-                            </Text>
-                        </View>
-                    </View>
-                </ScrollView>
-            </SafeAreaViewParent>
+                </View>
+            </ScrollView>
         );
     };
 
@@ -358,8 +356,12 @@ const Rayon = (props) => {
         <>
             <View style={[componentStyle.container, { paddingHorizontal: 20, paddingBottom: 10, paddingTop: Platform.OS === "ios" ? 15 : 10 }]}>
                 <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Produits en vente</Text>
-                <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16, { paddingTop: Platform.OS === "ios" ? 5 : 0}]}>{nbProductsSelected} produits sélectionnés</Text>
-                <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10, paddingTop: Platform.OS === "ios" ? 10 : 0 }]}>{nbProductsSelected}</Text>
+                <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16, { paddingTop: Platform.OS === "ios" ? 5 : 0 }]}>
+                    {nbProductsSelected} produits sélectionnés
+                </Text>
+                <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10, paddingTop: Platform.OS === "ios" ? 10 : 0 }]}>
+                    {nbProductsSelected}
+                </Text>
                 <View style={{ alignSelf: "center", marginBottom: 10 }}>
                     <TouchableOpacity disabled={nbProductsSelected === 0} onPress={handleSellProducts} style={[styles.btnSend, nbProductsSelected === 0 && { opacity: 0.5 }]}>
                         <Image source={require("../../assets/images/rayon.png")} style={styles.imageBtnSend} />
@@ -382,7 +384,7 @@ const Rayon = (props) => {
     );
 
     return (
-        <SafeAreaViewParent>
+        <View style={[styles.mainScreen, { paddingBottom: 110 }]}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
                     <TouchableOpacity disabled={tabActive === "sell"} onPress={() => setTabActive("sell")} style={{ alignSelf: "center" }}>
@@ -410,7 +412,7 @@ const Rayon = (props) => {
                         </SafeAreaView>
                     </>
                 ) : (
-                    <SafeAreaView style={{ marginBottom: 60 }}>
+                    <SafeAreaView style={{ marginBottom: productDetail ? 0 : 60 }}>
                         {productDetail ? renderSoldProductDetail() : <FlatList data={filter.listProducts} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} />}
                     </SafeAreaView>
                 )
@@ -419,7 +421,7 @@ const Rayon = (props) => {
             )}
 
             {loadingScreen(isLoadingScreen)}
-        </SafeAreaViewParent>
+        </View>
     );
 };
 

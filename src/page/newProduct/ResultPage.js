@@ -1,8 +1,9 @@
 /** React */
 import React from "react";
-import { SafeAreaView, ScrollView, View, TouchableOpacity, Text, Image, TextInput, Alert } from "react-native";
+import { ScrollView, View, TouchableOpacity, Text, Image, TextInput, Alert } from "react-native";
 
 /** App */
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import ModalScanner from "../../components/ModalScanner";
@@ -123,7 +124,7 @@ const ResultPage = (props) => {
     };
 
     return (
-        <SafeAreaView style={styles.mainScreen}>
+        <SafeAreaViewParent>
             <ScrollView style={{ marginTop: 30 }}>
                 {showPageResult && (
                     <>
@@ -203,7 +204,7 @@ const ResultPage = (props) => {
                         </View>
                     </>
                 )}
-                <View style={{ marginBottom: 20 }}>
+                <View style={{ marginBottom: 40 }}>
                     <TouchableOpacity
                         onPress={handleAddOtherProduct}
                         style={[styles.greenScreen, { marginHorizontal: 30, paddingVertical: 10, borderRadius: 10, marginVertical: 10 }]}>
@@ -217,7 +218,7 @@ const ResultPage = (props) => {
                 </View>
             </ScrollView>
             <ModalScanner visible={isModalScanner} handleScanSuccess={handleScanSuccess} onCancel={() => setIsModalScanner(false)} />
-        </SafeAreaView>
+        </SafeAreaViewParent>
     );
 };
 

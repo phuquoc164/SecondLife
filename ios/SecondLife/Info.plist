@@ -21,7 +21,9 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -42,9 +44,9 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string></string>
+	<string>The Second Life voudrait utiliser votre caméra</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string></string>
+	<string>The Second Life voudrait utiliser votre bibliothèque d'image</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>SofiaPro-Medium.otf</string>
