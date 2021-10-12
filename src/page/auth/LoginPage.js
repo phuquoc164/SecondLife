@@ -82,6 +82,7 @@ const LoginPage = (props) => {
                     lastname: profil.lastname,
                     email: profil.email,
                     store: profil.mainStore["@id"],
+                    voucherTrigger: profil.company?.voucherTrigger,
                     subscription
                 };
                 signIn(user);
