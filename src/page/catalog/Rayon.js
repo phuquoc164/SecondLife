@@ -198,7 +198,7 @@ const Rayon = (props) => {
                     <Text style={styles.addProductLabel}>Seller</Text>
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.seller.name}</Text>
                 </View>
-                <View style={{ marginHorizontal: 20, marginBottom: Platform.OS === "ios" ? 90 : 30 }}>
+                <View style={{ marginHorizontal: 20, marginBottom: 90 }}>
                     <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de dépôt: {convertDateToDisplay(productDetail.createAt)}</Text>
                     {voucher && (
                         <View>

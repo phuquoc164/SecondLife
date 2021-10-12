@@ -163,7 +163,7 @@ const OnceAgain = (props) => {
     const renderShipmentsDetailed = () => {
         return (
             <ScrollView key={dataDetailed["@id"]}>
-                <View style={[styles.singleProduct, { flexDirection: "column", alignItems: "flex-start", marginBottom: Platform.OS === "ios" ? 60 : 0 }]}>
+                <View style={[styles.singleProduct, { flexDirection: "column", alignItems: "flex-start", marginBottom: 60 }]}>
                     <View>
                         <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{dataDetailed.poolNumber}</Text>
                         <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>
