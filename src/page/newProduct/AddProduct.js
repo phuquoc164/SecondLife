@@ -428,7 +428,7 @@ const AddProduct = (props) => {
     return (
         <SafeAreaViewParent>
             <KeyboardAwareScrollView ref={scrollRef}>
-                <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }, listErreurs.includes("images") && { borderColor: colors.red }]}>
+                <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }]}>
                     <Text style={[styles.textCenter, styles.addProductLabel]}>Ajoute jusqu'à 5 photos</Text>
                     {product.images.length === 0 && (
                         <TouchableOpacity onPress={() => setModal("photo")} style={{ display: "flex", alignItems: "center", marginVertical: 20 }}>

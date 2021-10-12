@@ -104,10 +104,8 @@ export const getSimpleDiff = (oldObject, newObject) => {
 export const verifyProduct = (product) => {
     const listErreurs = [];
     Object.keys(product).forEach((key) => {
-        if (key === "price" || key === "reference" || key === "description") return;
-        if (key === "images" && (!product.images || product.images.length === 0)) {
-            listErreurs.push("images");
-        } else if (key === "name" && (!product[key] || product[key] === "")) {
+        if (key === "price" || key === "reference" || key === "description" || key === "images") return;
+        if (key === "name" && (!product[key] || product[key] === "")) {
             listErreurs.push(key);
         } else if (key === "voucherAmount" && (!product.voucherAmount || product.voucherAmount === "0" || product.voucherAmount === "")) {
             listErreurs.push("voucherAmount");
@@ -119,8 +117,8 @@ export const verifyProduct = (product) => {
 };
 
 export const getKeyByValue = (object, value) => {
-  return Object.keys(object).find(key => object[key] === value);
-}
+    return Object.keys(object).find((key) => object[key] === value);
+};
 
 /**
  * @deprecated
@@ -132,7 +130,8 @@ export const filterArray = (array, filtered, limit = 5) => {
 };
 
 // The component to display image slide
-{/* <ScrollView
+{
+    /* <ScrollView
     horizontal={true}
     contentContainerStyle={{ width: `${100 * (nbImages <= 3 ? 1 : 2)}%` }}
     showsHorizontalScrollIndicator={false}
@@ -155,4 +154,5 @@ export const filterArray = (array, filtered, limit = 5) => {
             />
         </View>
     ))}
-</ScrollView>; */}
+</ScrollView>; */
+}
