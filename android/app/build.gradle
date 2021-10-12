@@ -136,8 +136,8 @@ android {
         applicationId "thunderstone.secondlife"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20
-        versionName "2.0.2"
+        versionCode 25
+        versionName "2.2.3"
         missingDimensionStrategy 'react-native-camera', 'general'
         ndk {
             debugSymbolLevel = 'FULL'
