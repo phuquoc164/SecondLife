@@ -1,6 +1,6 @@
 /** React */
 import React from "react";
-import { Image, Linking, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
 import styles from "../../assets/css/styles";
@@ -46,7 +46,7 @@ const MyAccount = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <TouchableOpacity style={{paddingBottom: Platform.OS === "ios" ? 40 : 0 }} onPress={signOut}>
+                <TouchableOpacity style={{ paddingBottom: Platform.OS === "ios" ? 40 : 0 }} onPress={signOut}>
                     <LinearGradient style={componentStyle.buttonDeconnecte} colors={["#0EE38A", "#A3F8FF"]} useAngle={true} angle={170}>
                         <Text style={[styles.fontSofiaMedium, styles.font20, styles.textCenter]}>Déconnexion</Text>
                     </LinearGradient>
