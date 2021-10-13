@@ -67,8 +67,11 @@ const ResultPage = (props) => {
                 Alert.alert("Erreur", "Veuillez renseigner tous les champs encadrés en rouge");
                 return;
             }
-            product.price = parseInt(product.price.replace("€", ""));
-            FetchService.post("/products", product, user.token)
+            const data = {
+                ...product,
+                price: product.price ? parseInt(product.price.replace("€", "")) : 0,
+            };
+            FetchService.post("/products", data, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
                         props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { forceReset: true } });
@@ -96,8 +99,11 @@ const ResultPage = (props) => {
                 Alert.alert("Erreur", "Veuillez renseigner tous les champs encadrés en rouge");
                 return;
             }
-            product.price = parseInt(product.price.replace("€", ""));
-            FetchService.post("/products", product, user.token)
+            const data = {
+                ...product,
+                price: product.price ? parseInt(product.price.replace("€", "")) : 0
+            };
+            FetchService.post("/products", data, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
                         props.navigation.navigate("Catalog", { screen: "Rayon" });
