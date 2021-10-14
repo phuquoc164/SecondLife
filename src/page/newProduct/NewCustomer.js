@@ -14,8 +14,10 @@ const NewCustomer = (props) => {
     const hasReferenceField = Boolean(user.voucherTrigger);
 
     const handleAddCustomer = (newCustomer, callback) => {
-        const {reference, ...customerWithoutRef} = newCustomer;
-        const data = hasReferenceField ? { ...newCustomer, store: user.store } : { ...customerWithoutRef, store: user.store };
+        const { reference, ...customerWithoutRef } = newCustomer;
+        const data = hasReferenceField && reference && reference !== "" ? 
+            { ...newCustomer, store: user.store } :
+            { ...customerWithoutRef, store: user.store };
         FetchService.post("/customers", data, user.token)
             .then((result) => {
                 if (!!result) {
