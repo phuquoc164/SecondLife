@@ -54,7 +54,9 @@ const App = () => {
                 user = JSON.parse(userJson);
             } catch (error) {
                 console.error("reading user data error", error);
-                Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: () => authContext.signOut() }]);
+                if (!state.isSignout) {
+                    Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: () => authContext.signOut() }]);
+                }
             }
 
             dispatch({ type: "RESTORE_USER", user });
