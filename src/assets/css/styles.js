@@ -1,7 +1,9 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
+import { hasNotch } from "react-native-device-info";
 
 import { colors } from "../../lib/colors";
 
+const SofiaRegular = Platform.OS === "ios" ? "SofiaPro" : "SofiaPro-Regular";
 export default StyleSheet.create({
     // font family
     fontSofiaSemiBold: {
@@ -11,7 +13,7 @@ export default StyleSheet.create({
         fontFamily: "SofiaPro-Medium"
     },
     fontSofiaRegular: {
-        fontFamily: "SofiaPro-Regular"
+        fontFamily: SofiaRegular
     },
     fontSofiaUltraLight: {
         fontFamily: "SofiaPro-UltraLight"
@@ -96,7 +98,8 @@ export default StyleSheet.create({
         position: "relative",
         textAlign: "center",
         backgroundColor: colors.white,
-        paddingVertical: 20
+        paddingBottom: 20,
+        paddingTop: Platform.OS === "android" ? 20 : hasNotch() ? 10 : 25,
     },
     headerTitle: {
         fontSize: 20,
@@ -105,7 +108,7 @@ export default StyleSheet.create({
     },
     backImageBtn: {
         position: "absolute",
-        top: 21,
+        bottom: 14,
         left: 20,
         zIndex: 1
     },
@@ -115,7 +118,7 @@ export default StyleSheet.create({
     },
     infoImageBtn: {
         position: "absolute",
-        top: 24,
+        bottom: 19,
         right: 20,
         zIndex: 1
     },
@@ -125,7 +128,7 @@ export default StyleSheet.create({
     },
     historyImageBtn: {
         position: "absolute",
-        top: 24,
+        bottom: 18,
         left: 20,
         zIndex: 1
     },
@@ -138,7 +141,7 @@ export default StyleSheet.create({
         height: "100%",
         backgroundColor: colors.lightGray,
         position: "relative",
-        paddingBottom: 85
+        // paddingBottom: hasNotch() ? 50 : 85
     },
     boundImage: {
         width: "100%",
@@ -165,17 +168,15 @@ export default StyleSheet.create({
         width: 220,
         height: 113
     },
-    buttonWithBorderGreen: { 
+    buttonWithBorderGreen: {
         borderRadius: 10,
         borderColor: colors.green,
         borderWidth: 3,
         marginHorizontal: 20,
         marginBottom: 10,
         paddingVertical: 15,
-        backgroundColor: colors.darkBlue 
+        backgroundColor: colors.darkBlue
     },
-
-
 
     //input search
     inputContainer: {
@@ -188,14 +189,15 @@ export default StyleSheet.create({
     },
     inputSearch: {
         paddingLeft: 40,
-        paddingVertical: 10,
+        paddingBottom: 10,
+        paddingTop: Platform.OS === "ios" ? 15 : 10,
         fontSize: 15,
-        fontFamily: "SofiaPro-Regular"
+        fontFamily: SofiaRegular
     },
     imageSearch: {
         position: "absolute",
         left: 12,
-        top: 14,
+        bottom: 10,
         width: 20,
         height: 20
     },
@@ -234,13 +236,11 @@ export default StyleSheet.create({
         marginBottom: 10
     },
     menuNavigationLabel: {
-        color: colors.darkBlue,
-        borderBottomColor: colors.darkBlue,
-        borderBottomWidth: 1,
-        paddingVertical: 10,
+        paddingBottom: 10,
+        paddingTop: Platform.OS === "ios" ? 15 : 10,
         textAlign: "center",
         fontSize: 18,
-        fontFamily: "SofiaPro-Regular"
+        fontFamily: SofiaRegular
     },
     btnSend: {
         backgroundColor: "#EEF7FF",
@@ -279,18 +279,21 @@ export default StyleSheet.create({
         borderWidth: 1,
         borderRadius: 15,
         marginHorizontal: 20,
-        padding: 10,
+        paddingBottom: 10,
+        paddingTop: Platform.OS === "ios" ? 16 : 10,
+        paddingHorizontal: 10,
         marginBottom: 20
     },
     addProductLabel: {
         color: colors.textDarkBlue,
         fontSize: 20,
-        fontFamily: "SofiaPro-Regular"
+        fontFamily: SofiaRegular
     },
     addProductInput: {
-        padding: 0,
+        paddingBottom: 0,
+        paddingTop: Platform.OS === "ios" ? 7 : 0,
         margin: 0,
-        fontFamily: "SofiaPro-Regular",
+        fontFamily: SofiaRegular,
         color: colors.textDarkBlue,
         fontSize: 16
     },

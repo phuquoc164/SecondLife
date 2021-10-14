@@ -1,14 +1,17 @@
 /** React */
 import React from "react";
-import { SafeAreaView, ScrollView, TouchableOpacity, Text, View, Alert } from "react-native";
+import { ScrollView, TouchableOpacity, Text, View, Alert, Platform } from "react-native";
 import styles from "../../assets/css/styles";
 import FormCustomer from "../../components/FormCustomer";
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 
 /** App */
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 import FetchService from "../../lib/FetchService";
 import { convertDateToApi, getSimpleDiff, loading } from "../../lib/Helpers";
+
+const paddingTop = Platform.OS === "ios" ? 20 : 15;
 
 const CustomerDetailProduct = (props) => {
     const [customer, setCustomer] = React.useState(null);
@@ -69,25 +72,25 @@ const CustomerDetailProduct = (props) => {
     }
 
     return (
-        <SafeAreaView style={styles.mainScreen}>
+        <SafeAreaViewParent>
             <ScrollView style={{ paddingTop: 20 }}>
                 <FormCustomer customer={customer} editable={editable} btnSubmitTitle="Enregistrer les informations" handleSubmit={handleModifyCustomer} />
                 {!editable && (
                     <View>
                         <TouchableOpacity
                             onPress={handleOpenModificationPage}
-                            style={{ marginHorizontal: 30, marginTop: 20, borderRadius: 11, paddingVertical: 15, backgroundColor: colors.darkBlue }}>
+                            style={{ marginHorizontal: 20, marginTop: 20, borderRadius: 11, paddingBottom: 15, paddingTop, backgroundColor: colors.darkBlue }}>
                             <Text style={[styles.font20, styles.textWhite, styles.textCenter, styles.fontSofiaRegular]}>Modifier</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { customerId: customer["@id"] } })}
-                            style={[styles.greenScreen, { marginHorizontal: 30, marginTop: 20, marginBottom: 70, borderRadius: 11, paddingVertical: 15 }]}>
+                            style={[styles.greenScreen, { marginHorizontal: 20, marginTop: 20, marginBottom: 70, borderRadius: 11, paddingBottom: 15, paddingTop }]}>
                             <Text style={[styles.font20, styles.textWhite, styles.textCenter, styles.fontSofiaMedium]}>Ajouter un produit</Text>
                         </TouchableOpacity>
                     </View>
                 )}
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaViewParent>
     );
 };
 

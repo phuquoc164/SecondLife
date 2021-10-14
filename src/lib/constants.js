@@ -3,6 +3,7 @@ export const STORAGE_USER = "storage_user";
 export const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 export const DOMAIN = "http://api-tsl.thunderstone.tech";
 export const initialCustomer = {
+    reference: null,
     firstname: null,
     lastname: null,
     birthday: null,
@@ -20,7 +21,7 @@ export const initialProduct = {
     category: null,
     size: null,
     state: null,
-    description: null,
+    // description: null,
     price: null,
     voucherAmount: null,
     seller: null,

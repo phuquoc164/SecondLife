@@ -1,6 +1,6 @@
 /** React */
 import React, { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Platform, Text, TouchableOpacity, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 
 /** App */
@@ -18,7 +18,7 @@ const CustomDateTimePicker = (props) => {
 
             <View style={{ marginTop: 20 }}>
                 <TouchableOpacity
-                    style={[styles.greenScreen, { width: "100%", paddingHorizontal: 50, paddingVertical: 6, borderRadius: 20, marginBottom: 10 }]}
+                    style={[styles.greenScreen, { width: "100%", paddingHorizontal: 50, paddingBottom: 8, paddingTop: Platform.OS === "ios" ? 12 : 8, borderRadius: 20, marginBottom: 10 }]}
                     onPress={() => props.onValidate(date)}
 				>
                     <Text style={[styles.textWhite, styles.fontSofiaMedium, styles.font24, styles.textCenter]}>Confirmer</Text>

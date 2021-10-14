@@ -1,11 +1,12 @@
 /** React */
 import React, { useState } from "react";
-import { View, SafeAreaView, Text, FlatList, Alert } from "react-native";
+import { View, Text, FlatList, Alert, Platform } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
 /** App */
 import ModalConfirmation from "../../components/ModalConfirmation";
 import SwipeableComponent from "../../components/SwipeableComponent";
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
@@ -14,6 +15,7 @@ import { convertDateToDisplay, InputSearch } from "../../lib/Helpers";
 import { loading } from "../../lib/Helpers";
 
 let voucherSwiped = null;
+const marginBottomText = Platform.OS === "ios" ? 6 : 0;
 
 const InactifVouchers = (props) => {
     const [vouchers, setVouchers] = useState({
@@ -105,7 +107,7 @@ const InactifVouchers = (props) => {
     };
 
     /**
-     * send request to server to reactivate 
+     * send request to server to reactivate
      */
     const handleReactivateVoucher = () => {
         setModalConfirmation(false);
@@ -134,8 +136,8 @@ const InactifVouchers = (props) => {
 
     /**
      * render single voucher
-     * @param param0 
-     * @returns 
+     * @param param0
+     * @returns
      */
     const renderItem = ({ item, index }) => {
         const btnText = item.used ? "Utilisé" : "Expiré";
@@ -143,16 +145,32 @@ const InactifVouchers = (props) => {
         const angle = item.used ? 170 : 70;
 
         const renderContenu = () => (
-            <View style={styles.singleVoucher}>
-                <View>
-                    <Text style={[styles.font24, styles.fontSofiaSemiBold, styles.textDarkBlue]}>{`${item.customer.firstname} ${item.customer.lastname}`}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.customer.email}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.reference ? item.reference.substring(0, 10) : item["@id"]}</Text>
-                    <Text style={[styles.font16, styles.fontSofiaSemiBold, styles.textMediumGray]}>{convertDateToDisplay(item.expirationDate, true)}</Text>
+            <View style={[styles.singleVoucher, { paddingHorizontal: 10 }]}>
+                <View style={{ flex: 7 }}>
+                    <Text
+                        style={[
+                            styles.font24,
+                            styles.fontSofiaSemiBold,
+                            styles.textDarkBlue,
+                            { marginVertical: Platform.OS === "ios" ? 10 : 0 }
+                        ]}>{`${item.customer.firstname} ${item.customer.lastname}`}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue, { marginBottom: marginBottomText }]}>{item.customer.email}</Text>
+                    <Text style={[styles.font16, styles.fontSofiaMedium, styles.textDarkBlue, { marginBottom: marginBottomText }]}>
+                        {item.reference ? item.reference.substring(0, 10) : item["@id"]}
+                    </Text>
+                    <Text style={[styles.font16, styles.fontSofiaSemiBold, styles.textMediumGray, { marginBottom: marginBottomText }]}>
+                        {convertDateToDisplay(item.expirationDate, true)}
+                    </Text>
                 </View>
-                <View>
-                    <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, styles.textRight]}>{item.voucherAmount}€</Text>
-                    <LinearGradient style={{ borderRadius: 50, width: 100, marginTop: 30, paddingVertical: 2 }} colors={btnColors} useAngle={true} angle={angle}>
+                <View style={{ flex: 3, alignItems: "flex-end" }}>
+                    <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, styles.textRight, { marginVertical: Platform.OS === "ios" ? 10 : 0 }]}>
+                        {item.voucherAmount}€
+                    </Text>
+                    <LinearGradient
+                        style={{ borderRadius: 50, marginTop: 30, paddingVertical: Platform.OS === "ios" ? 4 : 2, width: "100%", maxWidth: 100 }}
+                        colors={btnColors}
+                        useAngle={true}
+                        angle={angle}>
                         <Text style={[styles.fontSofiaMedium, styles.textCenter, styles.textDarkBlue, styles.font16, styles.fontSofiaMedium]}>{btnText}</Text>
                     </LinearGradient>
                 </View>
@@ -184,7 +202,7 @@ const InactifVouchers = (props) => {
 
     /**
      * handle filter data
-     * @param filter 
+     * @param filter
      */
     const filterData = (filter) => {
         const filterToLower = filter.toLowerCase();
@@ -214,7 +232,7 @@ const InactifVouchers = (props) => {
     }
 
     return (
-        <SafeAreaView style={styles.mainScreen}>
+        <SafeAreaViewParent>
             {!props.route.params?.customer || props.route.params?.forceUpdate ? (
                 <InputSearch placeholder="Chercher un bon d'achat" placeholderTextColor={colors.lightBlue} value={filter.keyword} filterData={filterData} />
             ) : (
@@ -234,7 +252,7 @@ const InactifVouchers = (props) => {
                     voucherSwiped = null;
                 }}
             />
-        </SafeAreaView>
+        </SafeAreaViewParent>
     );
 };
 

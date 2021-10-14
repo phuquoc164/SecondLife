@@ -1,6 +1,6 @@
 /** React */
 import React, { useState } from "react";
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert, ScrollView } from "react-native";
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert, ScrollView, Platform } from "react-native";
 
 /** App */
 import styles from "../../assets/css/styles";
@@ -9,6 +9,9 @@ import { colors } from "../../lib/colors";
 import { SHIPMENT_STATUS } from "../../lib/constants";
 import FetchService from "../../lib/FetchService";
 import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../../lib/Helpers";
+
+// paddingTop of text in single product
+const paddingTop = Platform.OS === "ios" ? 5 : 0;
 
 // tab give => list Products
 // tab gave => list shipments
@@ -113,9 +116,11 @@ const Donation = (props) => {
     const renderListProducts = ({ item, index }) => (
         <View key={item["@id"]} style={[styles.singleProduct, index === filter.listOptions.length - 1 && { marginBottom: 30 }]}>
             <TouchableOpacity onPress={() => handleDisplayProductDetail(item)}>
-                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{item.title}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{item.brand.name}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>{`${item.seller.name} - ${convertDateToDisplay(item.createAt)}`}</Text>
+                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue, { paddingTop }]}>{item.title}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>{item.brand.name}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop: Platform.OS === "ios" ? 2 : 0 }]}>{`${
+                    item.seller.name
+                } - ${convertDateToDisplay(item.createAt)}`}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleSelectProduct(item)}>
                 {listProductsSelected.ids.includes(item["@id"]) ? (
@@ -128,12 +133,14 @@ const Donation = (props) => {
     );
 
     const renderShipments = ({ item, index }) => (
-        <View key={item["@id"]} style={[styles.singleProduct, { alignItems: "flex-start" }, index === filter.listOptions.length - 1 && { marginBottom: 30 }]}>
+        <View
+            key={item["@id"]}
+            style={[styles.singleProduct, { alignItems: "flex-start" }, index === filter.listOptions.length - 1 && { marginBottom: Platform.OS === "ios" ? 120 : 30 }]}>
             <View>
-                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{item.poolNumber}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(item.sentAt)}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Statut: {SHIPMENT_STATUS[item.status]}</Text>
-                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Nombre d'articles: {item.totalProducts}</Text>
+                <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue, { paddingTop }]}>Envoi n°{item.poolNumber}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Date d'envoi: {convertDateToDisplay(item.sentAt)}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Statut: {SHIPMENT_STATUS[item.status]}</Text>
+                <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Nombre d'articles: {item.totalProducts}</Text>
             </View>
             <TouchableOpacity
                 onPress={() => {
@@ -142,7 +149,7 @@ const Donation = (props) => {
                     });
                     setDataDetail(item);
                 }}>
-                <Text style={[styles.font14, styles.fontSofiaRegular, styles.textMediumGray]}>Voir le détail</Text>
+                <Text style={[styles.font14, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Voir le détail</Text>
             </TouchableOpacity>
         </View>
     );
@@ -150,23 +157,25 @@ const Donation = (props) => {
     const renderShipmentsDetailed = () => {
         return (
             <ScrollView key={dataDetailed["@id"]}>
-                <View style={[styles.singleProduct, { flexDirection: "column", alignItems: "flex-start" }]}>
+                <View style={[styles.singleProduct, { flexDirection: "column", alignItems: "flex-start", marginBottom: 60 }]}>
                     <View>
                         <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>Envoi n°{dataDetailed.poolNumber}</Text>
-                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Date d'envoi: {convertDateToDisplay(dataDetailed.sentAt)}</Text>
-                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Statut: {SHIPMENT_STATUS[dataDetailed.status]}</Text>
-                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Nombre d'articles: {dataDetailed.totalProducts}</Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>
+                            Date d'envoi: {convertDateToDisplay(dataDetailed.sentAt)}
+                        </Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Statut: {SHIPMENT_STATUS[dataDetailed.status]}</Text>
+                        <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Nombre d'articles: {dataDetailed.totalProducts}</Text>
                     </View>
                     <View style={[styles.divisionHorizontal, { backgroundColor: colors.gray, marginVertical: 10 }]} />
                     {dataDetailed.products.map((productShipment, index) => {
                         const { product } = productShipment;
                         return (
-                            <View key={product["@id"]} style={{ flexDirection: "row" }}>
+                            <View key={product["@id"]} style={{ flexDirection: "row", marginTop: Platform.OS === "ios" && index !== 0 ? 10 : 0 }}>
                                 <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, { marginRight: 10 }]}>{index + 1}.</Text>
                                 <View>
                                     <Text style={[styles.font20, styles.fontSofiaMedium, styles.textDarkBlue]}>{product.title}</Text>
-                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>Ref: {product.reference}</Text>
-                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray]}>
+                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Ref: {product.reference}</Text>
+                                    <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>
                                         Customer: {product.customer.firstname} {product.customer.lastname}
                                     </Text>
                                 </View>
@@ -303,8 +312,8 @@ const Donation = (props) => {
         <>
             <View style={[componentStyle.container, { paddingHorizontal: 20, paddingVertical: 10 }]}>
                 <Text style={[styles.textDarkBlue, styles.fontSofiaMedium, styles.font20]}>Préparation des dons en cours</Text>
-                <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16]}>{nbProductsSelected} produits sélectionnés</Text>
-                <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10 }]}>{nbProductsSelected}</Text>
+                <Text style={[styles.textMediumGray, styles.fontSofiaRegular, styles.font16, {paddingTop}]}>{nbProductsSelected} produits sélectionnés</Text>
+                <Text style={[styles.textDarkBlue, styles.fontSofiaSemiBold, styles.font60, styles.textCenter, { marginBottom: 10, paddingTop }]}>{nbProductsSelected}</Text>
                 <View style={{ alignSelf: "center", marginBottom: 10 }}>
                     <TouchableOpacity disabled={nbProductsSelected === 0} onPress={handleSendProducts} style={[styles.btnSend, nbProductsSelected === 0 && { opacity: 0.5 }]}>
                         <Image source={require("../../assets/images/don.png")} style={styles.imageBtnSend} />
@@ -329,7 +338,7 @@ const Donation = (props) => {
     );
 
     return (
-        <View style={styles.mainScreen}>
+        <View style={[styles.mainScreen, { paddingBottom: 110 }]}>
             <View style={styles.menuNavigationContainer}>
                 <View style={styles.flex1}>
                     <TouchableOpacity
@@ -339,7 +348,9 @@ const Donation = (props) => {
                             setTabActive("give");
                         }}
                         style={{ alignSelf: "center" }}>
-                        <Text style={[styles.menuNavigationLabel, tabActive !== "give" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>À donner</Text>
+                        <View style={{ borderBottomWidth: tabActive === "give" ? 1 : 0, borderBottomColor: colors.darkBlue }}>
+                            <Text style={[styles.menuNavigationLabel, { color: tabActive === "give" ? colors.darkBlue : colors.mediumGray }]}>À donner</Text>
+                        </View>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.flex1}>
@@ -350,7 +361,9 @@ const Donation = (props) => {
                             setTabActive("gave");
                         }}
                         style={{ alignSelf: "center" }}>
-                        <Text style={[styles.menuNavigationLabel, tabActive !== "gave" && { color: colors.mediumGray, borderBottomWidth: 0 }]}>Donnés</Text>
+                        <View style={{ borderBottomWidth: tabActive === "gave" ? 1 : 0, borderBottomColor: colors.darkBlue }}>
+                            <Text style={[styles.menuNavigationLabel, { color: tabActive === "gave" ? colors.darkBlue : colors.mediumGray }]}>Donnés</Text>
+                        </View>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -360,11 +373,11 @@ const Donation = (props) => {
 
             {!isLoading && filter.listOptions.length > 0 ? (
                 tabActive === "give" ? (
-                    <SafeAreaView style={{ marginBottom: 120 }}>
+                    <SafeAreaView style={{ marginBottom: 90 }}>
                         <FlatList data={filter.listOptions} renderItem={renderListProducts} keyExtractor={(item) => item["@id"]} ListHeaderComponent={renderDashboard} />
                     </SafeAreaView>
                 ) : (
-                    <SafeAreaView style={{ marginBottom: dataDetailed ? 0 : 120 }}>
+                    <SafeAreaView style={{ marginBottom: dataDetailed ? 0 : 90 }}>
                         {dataDetailed ? renderShipmentsDetailed() : <FlatList data={filter.listOptions} renderItem={renderShipments} keyExtractor={(item) => item["@id"]} />}
                     </SafeAreaView>
                 )

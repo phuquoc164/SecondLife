@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* SecondLifeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* SecondLifeTests.m */; };
+		0582300E9C6747288A462B9B /* SofiaPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -16,15 +17,14 @@
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* SecondLifeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* SecondLifeTests.m */; };
 		3612D4AD2AA90FCBB8139153 /* libPods-SecondLife-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 06E9C4FA53ADAFC65A4EBB24 /* libPods-SecondLife-tvOS.a */; };
+		3F5F076B949C4D25869B9B28 /* SofiaPro-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */; };
 		49161680D1969AE2F695D5E7 /* libPods-SecondLife-SecondLifeTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DEA2F14B9D9516B12D3B6 /* libPods-SecondLife-SecondLifeTests.a */; };
 		6FA662037273693738980CD9 /* libPods-SecondLife.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 67D023167D41D048B3A55CD3 /* libPods-SecondLife.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		F52D4AE1B81D4CAA647D0BE5 /* libPods-SecondLife-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0015EA8C01847E313440988F /* libPods-SecondLife-tvOSTests.a */; };
-		3F5F076B949C4D25869B9B28 /* SofiaPro-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */; };
-		0582300E9C6747288A462B9B /* SofiaPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */; };
-		F9A3736215854CC8BA9B3713 /* SofiaPro-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */; };
-		F0870D5196CC4CB19D1F3930 /* SofiaPro-UltraLight-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */; };
 		946C5F0E2E4D4F41A223BC19 /* SofiaPro-UltraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = C9CAC620AFD04E26A9C4AB5A /* SofiaPro-UltraLight.otf */; };
+		F0870D5196CC4CB19D1F3930 /* SofiaPro-UltraLight-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */; };
+		F52D4AE1B81D4CAA647D0BE5 /* libPods-SecondLife-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0015EA8C01847E313440988F /* libPods-SecondLife-tvOSTests.a */; };
+		F9A3736215854CC8BA9B3713 /* SofiaPro-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,25 +58,25 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = SecondLife/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SecondLife/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = SecondLife/main.m; sourceTree = "<group>"; };
+		25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SofiaPro-Medium.otf"; path = "../src/assets/fonts/SofiaPro-Medium.otf"; sourceTree = "<group>"; };
+		292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SofiaPro-SemiBold.otf"; path = "../src/assets/fonts/SofiaPro-SemiBold.otf"; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* SecondLife-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SecondLife-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* SecondLife-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SecondLife-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		39171650346180F8975D36BE /* Pods-SecondLife-tvOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SecondLife-tvOSTests.debug.xcconfig"; path = "Target Support Files/Pods-SecondLife-tvOSTests/Pods-SecondLife-tvOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SofiaPro-Regular.otf"; path = "../src/assets/fonts/SofiaPro-Regular.otf"; sourceTree = "<group>"; };
 		67D023167D41D048B3A55CD3 /* libPods-SecondLife.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SecondLife.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		796DEA2F14B9D9516B12D3B6 /* libPods-SecondLife-SecondLifeTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SecondLife-SecondLifeTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A37450F94BDB6437BA8CB76 /* Pods-SecondLife-SecondLifeTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SecondLife-SecondLifeTests.debug.xcconfig"; path = "Target Support Files/Pods-SecondLife-SecondLifeTests/Pods-SecondLife-SecondLifeTests.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = SecondLife/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9704A52FAAC50E0F672B7FDC /* Pods-SecondLife-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SecondLife-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-SecondLife-tvOS/Pods-SecondLife-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		A73A6C688A3EDEE5B12E3676 /* Pods-SecondLife.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SecondLife.release.xcconfig"; path = "Target Support Files/Pods-SecondLife/Pods-SecondLife.release.xcconfig"; sourceTree = "<group>"; };
+		C9CAC620AFD04E26A9C4AB5A /* SofiaPro-UltraLight.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SofiaPro-UltraLight.otf"; path = "../src/assets/fonts/SofiaPro-UltraLight.otf"; sourceTree = "<group>"; };
 		CCB71112E59C3395FA80C060 /* Pods-SecondLife-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SecondLife-tvOS.release.xcconfig"; path = "Target Support Files/Pods-SecondLife-tvOS/Pods-SecondLife-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		CEB8B1B0B0735DC8864B070A /* Pods-SecondLife-SecondLifeTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SecondLife-SecondLifeTests.release.xcconfig"; path = "Target Support Files/Pods-SecondLife-SecondLifeTests/Pods-SecondLife-SecondLifeTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
+		F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SofiaPro-UltraLight-Italic.otf"; path = "../src/assets/fonts/SofiaPro-UltraLight-Italic.otf"; sourceTree = "<group>"; };
 		FB9E299437A8EF90790EEFE0 /* Pods-SecondLife.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SecondLife.debug.xcconfig"; path = "Target Support Files/Pods-SecondLife/Pods-SecondLife.debug.xcconfig"; sourceTree = "<group>"; };
-		25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */ = {isa = PBXFileReference; name = "SofiaPro-Medium.otf"; path = "../src/assets/fonts/SofiaPro-Medium.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */ = {isa = PBXFileReference; name = "SofiaPro-Regular.otf"; path = "../src/assets/fonts/SofiaPro-Regular.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */ = {isa = PBXFileReference; name = "SofiaPro-SemiBold.otf"; path = "../src/assets/fonts/SofiaPro-SemiBold.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */ = {isa = PBXFileReference; name = "SofiaPro-UltraLight-Italic.otf"; path = "../src/assets/fonts/SofiaPro-UltraLight-Italic.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		C9CAC620AFD04E26A9C4AB5A /* SofiaPro-UltraLight.otf */ = {isa = PBXFileReference; name = "SofiaPro-UltraLight.otf"; path = "../src/assets/fonts/SofiaPro-UltraLight.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +146,18 @@
 			name = SecondLife;
 			sourceTree = "<group>";
 		};
+		13D8A1D463B646F69FF67AA8 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */,
+				54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */,
+				292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */,
+				F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */,
+				C9CAC620AFD04E26A9C4AB5A /* SofiaPro-UltraLight.otf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -207,19 +219,6 @@
 			);
 			name = Products;
 			sourceTree = "<group>";
-		};
-		13D8A1D463B646F69FF67AA8 /* Resources */ = {
-			isa = "PBXGroup";
-			children = (
-				25EBB7210DC14490AC216752 /* SofiaPro-Medium.otf */,
-				54EB31BB06AF49B594682C01 /* SofiaPro-Regular.otf */,
-				292442ED9A5143E59AC108C8 /* SofiaPro-SemiBold.otf */,
-				F2B84F8BB7FA47BF8270D611 /* SofiaPro-UltraLight-Italic.otf */,
-				C9CAC620AFD04E26A9C4AB5A /* SofiaPro-UltraLight.otf */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-			path = "";
 		};
 /* End PBXGroup section */
 
@@ -319,6 +318,7 @@
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 7X68LAV92J;
 						LastSwiftMigration = 1120;
+						ProvisioningStyle = Automatic;
 					};
 					2D02E47A1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -404,7 +404,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
+			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
 		24EF06D64A165341F342F649 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -684,11 +684,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 7X68LAV92J;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = SecondLife/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -696,6 +699,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.thunderstone.secondlife;
 				PRODUCT_NAME = SecondLife;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -709,10 +713,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 7X68LAV92J;
 				INFOPLIST_FILE = SecondLife/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -720,6 +727,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.thunderstone.secondlife;
 				PRODUCT_NAME = SecondLife;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";

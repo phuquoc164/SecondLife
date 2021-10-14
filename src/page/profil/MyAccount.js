@@ -1,17 +1,18 @@
 /** React */
 import React from "react";
-import { Image, Linking, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
 import styles from "../../assets/css/styles";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 
 const MyAccount = () => {
     const { user, signOut } = React.useContext(AuthContext);
 
     return (
-        <SafeAreaView style={styles.mainScreen}>
+        <SafeAreaViewParent>
             <ScrollView>
                 <View style={componentStyle.logoContainer}>
                     <Image source={require("../../assets/images/The-Second-Life-NOIR.png")} style={{ width: 160, height: 81.9 }} />
@@ -28,7 +29,7 @@ const MyAccount = () => {
                     </View>
                     <View style={[componentStyle.singleInfo, componentStyle.borderBottom]}>
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaSemiBold]}>Mot de passe</Text>
-                        <Image source={require("../../assets/images/croix.png")} style={{width: 25, height: 25, marginRight: 40}}/>
+                        <Image source={require("../../assets/images/croix.png")} style={{ width: 25, height: 25, marginRight: 40 }} />
                     </View>
                     <View style={[componentStyle.singleInfo, componentStyle.borderBottom]}>
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaSemiBold]}>Abonnement</Text>
@@ -45,13 +46,13 @@ const MyAccount = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <TouchableOpacity onPress={signOut}>
+                <TouchableOpacity style={{ paddingBottom: Platform.OS === "ios" ? 40 : 0 }} onPress={signOut}>
                     <LinearGradient style={componentStyle.buttonDeconnecte} colors={["#0EE38A", "#A3F8FF"]} useAngle={true} angle={170}>
                         <Text style={[styles.fontSofiaMedium, styles.font20, styles.textCenter]}>Déconnexion</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaViewParent>
     );
 };
 

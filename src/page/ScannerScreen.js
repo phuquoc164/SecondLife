@@ -26,7 +26,7 @@ const ScannerScreen = (props) => {
             const data = JSON.parse(event.data);
             if (data.type && data.type === "product") {
                 setIsLoadingScreen(true);
-                FetchService.get("/products/?reference=" + data.reference, user.token)
+                FetchService.get("/products?reference=" + data.reference, user.token)
                     .then((result) => {
                         const product = result["hydra:member"][0];
                         const status = product.currentStatus.status;

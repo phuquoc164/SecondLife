@@ -1,16 +1,19 @@
 /** React */
 import React from "react";
-import { View, Image, Text, TouchableOpacity, StyleSheet, Dimensions, Linking } from "react-native";
+import { View, Image, Text, TouchableOpacity, StyleSheet, Dimensions, Linking, Platform } from "react-native";
+import { hasNotch } from "react-native-device-info";
 import LinearGradient from "react-native-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 /** App */
 import styles from "../../assets/css/styles";
+import { colors } from "../../lib/colors";
 
 const PasswordForgotten = (props) => {
-    const {navigation, route} = props;
+    const { navigation, route } = props;
     return (
-        <View style={[styles.positionRelative, stylesComponent.mainContainer]}>
-            <TouchableOpacity onPress={navigation.goBack} style={{ position: "absolute", top: 20, left: 20 }}>
+        <SafeAreaView edges={["top"]} style={[styles.positionRelative, stylesComponent.mainContainer]}>
+            <TouchableOpacity onPress={navigation.goBack} style={{ position: "absolute", top: Platform.OS === "ios" && hasNotch() ? 40 : 20, left: 20 }}>
                 <Image source={require("../../assets/images/arrow-right.png")} style={{ width: 35, height: 21 }} />
             </TouchableOpacity>
             <View style={[stylesComponent.logoContainer, styles.positionAbsolute]}>
@@ -25,12 +28,13 @@ const PasswordForgotten = (props) => {
                     </LinearGradient>
                 </TouchableOpacity>
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 
 const stylesComponent = StyleSheet.create({
     mainContainer: {
+        backgroundColor: colors.white,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

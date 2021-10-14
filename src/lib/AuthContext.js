@@ -41,7 +41,8 @@ const authInitalState = {
         lastname: null,
         email: null,
         store: null,
-        subscription: null
+        subscription: null,
+        voucherTrigger: null,
     }
 };
 

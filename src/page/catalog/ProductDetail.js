@@ -1,13 +1,13 @@
 /** React */
 import React, { useState } from "react";
-import { Alert, SafeAreaView, Text, TextInput, TouchableOpacity, View, Image, Platform } from "react-native";
+import { Alert, Text, TextInput, TouchableOpacity, View, Image, Platform } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
 
 /** App */
 import Picker from "../../components/Picker";
-import PickerBrand from '../../components/PickerBrand';
+import PickerBrand from "../../components/PickerBrand";
 import PickerCategories from "../../components/PickerCategories";
 import ModalConfirmation from "../../components/ModalConfirmation";
 import ModalPhoto from "../../components/ModalPhoto";
@@ -17,6 +17,9 @@ import { AuthContext } from "../../lib/AuthContext";
 import { convertDateToDisplay, getKeyByValue, loading, loadingScreen } from "../../lib/Helpers";
 import { colors } from "../../lib/colors";
 import { DOMAIN, stateDict } from "../../lib/constants";
+import SafeAreaViewParent from "../../components/SafeAreaViewParent";
+
+const paddingBottomText = Platform.OS === "ios" ? 5 : 0;
 
 const ProductDetail = (props) => {
     const [editable, setEditable] = useState(false);
@@ -67,13 +70,13 @@ const ProductDetail = (props) => {
     };
 
     const formatProduct = (allInfoProduct) => {
-        const { title, brand, category, description, images, size, state, seller } = allInfoProduct;
+        const { title, brand, category, images, size, state, seller } = allInfoProduct;
         const product = {
             id: allInfoProduct["@id"],
             title,
             brand: { id: brand["@id"], name: brand.name },
             category: category.name,
-            description,
+            // description,
             images,
             size: { id: size["@id"], name: size.size },
             state: { id: state["@id"], name: stateDict[state["state"]], value: state["state"] },
@@ -166,7 +169,7 @@ const ProductDetail = (props) => {
      * @param {*} errorMessage
      */
     const sendRequestToAddImage = (response, errorMessage) => {
-        setIsLoadingScreen(true);
+        setIsLoadingScreenVisible(true);
         FetchService.postImage(response, user.token)
             .then((result) => {
                 if (!!result) {
@@ -174,11 +177,11 @@ const ProductDetail = (props) => {
                         ...product,
                         images: [...product.images, { base64: response.base64, id: result["@id"] }]
                     });
-                    setIsLoadingScreen(false);
+                    setIsLoadingScreenVisible(false);
                 }
             })
             .catch((error) => {
-                setIsLoadingScreen(false);
+                setIsLoadingScreenVisible(false);
                 console.error(error);
                 Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
@@ -188,21 +191,30 @@ const ProductDetail = (props) => {
      * Send request to delete image on server and update images
      * @param {*} imageId
      */
-    const handleDeletePhoto = (imageId) => {
-        FetchService.delete(imageId, user.token)
-            .then((result) => {
-                if (!!result) {
-                    const newImages = product.images.filter((image) => image["@id"] !== imageId);
-                    setProduct({
-                        ...product,
-                        images: newImages
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+    const handleDeletePhoto = (imageDeleted) => {
+        console.log(imageDeleted);
+        if (imageDeleted["@id"]) {
+            FetchService.delete(imageDeleted["@id"], user.token)
+                .then((result) => {
+                    if (!!result) {
+                        const newImages = product.images.filter((image) => image["@id"] !== imageDeleted["@id"]);
+                        setProduct({
+                            ...product,
+                            images: newImages
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+                });
+        } else {
+            const newImages = product.images.filter((image) => image.id !== imageDeleted.id);
+            setProduct({
+                ...product,
+                images: newImages
             });
+        }
     };
 
     /**
@@ -400,23 +412,23 @@ const ProductDetail = (props) => {
     }
 
     return (
-        <SafeAreaView style={styles.mainScreen}>
+        <SafeAreaViewParent>
             <KeyboardAwareScrollView>
                 {/* Images */}
                 <View style={[styles.addProductInputContainer, { paddingVertical: 20, marginTop: 20 }]}>
                     {product.images.length === 0 && (
-                        <TouchableOpacity onPress={() => setModal("photo")} style={{ display: "flex", alignItems: "center", marginVertical: 20 }}>
+                        <TouchableOpacity disabled={!editable} onPress={() => setModal("photo")} style={{ display: "flex", alignItems: "center", marginVertical: 20 }}>
                             <Image source={require("../../assets/images/image_upload.png")} style={{ width: 220, height: 209.1 }} />
                         </TouchableOpacity>
                     )}
 
                     {product.images.length > 0 && (
                         <View style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: 15 }}>
-                            {product.images.map((image) => (
-                                <View key={image["@id"]} style={{ width: "33.3%", aspectRatio: 1, padding: 5, position: "relative" }}>
+                            {product.images.map((image, index) => (
+                                <View key={index} style={{ width: "33.3%", aspectRatio: 1, padding: 5, position: "relative" }}>
                                     {editable && (
                                         <TouchableOpacity
-                                            onPress={() => handleDeletePhoto(image["@id"])}
+                                            onPress={() => handleDeletePhoto(image)}
                                             style={{
                                                 position: "absolute",
                                                 top: -2,
@@ -431,7 +443,7 @@ const ProductDetail = (props) => {
                                     )}
                                     <Image
                                         source={{
-                                            uri: DOMAIN + image.contentUrl
+                                            uri: image.contentUrl ? DOMAIN + image.contentUrl : "data:image/png;base64," + image.base64
                                         }}
                                         style={{
                                             width: "100%",
@@ -585,7 +597,7 @@ const ProductDetail = (props) => {
                 )}
 
                 {/* Description */}
-                {(editable || product.description) && (
+                {/* {(editable || product.description) && (
                     <View style={styles.addProductInputContainer}>
                         <Text style={styles.addProductLabel}>Description</Text>
                         <TextInput
@@ -600,7 +612,7 @@ const ProductDetail = (props) => {
                             onChangeText={(description) => setProduct({ ...product, description })}
                         />
                     </View>
-                )}
+                )} */}
 
                 {/* Seller */}
                 {!editable ? (
@@ -651,15 +663,23 @@ const ProductDetail = (props) => {
                                 }}>
                                 <Text style={[styles.font24, styles.textDarkBlue, styles.fontSofiaSemiBold, styles.textCenter]}>{voucher.voucherAmount}€</Text>
                             </View>
-                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Statut: {statusVoucher}</Text>
+                            <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>Statut: {statusVoucher}</Text>
                             <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Date de validité: {convertDateToDisplay(voucher.expirationDate)}</Text>
                         </View>
                     )}
                     <View>
-                        <Text style={[styles.font20, styles.textDarkBlue, styles.fontSofiaSemiBold, { marginVertical: 20 }]}>Informations déposant</Text>
-                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Prénom: {productRef.current.customer.firstname}</Text>
-                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Nom: {productRef.current.customer.lastname}</Text>
-                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>Email: {productRef.current.customer.email}</Text>
+                        <Text style={[styles.font20, styles.textDarkBlue, styles.fontSofiaSemiBold, { marginVertical: Platform.OS === "ios" ? 15 : 20 }]}>
+                            Informations déposant
+                        </Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
+                            Prénom: {productRef.current.customer.firstname}
+                        </Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
+                            Nom: {productRef.current.customer.lastname}
+                        </Text>
+                        <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular, { paddingBottom: paddingBottomText }]}>
+                            Email: {productRef.current.customer.email}
+                        </Text>
                         <Text style={[styles.font18, styles.textDarkBlue, styles.fontSofiaRegular]}>
                             Tel: {productRef.current.customer.phone ? productRef.current.customer.phone : "Pas des donées"}
                         </Text>
@@ -672,7 +692,7 @@ const ProductDetail = (props) => {
                             style={[styles.greenScreen, { marginHorizontal: 20, paddingVertical: 10, borderRadius: 10, marginVertical: 10 }]}>
                             <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Enregistrer</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleResetModification} style={styles.buttonWithBorderGreen}>
+                        <TouchableOpacity onPress={handleResetModification} style={[styles.buttonWithBorderGreen, { marginBottom: Platform.OS === "ios" ? 30 : 0 }]}>
                             <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>{"Annuler les\nmodifications"}</Text>
                         </TouchableOpacity>
                     </View>
@@ -694,7 +714,9 @@ const ProductDetail = (props) => {
                         <TouchableOpacity onPress={handleModifyProduct} style={styles.buttonWithBorderGreen}>
                             <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Modifier</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setModalConfirmation(true)} style={[styles.buttonWithBorderGreen, { backgroundColor: colors.red }]}>
+                        <TouchableOpacity
+                            onPress={() => setModalConfirmation(true)}
+                            style={[styles.buttonWithBorderGreen, { backgroundColor: colors.red, marginBottom: Platform.OS === "ios" ? 30 : 0 }]}>
                             <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Supprimer</Text>
                         </TouchableOpacity>
                     </View>
@@ -709,7 +731,7 @@ const ProductDetail = (props) => {
                     handleCancel={() => setModalConfirmation(false)}
                 />
             </KeyboardAwareScrollView>
-        </SafeAreaView>
+        </SafeAreaViewParent>
     );
 };
 

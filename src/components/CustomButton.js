@@ -1,16 +1,16 @@
 /** React */
 import React from "react";
-import { TouchableOpacity, Text, Dimensions } from "react-native";
+import { TouchableOpacity, Text, Platform } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
 /** App */
 import styles from "../assets/css/styles";
 
 const CustomButton = (props) => (
-    <TouchableOpacity onPress={props.onPress} style={[{ width: "100%", paddingVertical: 10, borderRadius: 6 }, props.btnContainerStyle]}>
+    <TouchableOpacity onPress={props.onPress} style={[{ width: "100%", paddingBottom: 10, paddingTop: Platform.OS === "ios" ? 15 : 10, borderRadius: 6 }, props.btnContainerStyle]}>
         {props.isLinear ? (
             <LinearGradient
-                style={{ borderRadius: 5, paddingVertical: 10}}
+                style={{ borderRadius: 5, paddingBottom: 10, paddingTop: Platform.OS === "ios" ? 15 : 10}}
                 colors={["#FFFFFF", "#3EE48A"]}
                 useAngle={true}
                 angle={88}>

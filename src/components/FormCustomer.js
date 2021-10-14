@@ -1,6 +1,6 @@
 /** React */
 import React from "react";
-import { Image, View, TextInput, StyleSheet, SafeAreaView, TouchableOpacity, Text } from "react-native";
+import { Image, View, TextInput, StyleSheet, SafeAreaView, TouchableOpacity, Text, Platform, ActivityIndicator, Alert } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 /** App */
@@ -15,15 +15,49 @@ initialDate.setFullYear(initialDate.getFullYear() - 18);
 const FormCustomer = (props) => {
     const [customer, setCustomer] = React.useState(props.customer);
     const [showCalender, setShowCalendar] = React.useState(false);
+    const [isSubmitted, setIsSubmitted] = React.useState(false);
 
     const birthdayRef = React.useRef({
         value: customer.birthday ? new Date(customer.birthday) : initialDate,
         color: customer.birthday ? styles.textDarkBlue : styles.textMediumGray
     });
 
+    const handleAddCustomer = () => {
+        setIsSubmitted(true);
+        let isError = false;
+        Object.keys(customer).forEach((key) => {
+            if (key === "reference") return;
+
+            if (!customer[key] || customer.key === "") {
+                isError = true;
+            }
+        });
+        if (isError) {
+            Alert.alert("Erreur", "Veuillez-vous remplir toutes les informations");
+            setIsSubmitted(false);
+        } else {
+            props.handleSubmit(customer, () => setIsSubmitted(false));
+        }
+    };
+
     return (
         <SafeAreaView>
             <KeyboardAwareScrollView>
+                {/* Référence */}
+                {props.hasReferenceField && (
+                    <View style={componentStyle.inputContainer}>
+                        <View style={componentStyle.imageContainer}>{/* <Image source={require("../assets/images/name.png")} style={{ width: 20, height: 30.8 }} /> */}</View>
+                        <TextInput
+                            editable={props.editable}
+                            style={[styles.textDarkBlue, styles.font20, componentStyle.input]}
+                            placeholder="Référence"
+                            placeholderTextColor={colors.mediumGray}
+                            value={customer.reference}
+                            onChangeText={(reference) => setCustomer({ ...customer, reference })}
+                        />
+                    </View>
+                )}
+
                 {/* Prénom */}
                 <View style={componentStyle.inputContainer}>
                     <View style={componentStyle.imageContainer}>
@@ -156,9 +190,15 @@ const FormCustomer = (props) => {
                 </View>
                 {props.editable && (
                     <View style={{ marginBottom: 40, marginTop: 20 }}>
-                        <TouchableOpacity onPress={() => props.handleSubmit(customer)} style={[styles.greenScreen, componentStyle.btnSubmit]}>
-                            <Text style={[styles.font20, styles.textWhite, styles.textCenter, styles.fontSofiaRegular]}>{props.btnSubmitTitle}</Text>
-                        </TouchableOpacity>
+                        {isSubmitted ? (
+                            <View style={[styles.greenScreen, componentStyle.btnSubmit]}>
+                                <ActivityIndicator color="#ffffff" />
+                            </View>
+                        ) : (
+                            <TouchableOpacity onPress={handleAddCustomer} style={[styles.greenScreen, componentStyle.btnSubmit]}>
+                                <Text style={[styles.font20, styles.textWhite, styles.textCenter, styles.fontSofiaRegular]}>{props.btnSubmitTitle}</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 )}
             </KeyboardAwareScrollView>
@@ -200,7 +240,8 @@ const componentStyle = StyleSheet.create({
     },
     input: {
         width: "100%",
-        paddingHorizontal: 20
+        paddingHorizontal: 20,
+        paddingVertical: Platform.OS === "ios" ? 10 : 5
     },
     smallContainer: {
         width: "46%",
