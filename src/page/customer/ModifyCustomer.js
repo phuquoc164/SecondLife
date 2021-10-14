@@ -14,24 +14,30 @@ import { convertDateToApi, getSimpleDiff } from "../../lib/Helpers";
 const ModifyCustomer = (props) => {
     const customer = props.route.params?.customer ? props.route.params.customer : initialCustomer;
     const { user } = React.useContext(AuthContext);
-    const { token, store } = user;
+    const { token, store, voucherTrigger } = user;
+    const hasReferenceField = Boolean(voucherTrigger);
 
-    const handleModifyCustomer = (newCustomer) => {
+    const handleModifyCustomer = (newCustomer, callback) => {
+        const customerCopy = { ...customer };
+        customerCopy.birthday = customerCopy.birthday.slice(0, 10);
         newCustomer.birthday = convertDateToApi(newCustomer.birthday);
-        const diffs = getSimpleDiff(customer, newCustomer);
+        const diffs = getSimpleDiff(customerCopy, newCustomer);
         const data = { store, ...diffs };
         if (Object.keys(diffs).length > 0) {
             FetchService.patch(customer["@id"], data, token)
                 .then((result) => {
                     if (!!result) {
+                        callback();
                         props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customer: result, customerId: null } });
                     }
                 })
                 .catch((error) => {
+                    callback();
                     console.error(error);
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         } else {
+            callback();
             props.navigation.navigate("Customer", { screen: "CustomerDetail", params: { customer, customerId: null } });
         }
     };
@@ -40,7 +46,13 @@ const ModifyCustomer = (props) => {
         <SafeAreaViewParent>
             <ScrollView>
                 <Text style={[styles.font20, styles.fontSofiaSemiBold, styles.textDarkBlue, styles.textCenter, componentStyle.title]}>Informations client</Text>
-                <FormCustomer customer={customer} editable={true} btnSubmitTitle="Enregistrer les informations" handleSubmit={handleModifyCustomer} />
+                <FormCustomer
+                    hasReferenceField={hasReferenceField}
+                    customer={customer}
+                    editable={true}
+                    btnSubmitTitle="Enregistrer les informations"
+                    handleSubmit={handleModifyCustomer}
+                />
             </ScrollView>
         </SafeAreaViewParent>
     );

@@ -41,6 +41,7 @@ const NewCustomer = (props) => {
             <ScrollView>
                 <View style={{ paddingVertical: 20 }}>
                     <FormCustomer
+                        timestamp={props.route.params?.timestamp}
                         hasReferenceField={hasReferenceField}
                         customer={initialCustomer}
                         editable={true}

@@ -6,6 +6,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 /** App */
 import styles from "../assets/css/styles";
 import { colors } from "../lib/colors";
+import { initialCustomer } from "../lib/constants";
 import { convertDateToApi, convertDateToDisplay } from "../lib/Helpers";
 import CustomDateTimePicker from "./CustomDateTimePicker";
 
@@ -13,7 +14,10 @@ let initialDate = new Date();
 initialDate.setFullYear(initialDate.getFullYear() - 18);
 
 const FormCustomer = (props) => {
-    const [customer, setCustomer] = React.useState(props.customer);
+    const [customer, setCustomer] = React.useState({
+        ...props.customer,
+        hasModifiedData: false
+    });
     const [showCalender, setShowCalendar] = React.useState(false);
     const [isSubmitted, setIsSubmitted] = React.useState(false);
 
@@ -22,10 +26,23 @@ const FormCustomer = (props) => {
         color: customer.birthday ? styles.textDarkBlue : styles.textMediumGray
     });
 
+    React.useEffect(() => {
+        if (props.timestamp && customer.hasModifiedData) {
+            setCustomer({
+                ...initialCustomer,
+                hasModifiedData: false
+            });
+            birthdayRef.current = {
+                value: initialDate,
+                color: styles.textMediumGray
+            };
+        }
+    }, [props.timestamp]);
+
     const handleAddCustomer = () => {
         setIsSubmitted(true);
         let isError = false;
-        Object.keys(customer).forEach((key) => {
+        Object.keys(initialCustomer).forEach((key) => {
             if (key === "reference") return;
 
             if (!customer[key] || customer.key === "") {
@@ -36,7 +53,8 @@ const FormCustomer = (props) => {
             Alert.alert("Erreur", "Veuillez-vous remplir toutes les informations");
             setIsSubmitted(false);
         } else {
-            props.handleSubmit(customer, () => setIsSubmitted(false));
+            const { hasModifiedData, ...data } = customer;
+            props.handleSubmit(data, () => setIsSubmitted(false));
         }
     };
 
@@ -53,7 +71,7 @@ const FormCustomer = (props) => {
                             placeholder="Référence"
                             placeholderTextColor={colors.mediumGray}
                             value={customer.reference}
-                            onChangeText={(reference) => setCustomer({ ...customer, reference })}
+                            onChangeText={(reference) => setCustomer({ ...customer, reference, hasModifiedData: true })}
                         />
                     </View>
                 )}
@@ -70,7 +88,7 @@ const FormCustomer = (props) => {
                         placeholderTextColor={colors.mediumGray}
                         value={customer.firstname}
                         autoCapitalize="words"
-                        onChangeText={(firstname) => setCustomer({ ...customer, firstname })}
+                        onChangeText={(firstname) => setCustomer({ ...customer, firstname, hasModifiedData: true })}
                     />
                 </View>
 
@@ -86,7 +104,7 @@ const FormCustomer = (props) => {
                         placeholderTextColor={colors.mediumGray}
                         value={customer.lastname}
                         autoCapitalize="characters"
-                        onChangeText={(lastname) => setCustomer({ ...customer, lastname })}
+                        onChangeText={(lastname) => setCustomer({ ...customer, lastname, hasModifiedData: true })}
                     />
                 </View>
 
@@ -121,7 +139,7 @@ const FormCustomer = (props) => {
                         keyboardType="phone-pad"
                         autoCompleteType="tel"
                         value={customer.phone}
-                        onChangeText={(phone) => setCustomer({ ...customer, phone })}
+                        onChangeText={(phone) => setCustomer({ ...customer, phone, hasModifiedData: true })}
                     />
                 </View>
 
@@ -139,7 +157,7 @@ const FormCustomer = (props) => {
                         autoCompleteType="email"
                         autoCapitalize="none"
                         value={customer.email}
-                        onChangeText={(email) => setCustomer({ ...customer, email })}
+                        onChangeText={(email) => setCustomer({ ...customer, email, hasModifiedData: true })}
                     />
                 </View>
 
@@ -155,7 +173,7 @@ const FormCustomer = (props) => {
                         placeholderTextColor={colors.mediumGray}
                         autoCompleteType="street-address"
                         value={customer.address}
-                        onChangeText={(address) => setCustomer({ ...customer, address })}
+                        onChangeText={(address) => setCustomer({ ...customer, address, hasModifiedData: true })}
                     />
                 </View>
 
@@ -172,7 +190,7 @@ const FormCustomer = (props) => {
                             value={customer.zipCode}
                             onChangeText={(zipCode) => {
                                 if (zipCode.length <= 5) {
-                                    setCustomer({ ...customer, zipCode });
+                                    setCustomer({ ...customer, zipCode, hasModifiedData: true });
                                 }
                             }}
                         />
@@ -184,7 +202,7 @@ const FormCustomer = (props) => {
                             placeholder="Ville"
                             placeholderTextColor={colors.mediumGray}
                             value={customer.city}
-                            onChangeText={(city) => setCustomer({ ...customer, city })}
+                            onChangeText={(city) => setCustomer({ ...customer, city, hasModifiedData: true })}
                         />
                     </View>
                 </View>
@@ -208,7 +226,7 @@ const FormCustomer = (props) => {
                 onCancel={() => setShowCalendar(false)}
                 onValidate={(birthday) => {
                     setShowCalendar(false);
-                    setCustomer({ ...customer, birthday: convertDateToApi(birthday) });
+                    setCustomer({ ...customer, birthday: convertDateToApi(birthday), hasModifiedData: true });
                     birthdayRef.current = {
                         value: birthday,
                         color: styles.textDarkBlue
