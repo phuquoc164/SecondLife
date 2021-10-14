@@ -368,9 +368,9 @@ const AddProduct = (props) => {
             price: 0
         };
 
-        if (product.description && product.description !== "") {
-            data["description"] = product.description;
-        }
+        // if (product.description && product.description !== "") {
+        //     data["description"] = product.description;
+        // }
 
         if (btnStatus === "sell") {
             props.navigation.navigate("NewProduct", {
@@ -546,7 +546,7 @@ const AddProduct = (props) => {
                 </TouchableOpacity>
 
                 {/* Description */}
-                <View style={styles.addProductInputContainer}>
+                {/* <View style={styles.addProductInputContainer}>
                     <Text style={styles.addProductLabel}>Description</Text>
                     <TextInput
                         style={[styles.addProductInput]}
@@ -558,7 +558,7 @@ const AddProduct = (props) => {
                         value={product.description}
                         onChangeText={(description) => setProduct({ ...product, description })}
                     />
-                </View>
+                </View> */}
 
                 {/* Voucher */}
                 <View style={[styles.addProductInputContainer, listErreurs.includes("voucherAmount") && { borderColor: colors.red }]}>

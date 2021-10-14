@@ -188,12 +188,12 @@ const Rayon = (props) => {
                     <Text style={styles.addProductLabel}>Etat</Text>
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.state.state}</Text>
                 </View>
-                {productDetail.description && (
+                {/* {productDetail.description && (
                     <View style={styles.addProductInputContainer}>
                         <Text style={styles.addProductLabel}>Description</Text>
                         <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.description}</Text>
                     </View>
-                )}
+                )} */}
                 <View style={styles.addProductInputContainer}>
                     <Text style={styles.addProductLabel}>Seller</Text>
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.seller.name}</Text>

@@ -70,13 +70,13 @@ const ProductDetail = (props) => {
     };
 
     const formatProduct = (allInfoProduct) => {
-        const { title, brand, category, description, images, size, state, seller } = allInfoProduct;
+        const { title, brand, category, images, size, state, seller } = allInfoProduct;
         const product = {
             id: allInfoProduct["@id"],
             title,
             brand: { id: brand["@id"], name: brand.name },
             category: category.name,
-            description,
+            // description,
             images,
             size: { id: size["@id"], name: size.size },
             state: { id: state["@id"], name: stateDict[state["state"]], value: state["state"] },
@@ -597,7 +597,7 @@ const ProductDetail = (props) => {
                 )}
 
                 {/* Description */}
-                {(editable || product.description) && (
+                {/* {(editable || product.description) && (
                     <View style={styles.addProductInputContainer}>
                         <Text style={styles.addProductLabel}>Description</Text>
                         <TextInput
@@ -612,7 +612,7 @@ const ProductDetail = (props) => {
                             onChangeText={(description) => setProduct({ ...product, description })}
                         />
                     </View>
-                )}
+                )} */}
 
                 {/* Seller */}
                 {!editable ? (

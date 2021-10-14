@@ -21,7 +21,7 @@ export const initialProduct = {
     category: null,
     size: null,
     state: null,
-    description: null,
+    // description: null,
     price: null,
     voucherAmount: null,
     seller: null,
