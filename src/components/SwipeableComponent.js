@@ -27,8 +27,10 @@ const SwipeableComponent = (props) => {
                         borderRadius: 20
                     }}
                     onPress={() => {
-                        prevOpenedRow.close();
-                        prevOpenedRow = null;
+                        if (prevOpenedRow) {
+                            prevOpenedRow.close();
+                            prevOpenedRow = null;
+                        }
                         onPress();
                     }}>
                     <Text style={[styles.font24, styles.fontSofiaRegular, styles.textWhite, styles.textCenter, { paddingLeft: 30, lineHeight: 33 }]}>{text}</Text>

@@ -173,7 +173,7 @@ const OnceAgain = (props) => {
                         <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Nombre d'articles: {dataDetailed.totalProducts}</Text>
                     </View>
                     <View style={[styles.divisionHorizontal, { backgroundColor: colors.gray, marginVertical: 10 }]} />
-                    {dataDetailed.products.map((productShipment, index) => {
+                    {dataDetailed.products && dataDetailed.products.map((productShipment, index) => {
                         const { product } = productShipment;
                         return (
                             <View key={product["@id"]} style={{ flexDirection: "row", marginTop: Platform.OS === "ios" && index !== 0 ? 10 : 0 }}>

@@ -8,7 +8,6 @@ import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
 import { colors } from "../../lib/colors";
 import { convertDateToDisplay, InputSearch, loading, loadingScreen } from "../../lib/Helpers";
-import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 
 const Rayon = (props) => {
     const [isLoadingScreen, setIsLoadingScreen] = useState(false);

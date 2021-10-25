@@ -167,7 +167,7 @@ const Donation = (props) => {
                         <Text style={[styles.font16, styles.fontSofiaRegular, styles.textMediumGray, { paddingTop }]}>Nombre d'articles: {dataDetailed.totalProducts}</Text>
                     </View>
                     <View style={[styles.divisionHorizontal, { backgroundColor: colors.gray, marginVertical: 10 }]} />
-                    {dataDetailed.products.map((productShipment, index) => {
+                    {dataDetailed.products && dataDetailed.products.map((productShipment, index) => {
                         const { product } = productShipment;
                         return (
                             <View key={product["@id"]} style={{ flexDirection: "row", marginTop: Platform.OS === "ios" && index !== 0 ? 10 : 0 }}>
@@ -191,15 +191,15 @@ const Donation = (props) => {
      * Handle select or unselect all products
      */
     const handleSelectAllProducts = () => {
-        if (listProductsSelected.allInfo.length === listProducts.length) {
+        if (listProductsSelected.allInfo.length === data.length) {
             setListProductsSelected({
                 allInfo: [],
                 ids: []
             });
         } else {
-            const ids = listProducts.map((product) => product["@id"]);
+            const ids = data.map((product) => product["@id"]);
             setListProductsSelected({
-                allInfo: listProducts,
+                allInfo: data,
                 ids
             });
         }
