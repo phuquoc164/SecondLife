@@ -18,7 +18,8 @@ const CustomerDetailProduct = (props) => {
     const [editable, setEditable] = React.useState(false);
 
     const { user } = React.useContext(AuthContext);
-    const { token, store } = user;
+    const { token, store, voucherTrigger } = user;
+    const hasReferenceField = Boolean(voucherTrigger);
 
     React.useEffect(() => {
         if (props.route.params.customerId) {
@@ -44,24 +45,29 @@ const CustomerDetailProduct = (props) => {
         props.navigation.setOptions({ title: "Modifier les informations" });
     };
 
-    const handleModifyCustomer = (newCustomer) => {
+    const handleModifyCustomer = (newCustomer, callback) => {
+        const customerCopy = { ...customer };
+        customerCopy.birthday = customerCopy.birthday.slice(0, 10);
         newCustomer.birthday = convertDateToApi(newCustomer.birthday);
-        const diffs = getSimpleDiff(customer, newCustomer);
+        const diffs = getSimpleDiff(customerCopy, newCustomer);
         const data = { store, ...diffs };
         if (Object.keys(diffs).length > 0) {
             FetchService.patch(customer["@id"], data, token)
                 .then((result) => {
                     if (!!result) {
+                        callback();
                         setCustomer(result);
                         setEditable(false);
                         props.navigation.setOptions({ title: "Informations client" });
                     }
                 })
                 .catch((error) => {
+                    callback();
                     console.error(error);
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
         } else {
+            callback();
             setEditable(false);
             props.navigation.setOptions({ title: "Informations client" });
         }
@@ -74,7 +80,13 @@ const CustomerDetailProduct = (props) => {
     return (
         <SafeAreaViewParent>
             <ScrollView style={{ paddingTop: 20 }}>
-                <FormCustomer customer={customer} editable={editable} btnSubmitTitle="Enregistrer les informations" handleSubmit={handleModifyCustomer} />
+                <FormCustomer
+                    hasReferenceField={hasReferenceField}
+                    customer={customer}
+                    editable={editable}
+                    btnSubmitTitle="Enregistrer les informations"
+                    handleSubmit={handleModifyCustomer}
+                />
                 {!editable && (
                     <View>
                         <TouchableOpacity

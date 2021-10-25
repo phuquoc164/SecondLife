@@ -26,7 +26,7 @@ const HomeScreen = (props) => {
                         height: heightMainContainer
                     }}>
                     <View>
-                        <TouchableOpacity onPress={() => props.navigation.navigate("NewProduct", { screen: "NewCustomer" })}>
+                        <TouchableOpacity onPress={() => props.navigation.navigate("NewProduct", { screen: "NewCustomer", params: { timestamp: Date.now() } })}>
                             <Image source={require("../assets/images/new-lifer.png")} style={{ width: imageWidth, height: (imageWidth * 974) / 548 }} />
                         </TouchableOpacity>
                     </View>
