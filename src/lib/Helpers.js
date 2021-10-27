@@ -6,7 +6,8 @@ import { ActivityIndicator, View, Image, Text, TextInput } from "react-native";
 import styles from "../assets/css/styles";
 import CustomModal from "../components/CustomModal";
 import { colors } from "./colors";
-import { monthNames } from "./constants";
+import { monthNames, stateDict } from "./constants";
+import FetchService from "./FetchService";
 
 /**
  * Verify if the champ have form of email
@@ -120,14 +121,103 @@ export const getKeyByValue = (object, value) => {
     return Object.keys(object).find((key) => object[key] === value);
 };
 
-/**
- * @deprecated
- */
-export const filterArray = (array, filtered, limit = 5) => {
-    if (!filtered || filtered === "") return array.slice(0, limit);
-    const newArray = array.filter((singleData) => singleData.toLowerCase().includes(filtered.toLowerCase()));
-    return newArray.slice(0, limit);
+const getListBrands = async (token) => {
+    try {
+        const brandApi = await FetchService.get("/brands?page=1", token);
+
+        if (brandApi && brandApi["hydra:member"]) {
+            const listBrands = brandApi["hydra:member"].map((brand) => ({ id: brand["@id"], name: brand.name, categories: brand.categories, pound: brand.pound }));
+            return sortListBrands(listBrands);
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.debug(error);
+        return null;
+    }
 };
+
+const getListSizes = async (token) => {
+    try {
+        const sizeApi = await FetchService.get("/sizes", token);
+
+        if (sizeApi && sizeApi["hydra:member"]) {
+            return sizeApi["hydra:member"].map((size) => ({ id: size["@id"], name: size["size"] }));
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.debug(error);
+        return null;
+    }
+};
+
+const getListStates = async (token) => {
+    try {
+        const stateApi = await FetchService.get("/states", token);
+
+        if (stateApi && stateApi["hydra:member"]) {
+            return stateApi["hydra:member"].map((state) => ({ id: state["@id"], name: stateDict[state["state"]], value: state["state"] }));
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.debug(error);
+        return null;
+    }
+};
+
+const getListSellers = async (token) => {
+    try {
+        const sellerApi = await FetchService.get("/sellers", token);
+
+        if (sellerApi && sellerApi["hydra:member"]) {
+            return sellerApi["hydra:member"].map((seller) => ({ id: seller["@id"], name: seller.name }));
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.debug(error);
+        return null;
+    }
+};
+
+const getListMaterials = async (token) => {
+    try {
+        const materialApi = await FetchService.get("/materials", token);
+
+        if (materialApi && materialApi["hydra:member"]) {
+            return materialApi["hydra:member"].map((material) => ({ id: material["@id"], name: material.material }));
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.debug(error);
+        return null;
+    }
+};
+
+export const getListOptionsProduct = async (token) => {
+    const listOptions = await Promise.all([getListBrands(token), getListMaterials(token), getListSizes(token), getListStates(token), getListSellers(token)]);
+    const hasError = listOptions.some((option) => !option);
+    if (hasError) return null;
+
+    return {
+        brands: listOptions[0],
+        materials: listOptions[1],
+        sizes: listOptions[2],
+        states: listOptions[3],
+        sellers: listOptions[4]
+    };
+};
+
+export const sortListBrands = (listBrands) => {
+    return listBrands.sort((brand, nextBrand) => {
+        const differentPound = brand.pound - nextBrand.pound;
+        const diffrentName = brand.name - nextBrand.name;
+        return differentPound > 0 || (differentPound === 0 && diffrentName > 0) ? -1 : 1;
+    });
+}
 
 // The component to display image slide
 {

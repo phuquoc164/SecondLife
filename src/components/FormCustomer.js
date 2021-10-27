@@ -43,7 +43,7 @@ const FormCustomer = (props) => {
         setIsSubmitted(true);
         let isError = false;
         Object.keys(initialCustomer).forEach((key) => {
-            if (key === "reference") return;
+            if (!props.hasReferenceField && key === "reference") return;
 
             if (!customer[key] || customer.key === "") {
                 isError = true;

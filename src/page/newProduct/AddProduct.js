@@ -15,7 +15,7 @@ import FetchService from "../../lib/FetchService";
 import { colors } from "../../lib/colors";
 import { initialProduct, stateDict } from "../../lib/constants";
 import { AuthContext } from "../../lib/AuthContext";
-import { loading, loadingScreen, verifyProduct } from "../../lib/Helpers";
+import { getListOptionsProduct, loading, loadingScreen, verifyProduct } from "../../lib/Helpers";
 import PickerBrand from "../../components/PickerBrand";
 
 const AddProduct = (props) => {
@@ -25,6 +25,7 @@ const AddProduct = (props) => {
     const [product, setProduct] = useState(initialProduct);
     const [listOptions, setListOptions] = useState({
         brands: [],
+        materials: [],
         sizes: [],
         states: [],
         sellers: [],
@@ -69,7 +70,7 @@ const AddProduct = (props) => {
      * Reset data when we have the param force reset
      */
     React.useEffect(() => {
-        if (props.route.params?.forceReset) {
+        if (props.route.params?.forceReset && listOptions.brands.length > 0) {
             setProduct(initialProduct);
             setBtnStatus("");
             setCategories({
@@ -79,7 +80,7 @@ const AddProduct = (props) => {
                 prefix: {}
             });
             resetArgus();
-            if (scrollRef) {
+            if (scrollRef && scrollRef.current) {
                 scrollRef.current.scrollToPosition(0, 0);
             }
         } else {
@@ -92,25 +93,14 @@ const AddProduct = (props) => {
      * list categories depends on list brand
      */
     const getListOptions = async () => {
-        try {
-            const brandApi = await FetchService.get("/brands?page=1", user.token);
-            const sizeApi = await FetchService.get("/sizes", user.token);
-            const stateApi = await FetchService.get("/states", user.token);
-            const sellerApi = await FetchService.get("/sellers", user.token);
-
-            const listBrands = brandApi["hydra:member"].map((brand) => ({ id: brand["@id"], name: brand.name, categories: brand.categories }));
-            const listSizes = sizeApi["hydra:member"].map((size) => ({ id: size["@id"], name: size["size"] }));
-            const listStates = stateApi["hydra:member"].map((state) => ({ id: state["@id"], name: stateDict[state["state"]], value: state["state"] }));
-            const listSellers = sellerApi["hydra:member"].map((seller) => ({ id: seller["@id"], name: seller.name }));
+        const listOptions = await getListOptionsProduct(user.token);
+        if (listOptions) {
             setListOptions({
-                brands: listBrands,
-                sizes: listSizes,
-                states: listStates,
-                sellers: listSellers,
+                ...listOptions,
                 isLoading: false
             });
-        } catch (error) {
-            console.error(error);
+        } else {
+            Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
         }
     };
 
@@ -300,13 +290,17 @@ const AddProduct = (props) => {
         if (!product.brand || !product.brand.name) return;
         let endPoint = "/arguses?brand=" + product.brand.name;
         if (data.type === "category") {
-            if (!product.state || !product.state.value) return;
+            if (!product.state || !product.state.value || !product.material || !product.material.name) return;
             const categoriesData = data.value.replace("/", ".");
-            endPoint += "&category=" + categoriesData + "&state=" + product.state.value;
+            endPoint += "&category=" + categoriesData + "&state=" + product.state.value + "&material=" + product.material.name;
         } else if (data.type === "state") {
-            if (!product.category) return;
+            if (!product.category || !product.material || !product.material.name) return;
             const categoriesData = product.category.replace("/", ".");
-            endPoint += "&category=" + categoriesData + "&state=" + data.value.value;
+            endPoint += "&category=" + categoriesData + "&state=" + data.value.value + "&material=" + product.material.name;
+        } else if (data.type === "material") {
+            if (!product.category || !product.state || !product.state.value) return;
+            const categoriesData = product.category.replace("/", ".");
+            endPoint += "&category=" + categoriesData + "&state=" + product.state.value + "&material=" + data.value.name;
         }
         setIsLoadingScreen(true);
         FetchService.get(endPoint, user.token)
@@ -347,12 +341,10 @@ const AddProduct = (props) => {
         const data = {
             title: product.title,
             images: product.images.map((image) => image.id),
-            vouchers: [
-                {
-                    voucherAmount: parseInt(product.voucherAmount.replace("€", "")),
-                    used: false
-                }
-            ],
+            voucher: {
+                voucherAmount: parseInt(product.voucherAmount.replace("€", "")),
+                used: false
+            },
             statuses: [
                 {
                     status: btnStatus,
@@ -361,6 +353,7 @@ const AddProduct = (props) => {
             ],
             brand: product.brand.id,
             category: categoriesRef.current.selectedIds[product.category],
+            material: product.material.id,
             seller: product.seller.id,
             customer: props.route.params.customerId,
             size: product.size.id,
@@ -394,9 +387,11 @@ const AddProduct = (props) => {
                                         } else {
                                             description = "Il vous reste " + (15 - nbProducts) + " produits à ajouter avant de pouvoir les envoyer à notre partenaire.";
                                         }
+                                        const descriptionUnsentVouchers =
+                                            result.customer.totalUnsentVouchers > 0 ? "Montant total de la reprise : " + result.customer.totalUnsentVouchers + "€" : null;
                                         props.navigation.navigate("NewProduct", {
                                             screen: "ResultPage",
-                                            params: { typeCatalog: "partner", description }
+                                            params: { typeCatalog: "partner", description, descriptionUnsentVouchers, customerId: result.customer["@id"] }
                                         });
                                     }
                                     setIsLoadingBtnsubmit(false);
@@ -523,6 +518,17 @@ const AddProduct = (props) => {
                     <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                 </TouchableOpacity>
 
+                {/* Material */}
+                <TouchableOpacity
+                    onPress={() => setModal("material")}
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("material") && { borderColor: colors.red }]}>
+                    <Text style={styles.addProductLabel}>Matériel</Text>
+                    <Text style={[styles.addProductInput, { color: product.material ? colors.darkBlue : colors.gray2 }]}>
+                        {product.material ? product.material.name : "Sélectionnez un matériel"}
+                    </Text>
+                    <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
+                </TouchableOpacity>
+
                 {/* Size */}
                 <TouchableOpacity
                     onPress={() => setModal("size")}
@@ -586,6 +592,7 @@ const AddProduct = (props) => {
                     {argus.voucherAmount && <Text style={[styles.font14, styles.fontSofiaRegular, { color: colors.gray2 }]}>Montant conseillé: {argus.voucherAmount}€</Text>}
                 </View>
 
+                {/* Descrition argus */}
                 {argus.fetchArgus && (
                     <View style={[styles.addProductInputContainer, { backgroundColor: "rgba(216, 255, 0, 0.22)", flexDirection: "row", alignItems: "center", padding: 15 }]}>
                         <Text style={[styles.font24, styles.fontSofiaRegular]}>💡</Text>
@@ -603,11 +610,14 @@ const AddProduct = (props) => {
                     </View>
                 )}
 
-                <TouchableOpacity
-                    onPress={() => setBtnStatus("partner")}
-                    style={[styles.addProductInputContainer, btnStatus === "partner" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : { padding: 20 }]}>
-                    <Text style={[styles.addProductLabel, styles.textCenter]}>Envoi</Text>
-                </TouchableOpacity>
+                {/* Group Btn */}
+                {(!argus.fetchArgus || argus.buyingPrice) && (
+                    <TouchableOpacity
+                        onPress={() => setBtnStatus("partner")}
+                        style={[styles.addProductInputContainer, btnStatus === "partner" ? { backgroundColor: "rgba(14, 227, 138, 0.22)", padding: 20 } : { padding: 20 }]}>
+                        <Text style={[styles.addProductLabel, styles.textCenter]}>Envoi</Text>
+                    </TouchableOpacity>
+                )}
 
                 <TouchableOpacity
                     onPress={() => setBtnStatus("sell")}
@@ -621,6 +631,7 @@ const AddProduct = (props) => {
                     <Text style={[styles.addProductLabel, styles.textCenter]}>Je donne à une association</Text>
                 </TouchableOpacity>
 
+                {/* Seller */}
                 <TouchableOpacity
                     onPress={() => setModal("seller")}
                     style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("seller") && { borderColor: colors.red }]}>
@@ -669,6 +680,21 @@ const AddProduct = (props) => {
                         setModal("");
                         setProduct({ ...product, category });
                         handleArgus({ type: "category", value: category });
+                    }}
+                />
+
+                {/* Modal Material */}
+                <Picker
+                    visible={modal === "material"}
+                    title="Sélectionnez un matériel"
+                    placeholderInputSearch="Cherchez un matériel"
+                    items={listOptions.materials}
+                    selected={product.material}
+                    handleClose={() => setModal("")}
+                    onSelected={(material) => {
+                        setProduct({ ...product, material });
+                        setModal("");
+                        handleArgus({ type: "material", value: material });
                     }}
                 />
 

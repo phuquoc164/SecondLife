@@ -4,7 +4,7 @@ import { Alert, Text, TextInput, TouchableOpacity, View, Image, Platform } from 
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
-
+import Config from "react-native-config";
 /** App */
 import Picker from "../../components/Picker";
 import PickerBrand from "../../components/PickerBrand";
@@ -14,12 +14,13 @@ import ModalPhoto from "../../components/ModalPhoto";
 import styles from "../../assets/css/styles";
 import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
-import { convertDateToDisplay, getKeyByValue, loading, loadingScreen } from "../../lib/Helpers";
+import { convertDateToDisplay, getKeyByValue, getListOptionsProduct, loading, loadingScreen } from "../../lib/Helpers";
 import { colors } from "../../lib/colors";
-import { DOMAIN, stateDict } from "../../lib/constants";
+import { stateDict } from "../../lib/constants";
 import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 
 const paddingBottomText = Platform.OS === "ios" ? 5 : 0;
+const API_URL = Config.API_URL;
 
 const ProductDetail = (props) => {
     const [editable, setEditable] = useState(false);
@@ -70,12 +71,13 @@ const ProductDetail = (props) => {
     };
 
     const formatProduct = (allInfoProduct) => {
-        const { title, brand, category, images, size, state, seller } = allInfoProduct;
+        const { title, brand, category, material, images, size, state, seller } = allInfoProduct;
         const product = {
             id: allInfoProduct["@id"],
             title,
             brand: { id: brand["@id"], name: brand.name },
             category: category.name,
+            material: material ? { id: material["@id"], name: material.material } : null,
             // description,
             images,
             size: { id: size["@id"], name: size.size },
@@ -192,7 +194,6 @@ const ProductDetail = (props) => {
      * @param {*} imageId
      */
     const handleDeletePhoto = (imageDeleted) => {
-        console.log(imageDeleted);
         if (imageDeleted["@id"]) {
             FetchService.delete(imageDeleted["@id"], user.token)
                 .then((result) => {
@@ -222,18 +223,9 @@ const ProductDetail = (props) => {
      * list category depends on brand
      */
     const getListOptions = async () => {
-        try {
-            const brandApi = await FetchService.get("/brands", user.token);
-            const sizeApi = await FetchService.get("/sizes", user.token);
-            const stateApi = await FetchService.get("/states", user.token);
-            const sellerApi = await FetchService.get("/sellers", user.token);
-
-            const listBrands = brandApi["hydra:member"].map((brand) => ({ id: brand["@id"], name: brand.name, categories: brand.categories }));
-            const listSizes = sizeApi["hydra:member"].map((size) => ({ id: size["@id"], name: size["size"] }));
-            const listStates = stateApi["hydra:member"].map((state) => ({ id: state["@id"], name: stateDict[state["state"]], value: state["state"] }));
-            const listSellers = sellerApi["hydra:member"].map((seller) => ({ id: seller["@id"], name: seller.name }));
-
-            const brandSelected = listBrands.find((brand) => brand.id === product.brand.id);
+        const listOptions = await getListOptionsProduct(user.token);
+        if (listOptions) {
+            const brandSelected = listOptions.brands.find((brand) => brand.id === product.brand.id);
             if (brandSelected) {
                 const listOptionCategories = initListOptionCategories(brandSelected);
                 const categoryName = getKeyByValue(listOptionCategories.selectedIds, productRef.current.category["@id"]);
@@ -242,14 +234,9 @@ const ProductDetail = (props) => {
             } else {
                 setProduct({ ...product, brand: null });
             }
-            setListOptions({
-                brands: listBrands.sort((a, b) => (a.name > b.name ? 1 : -1)),
-                sizes: listSizes,
-                states: listStates,
-                sellers: listSellers
-            });
-        } catch (error) {
-            console.error(error);
+            setListOptions(listOptions);
+        } else {
+            Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
         }
     };
 
@@ -353,7 +340,7 @@ const ProductDetail = (props) => {
         let data = {};
         let isError = false;
         Object.keys(product).forEach((key) => {
-            if (["brand", "size", "seller", "state"].includes(key)) {
+            if (["brand", "size", "seller", "state", "material"].includes(key)) {
                 if (!product[key] || !product[key].id) {
                     isError = true;
                 } else if (productRef.current[key]["@id"] !== product[key].id) {
@@ -405,7 +392,7 @@ const ProductDetail = (props) => {
         return <View style={styles.mainScreen}>{loading()}</View>;
     }
 
-    const voucher = productRef.current.vouchers[0];
+    const voucher = productRef.current?.vouchers ? productRef.current?.vouchers[0] : null;
     let statusVoucher = "";
     if (voucher) {
         statusVoucher = voucher.used ? "Utilisé" : voucher.expired ? "Expiré" : "Valide";
@@ -443,7 +430,7 @@ const ProductDetail = (props) => {
                                     )}
                                     <Image
                                         source={{
-                                            uri: image.contentUrl ? DOMAIN + image.contentUrl : "data:image/png;base64," + image.base64
+                                            uri: image.contentUrl ? API_URL + image.contentUrl : "data:image/png;base64," + image.base64
                                         }}
                                         style={{
                                             width: "100%",
@@ -493,6 +480,7 @@ const ProductDetail = (props) => {
                             </Text>
                             <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                         </TouchableOpacity>
+
                         {/* Category */}
                         <TouchableOpacity
                             disabled={!product.brand}
@@ -504,6 +492,16 @@ const ProductDetail = (props) => {
                             </Text>
                             <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                         </TouchableOpacity>
+
+                        {/* Material */}
+                        <TouchableOpacity onPress={() => setModal("material")} style={[styles.addProductInputContainer, styles.positionRelative]}>
+                            <Text style={styles.addProductLabel}>Matériel</Text>
+                            <Text style={[styles.addProductInput, { color: product.material ? colors.darkBlue : colors.gray2 }]}>
+                                {product.material ? product.material.name : "Sélectionnez un matériel"}
+                            </Text>
+                            <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
+                        </TouchableOpacity>
+
                         {/* Size */}
                         <TouchableOpacity onPress={() => setModal("size")} style={[styles.addProductInputContainer, styles.positionRelative]}>
                             <Text style={styles.addProductLabel}>Taille</Text>
@@ -548,6 +546,20 @@ const ProductDetail = (props) => {
                             }}
                         />
 
+                        {/* Modal Material */}
+                        <Picker
+                            visible={modal === "material"}
+                            title="Sélectionnez un matériel"
+                            placeholderInputSearch="Cherchez un matériel"
+                            items={listOptions.materials}
+                            selected={product.material}
+                            handleClose={() => setModal("")}
+                            onSelected={(material) => {
+                                setModal("");
+                                setProduct({ ...product, material });
+                            }}
+                        />
+
                         {/* Modal Size */}
                         <Picker
                             visible={modal === "size"}
@@ -584,6 +596,10 @@ const ProductDetail = (props) => {
                         <View style={styles.addProductInputContainer}>
                             <Text style={styles.addProductLabel}>Catégorie</Text>
                             <Text style={[styles.addProductInput, styles.textMediumGray]}>{product.category}</Text>
+                        </View>
+                        <View style={styles.addProductInputContainer}>
+                            <Text style={styles.addProductLabel}>Matériel</Text>
+                            <Text style={[styles.addProductInput, styles.textMediumGray]}>{product.material?.name || "Pas de donnée"}</Text>
                         </View>
                         <View style={styles.addProductInputContainer}>
                             <Text style={styles.addProductLabel}>Taille</Text>

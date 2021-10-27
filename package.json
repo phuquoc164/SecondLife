@@ -3,6 +3,10 @@
   "version": "1.0.2",
   "private": true,
   "scripts": {
+    "android:dev": "react-native run-android --variant=developmentdebug",
+    "android:dev-release": "react-native run-android --variant=developmentrelease",
+    "android:prod": "react-native run-android --variant=productiondebug",
+    "android:prod-release": "react-native run-android --variant=productionreleas",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
@@ -18,6 +22,7 @@
     "react": "16.13.1",
     "react-native": "0.63.3",
     "react-native-camera": "^3.40.0",
+    "react-native-config": "^1.4.5",
     "react-native-date-picker": "^3.3.0",
     "react-native-device-info": "^8.1.5",
     "react-native-gesture-handler": "^1.10.3",

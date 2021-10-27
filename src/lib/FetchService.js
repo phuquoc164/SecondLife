@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
-import { DOMAIN } from "./constants";
+import Config from "react-native-config";
 
+const API_URL = Config.API_URL;
 export default class FetchService {
     static login = (email, password) => {
         const header = new Headers({
@@ -8,7 +9,7 @@ export default class FetchService {
             "Content-Type": "application/json"
         });
 
-        const url = DOMAIN + "/authentication";
+        const url = API_URL + "/authentication";
         const setting = {
             method: "POST",
             headers: header,
@@ -44,7 +45,7 @@ export default class FetchService {
             method: "GET",
             headers: header
         };
-        const url = DOMAIN + endPoint;
+        const url = API_URL + endPoint;
 
         let response;
         return fetch(url, setting)
@@ -71,8 +72,7 @@ export default class FetchService {
             body: JSON.stringify(data)
         };
 
-        const url = DOMAIN + endPoint;
-
+        const url = API_URL + endPoint;
         let response;
         return fetch(url, setting)
             .then((res) => {
@@ -106,7 +106,7 @@ export default class FetchService {
             redirect: "follow"
         };
 
-        const url = DOMAIN + "/images";
+        const url = API_URL + "/images";
 
         let response;
         return fetch(url, setting)
@@ -132,7 +132,7 @@ export default class FetchService {
             headers: header
         };
 
-        const url = DOMAIN + endPoint;
+        const url = API_URL + endPoint;
 
         return fetch(url, setting)
             .then((res) => {
@@ -155,7 +155,7 @@ export default class FetchService {
             body: JSON.stringify(data)
         };
 
-        const url = DOMAIN + endPoint;
+        const url = API_URL + endPoint;
         let response;
         return fetch(url, setting)
             .then((res) => {

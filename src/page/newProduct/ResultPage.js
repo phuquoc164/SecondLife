@@ -69,7 +69,7 @@ const ResultPage = (props) => {
             }
             const data = {
                 ...product,
-                price: product.price ? parseInt(product.price.replace("€", "")) : 0,
+                price: product.price ? parseInt(product.price.replace("€", "")) : 0
             };
             FetchService.post("/products", data, user.token)
                 .then((result) => {
@@ -88,10 +88,27 @@ const ResultPage = (props) => {
      * handle finish adding product and go to the page catalog
      */
     const handleFinish = () => {
-        const { typeCatalog } = props.route.params;
+        const { typeCatalog, customerId } = props.route.params;
+        const endpoint = customerId + "/finished";
         if (typeCatalog !== "sell") {
             // go to page catalog
-            props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] });
+            if (typeCatalog === "partner" && customerId) {
+                FetchService.post(endpoint, {}, user.token)
+                    .then((result) => {
+                        if (result && result["@id"] === customerId) {
+                            props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] });
+                        }
+                    })
+                    .catch((error) => {
+                        console.debug(error);
+                        Alert.alert("Erreur système", "Erreur interne du système", [
+                            { text: "Annuler", style: "cancel" },
+                            { text: "Catalogue envoi", onPress: () => props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] }) }
+                        ]);
+                    });
+            } else {
+                props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] });
+            }
         } else {
             // add product and go to page catalog
             const isGoodData = verifyData();
@@ -106,7 +123,19 @@ const ResultPage = (props) => {
             FetchService.post("/products", data, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
-                        props.navigation.navigate("Catalog", { screen: "Rayon" });
+                        FetchService.post(endpoint, {}, user.token)
+                            .then((resultConsolidate) => {
+                                if (resultConsolidate && resultConsolidate["@id"] === customerId) {
+                                    props.navigation.navigate("Catalog", { screen: "Rayon" });
+                                }
+                            })
+                            .catch((error) => {
+                                console.debug(error);
+                                Alert.alert("Erreur système", "Erreur interne du système", [
+                                    { text: "Annuler", style: "cancel" },
+                                    { text: "Catalogue rayon", onPress: () => props.navigation.navigate("Catalog", { screen: "Rayon" }) }
+                                ]);
+                            });
                     }
                 })
                 .catch((error) => {
@@ -152,6 +181,11 @@ const ResultPage = (props) => {
                             <Text style={[styles.textDarkBlue, styles.textCenter, styles.fontSofiaRegular, styles.font20, { lineHeight: 25 }]}>
                                 {props.route.params.description}
                             </Text>
+                            {props.route.params.descriptionUnsentVouchers && (
+                                <Text style={[styles.textDarkBlue, styles.textCenter, styles.fontSofiaRegular, styles.font20, { lineHeight: 25, marginTop: 5 }]}>
+                                    {props.route.params.descriptionUnsentVouchers}
+                                </Text>
+                            )}
                         </View>
                     </>
                 )}

@@ -180,6 +180,10 @@ const Rayon = (props) => {
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.category.name}</Text>
                 </View>
                 <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Matériel</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.material?.material || "Pas de donnée"}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
                     <Text style={styles.addProductLabel}>Taille</Text>
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.size.size}</Text>
                 </View>

@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "../assets/css/styles";
 import { colors } from "../lib/colors";
 import FetchService from "../lib/FetchService";
-import { InputSearch, loading } from "../lib/Helpers";
+import { InputSearch, loading, sortListBrands } from "../lib/Helpers";
 import SafeAreaViewParent from "./SafeAreaViewParent";
 
 const PickerBrand = (props) => {
@@ -59,8 +59,8 @@ const PickerBrand = (props) => {
         FetchService.get(endPoint, props.token)
             .then((result) => {
                 if (result) {
-                    const listOptions = result["hydra:member"].map((brand) => ({ id: brand["@id"], name: brand.name, categories: brand.categories }));
-                    setOptions(listOptions);
+                    const listOptions = result["hydra:member"].map((brand) => ({ id: brand["@id"], name: brand.name, categories: brand.categories, pound: brand.pound }));
+                    setOptions(sortListBrands(listOptions));
                     setIsLoading(false);
                 }
             })

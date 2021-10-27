@@ -38,7 +38,10 @@ const BottomBarMenu = ({ state, navigation }) => {
         return null;
     }
     const lastHistory = state.history[state.history.length - 1];
-
+    let isAllBtnDesactive = false;
+    if (lastHistory.key.includes("NewProduct")) {
+        isAllBtnDesactive = state.routes.some((route) => route.name === "NewProduct" && route.params?.screen === "ResultPage");
+    }
     return (
         <View style={stylesMenu.main}>
             {state.routes.map((route, index) => {
@@ -62,8 +65,9 @@ const BottomBarMenu = ({ state, navigation }) => {
                         }
                     }
                 };
-
+                
                 if (!listItems.includes(name)) return null;
+
                 if (name === "Home" && lastHistory.key.includes("Home")) {
                     return (
                         <Image
@@ -73,21 +77,23 @@ const BottomBarMenu = ({ state, navigation }) => {
                                 stylesMenu.btnHome,
                                 {
                                     width: 90,
-                                    height: 94.1
+                                    height: 94.1,
+                                    opacity: isAllBtnDesactive ? 0.4 : 1
                                 }
                             ]}
                         />
                     );
                 } else if (name === "Home") {
                     return (
-                        <TouchableOpacity onPress={onPress} key={key}>
+                        <TouchableOpacity onPress={onPress} key={key} disabled={isAllBtnDesactive}>
                             <Image
                                 source={require("../assets/images/2.png")}
                                 style={[
                                     stylesMenu.btnHome,
                                     {
                                         width: 90,
-                                        height: 94.1
+                                        height: 94.1,
+                                        opacity: isAllBtnDesactive ? 0.4 : 1
                                     }
                                 ]}
                             />
@@ -96,7 +102,7 @@ const BottomBarMenu = ({ state, navigation }) => {
                 }
 
                 return (
-                    <TouchableOpacity key={key} onPress={onPress} style={[styles.flex1, stylesMenu.item]}>
+                    <TouchableOpacity key={key} onPress={onPress} style={[styles.flex1, stylesMenu.item, { opacity: isAllBtnDesactive ? 0.4 : 1 }]} disabled={isAllBtnDesactive}>
                         <Image source={listItemsData[name].image} style={listItemsData[name].imageStyle} />
                         <Text style={[styles.fontSofiaRegular, styles.font12, styles.textCenter, { marginTop: Platform.OS === "ios" ? 5 : 0 }]}>{listItemsData[name].title}</Text>
                         {isFocused && (

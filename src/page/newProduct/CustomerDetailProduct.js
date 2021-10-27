@@ -95,7 +95,7 @@ const CustomerDetailProduct = (props) => {
                             <Text style={[styles.font20, styles.textWhite, styles.textCenter, styles.fontSofiaRegular]}>Modifier</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={() => props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { customerId: customer["@id"] } })}
+                            onPress={() => props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { customerId: customer["@id"], forceReset: true } })}
                             style={[styles.greenScreen, { marginHorizontal: 20, marginTop: 20, marginBottom: 70, borderRadius: 11, paddingBottom: 15, paddingTop }]}>
                             <Text style={[styles.font20, styles.textWhite, styles.textCenter, styles.fontSofiaMedium]}>Ajouter un produit</Text>
                         </TouchableOpacity>
