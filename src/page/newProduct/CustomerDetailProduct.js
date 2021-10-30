@@ -78,6 +78,14 @@ const CustomerDetailProduct = (props) => {
         }
     };
 
+    const handleAddProduct = () => {
+        if (hasReferenceField && !customer.reference) {
+            Alert.alert("Erreur", "Merci de renseigner une référence valide avant d'ajouter un nouveau produit.");
+        } else {
+            props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { customerId: customer["@id"], forceReset: true } });
+        }
+    }
+
     if (!customer) {
         return loading();
     }
@@ -100,7 +108,7 @@ const CustomerDetailProduct = (props) => {
                             <Text style={[styles.font20, styles.textWhite, styles.textCenter, styles.fontSofiaRegular]}>Modifier</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={() => props.navigation.navigate("NewProduct", { screen: "AddProduct", params: { customerId: customer["@id"], forceReset: true } })}
+                            onPress={handleAddProduct}
                             style={[styles.greenScreen, { marginHorizontal: 20, marginTop: 20, marginBottom: 70, borderRadius: 11, paddingBottom: 15, paddingTop }]}>
                             <Text style={[styles.font20, styles.textWhite, styles.textCenter, styles.fontSofiaMedium]}>Ajouter un produit</Text>
                         </TouchableOpacity>
