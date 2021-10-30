@@ -197,11 +197,6 @@ const AddProduct = (props) => {
                         ...product,
                         images: [...product.images, { base64: response.base64, id: result["@id"] }]
                     });
-                    if (listErreurs.includes("images")) {
-                        const newListErreurs = [...listErreurs];
-                        newListErreurs.shift();
-                        setListErreurs(newListErreurs);
-                    }
                     setIsLoadingScreen(false);
                 }
             })
