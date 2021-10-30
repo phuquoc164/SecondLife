@@ -26,6 +26,7 @@ const AddProduct = (props) => {
     const [listOptions, setListOptions] = useState({
         brands: [],
         materials: [],
+        colors: [],
         sizes: [],
         states: [],
         sellers: [],
@@ -354,6 +355,7 @@ const AddProduct = (props) => {
             brand: product.brand.id,
             category: categoriesRef.current.selectedIds[product.category],
             material: product.material.id,
+            color: product.color.id,
             seller: product.seller.id,
             customer: props.route.params.customerId,
             size: product.size.id,
@@ -368,7 +370,7 @@ const AddProduct = (props) => {
         if (btnStatus === "sell") {
             props.navigation.navigate("NewProduct", {
                 screen: "ResultPage",
-                params: { data: { ...data, price: null, reference: null }, typeCatalog: "sell", sellingPrice: argus.sellingPrice }
+                params: { data: { ...data, price: null, reference: null }, typeCatalog: "sell", sellingPrice: argus.sellingPrice, customerId: props.route.params.customerId }
             });
             setIsLoadingBtnsubmit(false);
         } else {
@@ -529,6 +531,17 @@ const AddProduct = (props) => {
                     <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                 </TouchableOpacity>
 
+                {/* Color */}
+                <TouchableOpacity
+                    onPress={() => setModal("color")}
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("color") && { borderColor: colors.red }]}>
+                    <Text style={styles.addProductLabel}>Couleur</Text>
+                    <Text style={[styles.addProductInput, { color: product.color ? colors.darkBlue : colors.gray2 }]}>
+                        {product.color ? product.color.name : "Sélectionnez une couleur"}
+                    </Text>
+                    <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
+                </TouchableOpacity>
+
                 {/* Size */}
                 <TouchableOpacity
                     onPress={() => setModal("size")}
@@ -656,6 +669,7 @@ const AddProduct = (props) => {
                 )}
 
                 {/* ========================================== */}
+
                 {/* Modal Brand */}
                 <PickerBrand
                     visible={modal === "brand"}
@@ -695,6 +709,20 @@ const AddProduct = (props) => {
                         setProduct({ ...product, material });
                         setModal("");
                         handleArgus({ type: "material", value: material });
+                    }}
+                />
+
+                {/* Modal Color */}
+                <Picker
+                    visible={modal === "color"}
+                    title="Sélectionnez une couleur"
+                    placeholderInputSearch="Cherchez une couleur"
+                    items={listOptions.colors}
+                    selected={product.color}
+                    handleClose={() => setModal("")}
+                    onSelected={(color) => {
+                        setModal("");
+                        setProduct({ ...product, color });
                     }}
                 />
 

@@ -130,7 +130,7 @@ const ResultPage = (props) => {
                                 }
                             })
                             .catch((error) => {
-                                console.debug(error);
+                                console.error(error);
                                 Alert.alert("Erreur système", "Erreur interne du système", [
                                     { text: "Annuler", style: "cancel" },
                                     { text: "Catalogue rayon", onPress: () => props.navigation.navigate("Catalog", { screen: "Rayon" }) }

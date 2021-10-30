@@ -30,6 +30,8 @@ const ProductDetail = (props) => {
     const [modal, setModal] = useState("");
     const [listOptions, setListOptions] = useState({
         brands: [],
+        materials: [],
+        colors: [],
         sizes: [],
         states: [],
         sellers: []
@@ -71,13 +73,14 @@ const ProductDetail = (props) => {
     };
 
     const formatProduct = (allInfoProduct) => {
-        const { title, brand, category, material, images, size, state, seller } = allInfoProduct;
+        const { title, brand, category, material, images, size, state, seller, color } = allInfoProduct;
         const product = {
             id: allInfoProduct["@id"],
             title,
             brand: { id: brand["@id"], name: brand.name },
             category: category.name,
             material: material ? { id: material["@id"], name: material.material } : null,
+            color: color ? { id: color["@id"], name: color.color } : null,
             // description,
             images,
             size: { id: size["@id"], name: size.size },
@@ -340,10 +343,10 @@ const ProductDetail = (props) => {
         let data = {};
         let isError = false;
         Object.keys(product).forEach((key) => {
-            if (["brand", "size", "seller", "state", "material"].includes(key)) {
+            if (["brand", "size", "seller", "state", "material", "color"].includes(key)) {
                 if (!product[key] || !product[key].id) {
                     isError = true;
-                } else if (productRef.current[key]["@id"] !== product[key].id) {
+                } else if (!productRef.current[key] || !productRef.current[key]["@id"] || productRef.current[key]["@id"] !== product[key].id) {
                     data[key] = product[key].id;
                 }
             } else if (key === "category") {
@@ -502,6 +505,15 @@ const ProductDetail = (props) => {
                             <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
                         </TouchableOpacity>
 
+                        {/* Color */}
+                        <TouchableOpacity onPress={() => setModal("color")} style={[styles.addProductInputContainer, styles.positionRelative]}>
+                            <Text style={styles.addProductLabel}>Couleur</Text>
+                            <Text style={[styles.addProductInput, { color: product.color ? colors.darkBlue : colors.gray2 }]}>
+                                {product.color ? product.color.name : "Sélectionnez une couleur"}
+                            </Text>
+                            <Image source={require("../../assets/images/chevron-down.png")} style={styles.chevronDown} />
+                        </TouchableOpacity>
+
                         {/* Size */}
                         <TouchableOpacity onPress={() => setModal("size")} style={[styles.addProductInputContainer, styles.positionRelative]}>
                             <Text style={styles.addProductLabel}>Taille</Text>
@@ -560,6 +572,20 @@ const ProductDetail = (props) => {
                             }}
                         />
 
+                        {/* Modal color */}
+                        <Picker
+                            visible={modal === "color"}
+                            title="Sélectionnez une couleur"
+                            placeholderInputSearch="Cherchez une couleur"
+                            items={listOptions.colors}
+                            selected={product.color}
+                            handleClose={() => setModal("")}
+                            onSelected={(color) => {
+                                setModal("");
+                                setProduct({ ...product, color });
+                            }}
+                        />
+
                         {/* Modal Size */}
                         <Picker
                             visible={modal === "size"}
@@ -600,6 +626,10 @@ const ProductDetail = (props) => {
                         <View style={styles.addProductInputContainer}>
                             <Text style={styles.addProductLabel}>Matériel</Text>
                             <Text style={[styles.addProductInput, styles.textMediumGray]}>{product.material?.name || "Pas de donnée"}</Text>
+                        </View>
+                        <View style={styles.addProductInputContainer}>
+                            <Text style={styles.addProductLabel}>Couleur</Text>
+                            <Text style={[styles.addProductInput, styles.textMediumGray]}>{product.color?.name || "Pas de donnée"}</Text>
                         </View>
                         <View style={styles.addProductInputContainer}>
                             <Text style={styles.addProductLabel}>Taille</Text>

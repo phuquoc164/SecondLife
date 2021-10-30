@@ -128,9 +128,8 @@ const getListBrands = async (token) => {
         if (brandApi && brandApi["hydra:member"]) {
             const listBrands = brandApi["hydra:member"].map((brand) => ({ id: brand["@id"], name: brand.name, categories: brand.categories, pound: brand.pound }));
             return sortListBrands(listBrands);
-        } else {
-            return null;
         }
+        return null;
     } catch (error) {
         console.debug(error);
         return null;
@@ -143,9 +142,8 @@ const getListSizes = async (token) => {
 
         if (sizeApi && sizeApi["hydra:member"]) {
             return sizeApi["hydra:member"].map((size) => ({ id: size["@id"], name: size["size"] }));
-        } else {
-            return null;
         }
+        return null;
     } catch (error) {
         console.debug(error);
         return null;
@@ -158,9 +156,8 @@ const getListStates = async (token) => {
 
         if (stateApi && stateApi["hydra:member"]) {
             return stateApi["hydra:member"].map((state) => ({ id: state["@id"], name: stateDict[state["state"]], value: state["state"] }));
-        } else {
-            return null;
         }
+        return null;
     } catch (error) {
         console.debug(error);
         return null;
@@ -173,9 +170,8 @@ const getListSellers = async (token) => {
 
         if (sellerApi && sellerApi["hydra:member"]) {
             return sellerApi["hydra:member"].map((seller) => ({ id: seller["@id"], name: seller.name }));
-        } else {
-            return null;
         }
+        return null;
     } catch (error) {
         console.debug(error);
         return null;
@@ -188,9 +184,22 @@ const getListMaterials = async (token) => {
 
         if (materialApi && materialApi["hydra:member"]) {
             return materialApi["hydra:member"].map((material) => ({ id: material["@id"], name: material.material }));
-        } else {
-            return null;
         }
+        return null;
+    } catch (error) {
+        console.debug(error);
+        return null;
+    }
+};
+
+const getListColors = async (token) => {
+    try {
+        const colorApi = await FetchService.get("/colors", token);
+
+        if (colorApi && colorApi["hydra:member"]) {
+            return colorApi["hydra:member"].map((color) => ({ id: color["@id"], name: color.color }));
+        }
+        return null;
     } catch (error) {
         console.debug(error);
         return null;
@@ -198,7 +207,7 @@ const getListMaterials = async (token) => {
 };
 
 export const getListOptionsProduct = async (token) => {
-    const listOptions = await Promise.all([getListBrands(token), getListMaterials(token), getListSizes(token), getListStates(token), getListSellers(token)]);
+    const listOptions = await Promise.all([getListBrands(token), getListMaterials(token), getListSizes(token), getListStates(token), getListSellers(token), getListColors(token)]);
     const hasError = listOptions.some((option) => !option);
     if (hasError) return null;
 
@@ -207,7 +216,8 @@ export const getListOptionsProduct = async (token) => {
         materials: listOptions[1],
         sizes: listOptions[2],
         states: listOptions[3],
-        sellers: listOptions[4]
+        sellers: listOptions[4],
+        colors: listOptions[5]
     };
 };
 
@@ -217,7 +227,7 @@ export const sortListBrands = (listBrands) => {
         const diffrentName = brand.name - nextBrand.name;
         return differentPound > 0 || (differentPound === 0 && diffrentName > 0) ? -1 : 1;
     });
-}
+};
 
 // The component to display image slide
 {

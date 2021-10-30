@@ -19,6 +19,7 @@ export const initialProduct = {
     brand: null,
     category: null,
     material: null,
+    color: null,
     size: null,
     state: null,
     // description: null,

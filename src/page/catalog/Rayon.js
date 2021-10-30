@@ -184,6 +184,10 @@ const Rayon = (props) => {
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.material?.material || "Pas de donnée"}</Text>
                 </View>
                 <View style={styles.addProductInputContainer}>
+                    <Text style={styles.addProductLabel}>Couleur</Text>
+                    <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.color?.color || "Pas de donnée"}</Text>
+                </View>
+                <View style={styles.addProductInputContainer}>
                     <Text style={styles.addProductLabel}>Taille</Text>
                     <Text style={[styles.addProductInput, styles.textMediumGray]}>{productDetail.size.size}</Text>
                 </View>
@@ -345,8 +349,6 @@ const Rayon = (props) => {
         setIsLoadingScreen(false);
         if (indexErrors > 0) {
             Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
-            // const messageError = "On ne peut pas mettre en rayon les produits: " + newListProductsSelectedAllInfo.map((product) => product.title).split(", ");
-            // Alert.alert("Erreur", messageError);
         }
     };
 
