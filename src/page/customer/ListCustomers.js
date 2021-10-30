@@ -13,9 +13,9 @@ import { InputSearch, loading } from "../../lib/Helpers";
 const ListCustomers = (props) => {
     const [state, setState] = React.useState({
         allCustomers: [],
-        filteredCustomers: [],
-        filter: ""
+        filteredCustomers: []
     });
+    const [filter, setFilter] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(true);
     const { user, signOut } = React.useContext(AuthContext);
     const routeParams = props.route.params;
@@ -36,9 +36,9 @@ const ListCustomers = (props) => {
                 if (result && result["hydra:member"]?.length > 0) {
                     setState({
                         allCustomers: result["hydra:member"],
-                        filteredCustomers: result["hydra:member"],
-                        filter: ""
+                        filteredCustomers: result["hydra:member"]
                     });
+                    setFilter("");
                     setIsLoading(false);
                 }
             })
@@ -90,30 +90,21 @@ const ListCustomers = (props) => {
     );
 
     const filterData = (filter) => {
-        if (state.allCustomers.length === 0) {
-            setState({
-                ...state,
-                filter
-            });
-        } else {
+        setFilter(filter);
+        if (state.allCustomers.length > 0) {
             const endPoint = filter === "" ? "/customers?page=1" : "/customers?page=1&lastname=" + filter;
             setIsLoading(true);
             FetchService.get(endPoint, user.token)
                 .then((result) => {
-                    setIsLoading(false);
                     if (result && result["hydra:member"]) {
                         setState({
                             ...state,
-                            filteredCustomers: result["hydra:member"],
-                            filter
+                            filteredCustomers: result["hydra:member"]
                         });
                     }
+                    setIsLoading(false);
                 })
                 .catch((error) => {
-                    setState({
-                        ...state,
-                        filter
-                    });
                     setIsLoading(false);
                     console.error(error);
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
@@ -123,7 +114,7 @@ const ListCustomers = (props) => {
 
     return (
         <SafeAreaViewParent>
-            <InputSearch placeholder="Chercher un client" placeholderTextColor={colors.lightBlue} value={state.filter} filterData={filterData} />
+            <InputSearch placeholder="Chercher un client" placeholderTextColor={colors.lightBlue} value={filter} filterData={filterData} />
             {isLoading && loading()}
             {!isLoading &&
                 (state.allCustomers.length > 0 && state.filteredCustomers.length > 0 ? (
