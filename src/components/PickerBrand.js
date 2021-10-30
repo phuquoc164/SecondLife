@@ -18,7 +18,7 @@ const PickerBrand = (props) => {
     React.useEffect(() => {
         setOptions(props.items);
         setFilter("");
-    }, [props.items]);
+    }, [props.items, props.selected]);
 
     const renderItem = ({ item, index }) => {
         const isLastItem = index === options.length - 1 && Platform.OS === "ios"; // check last item only on ios
