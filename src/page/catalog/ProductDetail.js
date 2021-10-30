@@ -4,7 +4,7 @@ import { Alert, Text, TextInput, TouchableOpacity, View, Image, Platform } from 
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { request, PERMISSIONS, RESULTS } from "react-native-permissions";
-import Config from "react-native-config";
+
 /** App */
 import Picker from "../../components/Picker";
 import PickerBrand from "../../components/PickerBrand";
@@ -16,11 +16,10 @@ import FetchService from "../../lib/FetchService";
 import { AuthContext } from "../../lib/AuthContext";
 import { convertDateToDisplay, getKeyByValue, getListOptionsProduct, loading, loadingScreen } from "../../lib/Helpers";
 import { colors } from "../../lib/colors";
-import { stateDict } from "../../lib/constants";
+import { API_URL, stateDict } from "../../lib/constants";
 import SafeAreaViewParent from "../../components/SafeAreaViewParent";
 
 const paddingBottomText = Platform.OS === "ios" ? 5 : 0;
-const API_URL = Config.API_URL;
 
 const ProductDetail = (props) => {
     const [editable, setEditable] = useState(false);

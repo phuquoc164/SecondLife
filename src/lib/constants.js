@@ -1,5 +1,6 @@
 export const STORAGE_USER = "storage_user";
 
+export const API_URL = "http://preprod-api-tsl.thunderstone.tech";
 export const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 export const initialCustomer = {
     reference: null,

@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 
+/**
 project.ext.envConfigFiles = [
     developmentdebug: ".env.development",
     developmentrelease: ".env.development",
@@ -7,6 +8,7 @@ project.ext.envConfigFiles = [
     productionrelease: ".env.production",
 ]
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+*/
 
 import com.android.build.OutputFile
 
@@ -142,11 +144,11 @@ android {
 
     defaultConfig {
         applicationId "thunderstone.secondlife"
-        resValue "string", "build_config_package", "com.secondlife"
+        // resValue "string", "build_config_package", "com.secondlife"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 27
-        versionName "2.1.1"
+        versionCode 28
+        versionName "2.2.0"
         missingDimensionStrategy 'react-native-camera', 'general'
         ndk {
             debugSymbolLevel = 'FULL'
@@ -179,7 +181,7 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-            matchingFallbacks = ['debug', 'release']
+            // matchingFallbacks = ['debug', 'release']
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -190,6 +192,7 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    /**
     flavorDimensions "default"
 	    productFlavors {
 	        production {
@@ -197,7 +200,7 @@ android {
 	        }
 	        development {}
 	    }
-
+    */
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
