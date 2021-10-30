@@ -56,7 +56,11 @@ const FormCustomer = (props) => {
             setIsSubmitted(false);
         } else {
             const { hasModifiedData, ...data } = customer;
-            props.handleSubmit(data, () => setIsSubmitted(false));
+            props.handleSubmit(
+                data,
+                () => setIsSubmitted(false),
+                () => setCustomer({ ...customer, reference: null }) // reset reference
+            );
         }
     };
 

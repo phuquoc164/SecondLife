@@ -13,11 +13,9 @@ const NewCustomer = (props) => {
     const { user, signOut } = React.useContext(AuthContext);
     const hasReferenceField = Boolean(user.voucherTrigger);
 
-    const handleAddCustomer = (newCustomer, callback) => {
+    const handleAddCustomer = (newCustomer, callback, resetReference) => {
         const { reference, ...customerWithoutRef } = newCustomer;
-        const data = hasReferenceField && reference && reference !== "" ? 
-            { ...newCustomer, store: user.store } :
-            { ...customerWithoutRef, store: user.store };
+        const data = hasReferenceField && reference && reference !== "" ? { ...newCustomer, store: user.store } : { ...customerWithoutRef, store: user.store };
         FetchService.post("/customers", data, user.token)
             .then((result) => {
                 if (!!result) {
@@ -27,10 +25,13 @@ const NewCustomer = (props) => {
             })
             .catch((error) => {
                 callback();
+                console.error(error);
                 if (error === 401) {
                     Alert.alert("Erreur système", "Votre session est expirée, veuillez-vous re-connecter!", [{ text: "Se connecter", onPress: signOut }]);
+                } else if (error === 400) {
+                    resetReference();
+                    Alert.alert("Erreur", "Votre référence n'est pas valide.");
                 } else {
-                    console.error(error);
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 }
             });

@@ -45,7 +45,7 @@ const CustomerDetailProduct = (props) => {
         props.navigation.setOptions({ title: "Modifier les informations" });
     };
 
-    const handleModifyCustomer = (newCustomer, callback) => {
+    const handleModifyCustomer = (newCustomer, callback, resetReference) => {
         const customerCopy = { ...customer };
         customerCopy.birthday = customerCopy.birthday.slice(0, 10);
         newCustomer.birthday = convertDateToApi(newCustomer.birthday);
@@ -64,7 +64,12 @@ const CustomerDetailProduct = (props) => {
                 .catch((error) => {
                     callback();
                     console.error(error);
-                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+                    if (error === 400) {
+                        resetReference();
+                        Alert.alert("Erreur", "Votre référence n'est pas valide.");
+                    } else {
+                        Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+                    }
                 });
         } else {
             callback();
