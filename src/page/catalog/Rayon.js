@@ -160,7 +160,7 @@ const Rayon = (props) => {
 
     const renderSoldProductDetail = () => {
         const paddingBottomText = Platform.OS === "ios" ? 5 : 0;
-        const voucher = productDetail.vouchers[0];
+        const voucher = productDetail.voucher;
         let statusVoucher = "";
         if (voucher) {
             statusVoucher = voucher.used ? "Utilisé" : voucher.expired ? "Expiré" : "Valide";

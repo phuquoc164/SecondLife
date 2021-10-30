@@ -395,7 +395,7 @@ const ProductDetail = (props) => {
         return <View style={styles.mainScreen}>{loading()}</View>;
     }
 
-    const voucher = productRef.current?.vouchers ? productRef.current?.vouchers[0] : null;
+    const voucher = productRef.current.voucher;
     let statusVoucher = "";
     if (voucher) {
         statusVoucher = voucher.used ? "Utilisé" : voucher.expired ? "Expiré" : "Valide";
