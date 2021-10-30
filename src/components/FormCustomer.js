@@ -20,6 +20,7 @@ const FormCustomer = (props) => {
     });
     const [showCalender, setShowCalendar] = React.useState(false);
     const [isSubmitted, setIsSubmitted] = React.useState(false);
+    const [listErrors, setListErrors] = React.useState([]);
 
     const birthdayRef = React.useRef({
         value: customer.birthday ? new Date(customer.birthday) : initialDate,
@@ -41,16 +42,17 @@ const FormCustomer = (props) => {
 
     const handleAddCustomer = () => {
         setIsSubmitted(true);
-        let isError = false;
+        let listErrors = [];
         Object.keys(initialCustomer).forEach((key) => {
             if (!props.hasReferenceField && key === "reference") return;
 
             if (!customer[key] || customer.key === "") {
-                isError = true;
+                listErrors.push(key);
             }
         });
-        if (isError) {
-            Alert.alert("Erreur", "Veuillez-vous remplir toutes les informations");
+        setListErrors(listErrors);
+        if (listErrors.length > 0) {
+            Alert.alert("Erreur", "Veuillez renseigner tous les champs encadrés en rouge");
             setIsSubmitted(false);
         } else {
             const { hasModifiedData, ...data } = customer;
@@ -63,7 +65,7 @@ const FormCustomer = (props) => {
             <KeyboardAwareScrollView>
                 {/* Référence */}
                 {props.hasReferenceField && (
-                    <View style={componentStyle.inputContainer}>
+                    <View style={[componentStyle.inputContainer, listErrors.includes("reference") && { borderColor: colors.red }]}>
                         <View style={componentStyle.imageContainer}>{/* <Image source={require("../assets/images/name.png")} style={{ width: 20, height: 30.8 }} /> */}</View>
                         <TextInput
                             editable={props.editable}
@@ -77,7 +79,7 @@ const FormCustomer = (props) => {
                 )}
 
                 {/* Prénom */}
-                <View style={componentStyle.inputContainer}>
+                <View style={[componentStyle.inputContainer, listErrors.includes("firstname") && { borderColor: colors.red }]}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/name.png")} style={{ width: 20, height: 30.8 }} />
                     </View>
@@ -93,7 +95,7 @@ const FormCustomer = (props) => {
                 </View>
 
                 {/* Nom */}
-                <View style={componentStyle.inputContainer}>
+                <View style={[componentStyle.inputContainer, listErrors.includes("lastname") && { borderColor: colors.red }]}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/name.png")} style={{ width: 25, height: 30.8 }} />
                     </View>
@@ -109,7 +111,7 @@ const FormCustomer = (props) => {
                 </View>
 
                 {/* Birthday */}
-                <View style={componentStyle.inputContainer}>
+                <View style={[componentStyle.inputContainer, listErrors.includes("birthday") && { borderColor: colors.red }]}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/birthday.png")} style={{ width: 25, height: 29.3 }} />
                     </View>
@@ -127,7 +129,7 @@ const FormCustomer = (props) => {
                 </View>
 
                 {/* Phone */}
-                <View style={componentStyle.inputContainer}>
+                <View style={[componentStyle.inputContainer, listErrors.includes("phone") && { borderColor: colors.red }]}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/phone.png")} style={{ width: 30, height: 26.1 }} />
                     </View>
@@ -144,7 +146,7 @@ const FormCustomer = (props) => {
                 </View>
 
                 {/* Email */}
-                <View style={componentStyle.inputContainer}>
+                <View style={[componentStyle.inputContainer, listErrors.includes("email") && { borderColor: colors.red }]}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/email.png")} style={{ width: 30, height: 28.3 }} />
                     </View>
@@ -162,7 +164,7 @@ const FormCustomer = (props) => {
                 </View>
 
                 {/* Address */}
-                <View style={componentStyle.inputContainer}>
+                <View style={[componentStyle.inputContainer, listErrors.includes("address") && { borderColor: colors.red }]}>
                     <View style={componentStyle.imageContainer}>
                         <Image source={require("../assets/images/home.png")} style={{ width: 30, height: 30.9 }} />
                     </View>
@@ -178,8 +180,14 @@ const FormCustomer = (props) => {
                 </View>
 
                 {/* Code postal */}
-                <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", marginHorizontal: 20 }}>
-                    <View style={componentStyle.smallContainer}>
+                <View
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        marginHorizontal: 20
+                    }}>
+                    <View style={[componentStyle.smallContainer, listErrors.includes("zipCode") && { borderColor: colors.red }]}>
                         <TextInput
                             editable={props.editable}
                             style={[styles.textDarkBlue, styles.font20, componentStyle.input]}
@@ -195,7 +203,7 @@ const FormCustomer = (props) => {
                             }}
                         />
                     </View>
-                    <View style={componentStyle.smallContainer}>
+                    <View style={[componentStyle.smallContainer, listErrors.includes("city") && { borderColor: colors.red }]}>
                         <TextInput
                             editable={props.editable}
                             style={[styles.textDarkBlue, styles.font20, componentStyle.input]}
