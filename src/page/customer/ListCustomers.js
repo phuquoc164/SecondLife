@@ -90,29 +90,34 @@ const ListCustomers = (props) => {
     );
 
     const filterData = (filter) => {
-        const filterToLower = filter.toLowerCase();
         if (state.allCustomers.length === 0) {
             setState({
                 ...state,
                 filter
             });
         } else {
-            const newfilteredCustomers = state.allCustomers.filter((customer) => {
-                const { firstname, lastname, email, phone } = customer;
-                const fullname = firstname + " " + lastname;
-                return (
-                    fullname.toLowerCase().includes(filterToLower) ||
-                    firstname.toLowerCase().includes(filterToLower) ||
-                    lastname.toLowerCase().includes(filterToLower) ||
-                    email.includes(filterToLower) ||
-                    phone.includes(filterToLower)
-                );
-            });
-            setState({
-                ...state,
-                filteredCustomers: newfilteredCustomers,
-                filter
-            });
+            const endPoint = filter === "" ? "/customers?page=1" : "/customers?page=1&lastname=" + filter;
+            setIsLoading(true);
+            FetchService.get(endPoint, user.token)
+                .then((result) => {
+                    setIsLoading(false);
+                    if (result && result["hydra:member"]) {
+                        setState({
+                            ...state,
+                            filteredCustomers: result["hydra:member"],
+                            filter
+                        });
+                    }
+                })
+                .catch((error) => {
+                    setState({
+                        ...state,
+                        filter
+                    });
+                    setIsLoading(false);
+                    console.error(error);
+                    Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
+                });
         }
     };
 
@@ -121,10 +126,10 @@ const ListCustomers = (props) => {
             <InputSearch placeholder="Chercher un client" placeholderTextColor={colors.lightBlue} value={state.filter} filterData={filterData} />
             {isLoading && loading()}
             {!isLoading &&
-                (state.allCustomers.length > 0 ? (
+                (state.allCustomers.length > 0 && state.filteredCustomers.length > 0 ? (
                     <FlatList data={state.filteredCustomers} renderItem={renderItem} keyExtractor={(item) => item["@id"]} />
                 ) : (
-                    <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Il n'y a aucun customer</Text>
+                    <Text style={[styles.textCenter, styles.textDarkBlue, styles.font20, styles.fontSofiaMedium, { paddingVertical: 10 }]}>Aucun clien trouvé</Text>
                 ))}
         </SafeAreaViewParent>
     );
