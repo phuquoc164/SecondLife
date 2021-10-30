@@ -76,8 +76,7 @@ const ActifVouchers = (props) => {
                 setIsLoading(false);
             } else if (paramsNavigation.reference) {
                 // navigate from page scanner
-                getListVouchers(paramsNavigation.reference);
-                props.navigation.setParams({ reference: null });
+                getListVouchersFromReference(paramsNavigation.reference);
             } else if (paramsNavigation.forceUpdate) {
                 // navigate when we push the bottom bar item
                 getListVouchers();
@@ -88,7 +87,7 @@ const ActifVouchers = (props) => {
     /**
      * send request to get list vouchers
      */
-    const getListVouchers = (reference = null) => {
+    const getListVouchers = () => {
         setIsLoading(true);
         FetchService.get("/vouchers", user.token)
             .then((result) => {
@@ -103,19 +102,10 @@ const ActifVouchers = (props) => {
                         }
                     });
                     setVouchers({ available, usedOrExpired });
-                    // if we have reference, we have to update the keyword of filter with value of reference
-                    if (reference) {
-                        const voucherFiltered = available.filter((voucher) => voucher.reference === props.route.params.reference);
-                        setFilter({
-                            keyword: props.route.params.reference,
-                            vouchers: voucherFiltered
-                        });
-                    } else {
-                        setFilter({
-                            keyword: "",
-                            vouchers: available
-                        });
-                    }
+                    setFilter({
+                        keyword: "",
+                        vouchers: available
+                    });
                     setIsLoading(false);
                 }
             })
@@ -126,6 +116,26 @@ const ActifVouchers = (props) => {
                     console.error(error);
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 }
+            });
+    };
+
+    const getListVouchersFromReference = (reference) => {
+        const endpoint = "/vouchers?page=1&reference=" + reference;
+        FetchService.get(endpoint, user.token)
+            .then((result) => {
+                if (result && result["hydra:member"]) {
+                    const listVouchersActif = result["hydra:member"].filter((voucher) => !voucher.used && !voucher.expired);
+                    setFilter({
+                        keyword: reference,
+                        vouchers: listVouchersActif
+                    });
+                    setIsLoading(false);
+                    props.navigation.setParams({ reference: null });
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
             });
     };
 
