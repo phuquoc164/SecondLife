@@ -1,6 +1,6 @@
 /** React */
 import React from "react";
-import { ScrollView, View, TouchableOpacity, Text, Image, TextInput, Alert } from "react-native";
+import { ScrollView, View, TouchableOpacity, Text, Image, TextInput, Alert, ActivityIndicator } from "react-native";
 
 /** App */
 import SafeAreaViewParent from "../../components/SafeAreaViewParent";
@@ -21,7 +21,7 @@ const ResultPage = (props) => {
     const [showPageResult, setShowPageResult] = React.useState(props.route.params.typeCatalog !== "sell");
     const [isModalScanner, setIsModalScanner] = React.useState(false);
     const [listErreurs, setListErreurs] = React.useState([]);
-
+    const [isFinishedBtnClicked, setIsFinishedBtnClicked] = React.useState(false);
     const { user } = React.useContext(AuthContext);
 
     /**
@@ -93,16 +93,18 @@ const ResultPage = (props) => {
         if (typeCatalog !== "sell") {
             // go to page catalog
             if (typeCatalog === "partner" && customerId) {
+                setIsFinishedBtnClicked(true);
                 FetchService.post(endpoint, {}, user.token)
                     .then((result) => {
                         if (result && result["@id"] === customerId) {
+                            setIsFinishedBtnClicked(false);
                             props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] });
                         }
                     })
                     .catch((error) => {
                         console.debug(error);
                         Alert.alert("Erreur système", "Erreur interne du système", [
-                            { text: "Annuler", style: "cancel" },
+                            { text: "Annuler", style: "cancel", onPress: () => setIsFinishedBtnClicked(false) },
                             { text: "Catalogue envoi", onPress: () => props.navigation.navigate("Catalog", { screen: screenPageCatalog[typeCatalog] }) }
                         ]);
                     });
@@ -120,25 +122,28 @@ const ResultPage = (props) => {
                 ...product,
                 price: product.price ? parseInt(product.price.replace("€", "")) : 0
             };
+            setIsFinishedBtnClicked(true);
             FetchService.post("/products", data, user.token)
                 .then((result) => {
                     if (result && result["@id"]) {
                         FetchService.post(endpoint, {}, user.token)
                             .then((resultConsolidate) => {
                                 if (resultConsolidate && resultConsolidate["@id"] === customerId) {
+                                    setIsFinishedBtnClicked(false);
                                     props.navigation.navigate("Catalog", { screen: "Rayon" });
                                 }
                             })
                             .catch((error) => {
                                 console.error(error);
                                 Alert.alert("Erreur système", "Erreur interne du système", [
-                                    { text: "Annuler", style: "cancel" },
+                                    { text: "Annuler", style: "cancel", onPress: () => setIsFinishedBtnClicked(false) },
                                     { text: "Catalogue rayon", onPress: () => props.navigation.navigate("Catalog", { screen: "Rayon" }) }
                                 ]);
                             });
                     }
                 })
                 .catch((error) => {
+                    setIsFinishedBtnClicked(false);
                     console.error(error);
                     Alert.alert("Erreur", "Erreur interne du système, veuillez réessayer ultérieurement");
                 });
@@ -250,11 +255,17 @@ const ResultPage = (props) => {
                         style={[styles.greenScreen, { marginHorizontal: 30, paddingVertical: 10, borderRadius: 10, marginVertical: 10 }]}>
                         <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>{"Ajouter un nouveau\nproduit"}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={handleFinish}
-                        style={{ borderRadius: 10, borderColor: colors.green, borderWidth: 3, marginHorizontal: 30, paddingVertical: 15, backgroundColor: colors.darkBlue }}>
-                        <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Terminer</Text>
-                    </TouchableOpacity>
+                    {isFinishedBtnClicked ? (
+                        <View style={{ borderRadius: 10, borderColor: colors.green, borderWidth: 3, marginHorizontal: 30, paddingVertical: 15, backgroundColor: colors.darkBlue }}>
+                            <ActivityIndicator color="#ffffff" />
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            onPress={handleFinish}
+                            style={{ borderRadius: 10, borderColor: colors.green, borderWidth: 3, marginHorizontal: 30, paddingVertical: 15, backgroundColor: colors.darkBlue }}>
+                            <Text style={[styles.textWhite, styles.textCenter, styles.font24]}>Terminer</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </ScrollView>
             <ModalScanner visible={isModalScanner} handleScanSuccess={handleScanSuccess} onCancel={() => setIsModalScanner(false)} />
