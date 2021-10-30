@@ -46,7 +46,7 @@ const AddProduct = (props) => {
         sellingPrice: null,
         buyingPrice: null
     });
-    const [listErreurs, setListErreurs] = useState([]);
+    const [listErrors, setListErrors] = useState([]);
 
     const categoriesRef = React.useRef(categories);
     const setCategories = (categories) => {
@@ -326,14 +326,14 @@ const AddProduct = (props) => {
      * @returns
      */
     const handlSubmitForm = () => {
-        const listErreurs = verifyProduct(product);
-        if (listErreurs.length > 0) {
+        const listErrors = verifyProduct(product);
+        if (listErrors.length > 0) {
             Alert.alert("Erreur", "Veuillez renseigner tous les champs encadrés en rouge");
-            setListErreurs(listErreurs);
+            setListErrors(listErrors);
             return;
         }
         setIsLoadingBtnsubmit(true);
-        setListErreurs([]);
+        setListErrors([]);
         const data = {
             title: product.title,
             images: product.images.map((image) => image.id),
@@ -476,7 +476,7 @@ const AddProduct = (props) => {
                 </View>
 
                 {/* Nom */}
-                <View style={[styles.addProductInputContainer, listErreurs.includes("title") && { borderColor: colors.red }]}>
+                <View style={[styles.addProductInputContainer, listErrors.includes("title") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Nom</Text>
                     <TextInput
                         style={[styles.addProductInput]}
@@ -490,7 +490,7 @@ const AddProduct = (props) => {
                 {/* Brand */}
                 <TouchableOpacity
                     onPress={() => setModal("brand")}
-                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("brand") && { borderColor: colors.red }]}>
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErrors.includes("brand") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Marque</Text>
                     <Text style={[styles.addProductInput, { color: product.brand ? colors.darkBlue : colors.gray2 }]}>
                         {product.brand ? product.brand.name : "Sélectionnez une marque"}
@@ -506,7 +506,7 @@ const AddProduct = (props) => {
                         styles.addProductInputContainer,
                         styles.positionRelative,
                         !product.brand && { opacity: 0.4 },
-                        listErreurs.includes("category") && { borderColor: colors.red }
+                        listErrors.includes("category") && { borderColor: colors.red }
                     ]}>
                     <Text style={styles.addProductLabel}>Catégorie</Text>
                     <Text style={[styles.addProductInput, { color: product.category ? colors.darkBlue : colors.gray2 }]}>
@@ -518,7 +518,7 @@ const AddProduct = (props) => {
                 {/* Material */}
                 <TouchableOpacity
                     onPress={() => setModal("material")}
-                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("material") && { borderColor: colors.red }]}>
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErrors.includes("material") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Matériel</Text>
                     <Text style={[styles.addProductInput, { color: product.material ? colors.darkBlue : colors.gray2 }]}>
                         {product.material ? product.material.name : "Sélectionnez un matériel"}
@@ -529,7 +529,7 @@ const AddProduct = (props) => {
                 {/* Color */}
                 <TouchableOpacity
                     onPress={() => setModal("color")}
-                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("color") && { borderColor: colors.red }]}>
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErrors.includes("color") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Couleur</Text>
                     <Text style={[styles.addProductInput, { color: product.color ? colors.darkBlue : colors.gray2 }]}>
                         {product.color ? product.color.name : "Sélectionnez une couleur"}
@@ -540,7 +540,7 @@ const AddProduct = (props) => {
                 {/* Size */}
                 <TouchableOpacity
                     onPress={() => setModal("size")}
-                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("size") && { borderColor: colors.red }]}>
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErrors.includes("size") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Taille</Text>
                     <Text style={[styles.addProductInput, { color: product.size ? colors.darkBlue : colors.gray2 }]}>
                         {product.size ? product.size.name : "Renseignez la taille de l'article"}
@@ -551,7 +551,7 @@ const AddProduct = (props) => {
                 {/* State */}
                 <TouchableOpacity
                     onPress={() => setModal("state")}
-                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("state") && { borderColor: colors.red }]}>
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErrors.includes("state") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Etat</Text>
                     <Text style={[styles.addProductInput, { color: product.state ? colors.darkBlue : colors.gray2 }]}>
                         {product.state ? product.state.name : "Indiquez l'état de l'article"}
@@ -575,7 +575,7 @@ const AddProduct = (props) => {
                 </View> */}
 
                 {/* Voucher */}
-                <View style={[styles.addProductInputContainer, listErreurs.includes("voucherAmount") && { borderColor: colors.red }]}>
+                <View style={[styles.addProductInputContainer, listErrors.includes("voucherAmount") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Bon d'achat</Text>
                     <TextInput
                         style={[styles.addProductInput]}
@@ -642,7 +642,7 @@ const AddProduct = (props) => {
                 {/* Seller */}
                 <TouchableOpacity
                     onPress={() => setModal("seller")}
-                    style={[styles.addProductInputContainer, styles.positionRelative, listErreurs.includes("seller") && { borderColor: colors.red }]}>
+                    style={[styles.addProductInputContainer, styles.positionRelative, listErrors.includes("seller") && { borderColor: colors.red }]}>
                     <Text style={styles.addProductLabel}>Nom du vendeur</Text>
                     <Text style={[styles.addProductInput, { color: product.seller ? colors.darkBlue : colors.gray2 }]}>
                         {product.seller ? product.seller.name : "Sélectionnez un vendeur"}
